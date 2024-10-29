@@ -1,0 +1,8 @@
+.vscode/
+build/
+out/log/
+out/*.dll
+out/*.exe
+uml/*
+!uml/*.tex
+!uml/*.pdf
