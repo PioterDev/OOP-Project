@@ -35,7 +35,7 @@ const char keynames[179][32] = {
     "Keypad 1", "Keypad 2", "Keypad 3", "Keypad 4", "Keypad 5",
     "Keypad 6", "Keypad 7", "Keypad 8", "Keypad 9", "Keypad 0",
     "Keypad .", //1073741923
-    //49-78
+    //49-78, the weird ones start here
     "Application", //1073741925
     "Power",
     "Keypad =",
@@ -88,8 +88,8 @@ const char keynames[179][32] = {
     "Keypad Binary", "Keypad Octal",
     "Keypad Decimal", "Keypad Hexadecimal", //1073742045
     //137-144
-    "Left Control", "Left Shift", "Left Alt", "Left GUI Key", //1073742048
-    "Right Control", "Right Shift", "Right Alt", "Right GUI Key", //1073742055
+    "Left Control", "Left Shift", "Left Alt", "Left GUI", //1073742048
+    "Right Control", "Right Shift", "Right Alt", "Right GUI", //1073742055
     //145
     "Mode key", //1073742081
     //146-162
@@ -184,44 +184,59 @@ int getKeystringIndex(SDL_Keycode key) {
 
 void InputHandler::processInput(Game* game) {
     //Aliases
-    #define event latestEvents.buffer[latestEvents.index]
+    #define latestEvent latestEvents.buffer[latestEvents.index]
     constexpr size_t bufferSize = sizeof(latestEvents.buffer) / sizeof(SDL_Event);
 
-    while(SDL_PollEvent(&event)) {
-        switch(event.type) {
+    while(SDL_PollEvent(&latestEvent)) {
+        switch(latestEvent.type) {
             case SDL_QUIT:
                 game->flags.running = false;
-                game->renderer.status = ThreadStatus::STOP;
+                // game->renderer.status = ThreadStatus::STOP;
                 break;
             case SDL_WINDOWEVENT:
-                switch(event.window.type) {
+                switch(latestEvent.window.event) {
                     case SDL_WINDOWEVENT_RESIZED:
                         //reload all textures
-                        game->windowParameters.size.width = event.window.data1;
-                        game->windowParameters.size.height = event.window.data2;
+                        game->windowParameters.size.width = latestEvent.window.data1;
+                        game->windowParameters.size.height = latestEvent.window.data2;
                         Program::getLogger().info(
                             "Resized window to ",
-                            event.window.data1,
+                            latestEvent.window.data1,
                             "x",
-                            event.window.data2
+                            latestEvent.window.data2
                         );
+                        break;
+                    case SDL_WINDOWEVENT_MINIMIZED: 
                         break;
                 }
                 break;
                 
             case SDL_KEYDOWN: {
-                if(event.key.keysym.sym == SDLK_w) {
-                    
-                }
-                else if(event.key.keysym.sym == SDLK_SPACE) {
+                break;
+            }
 
-                }
+            case SDL_KEYUP: {
+                break;
+            }
+
+            case SDL_MOUSEWHEEL: {
+                if(game->renderer.scalingFactor < 0.05 && latestEvent.wheel.y < 0) break;
+                game->renderer.scalingFactor += (double)latestEvent.wheel.y * 0.01;
+
+                break;
+            }
+            case SDL_MOUSEMOTION: {
                 break;
             }
 
         }
         latestEvents.index = (latestEvents.index + 1) % bufferSize;
     }
+    
+    if(Program::keyboardState[SDL_SCANCODE_RIGHT])  game->renderer.moveCamera(1,  0);
+    if(Program::keyboardState[SDL_SCANCODE_LEFT])   game->renderer.moveCamera(-1, 0);
+    if(Program::keyboardState[SDL_SCANCODE_DOWN])   game->renderer.moveCamera(0,  1);
+    if(Program::keyboardState[SDL_SCANCODE_UP])     game->renderer.moveCamera(0, -1);
 
-    #undef event
+    #undef latestEvent
 }

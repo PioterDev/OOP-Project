@@ -28,6 +28,18 @@ Status tryOpeningFile(const char* path) {
     }
 }
 
+ResourceManager::~ResourceManager()  {
+    for(size_t i = 0; i < textures.size(); i++) {
+        SDL_DestroyTexture(textures[i].texture);
+    }
+    for(size_t i = 1; i < soundEffects.size(); i++) {
+        Mix_FreeChunk(soundEffects[i]);
+    }
+    for(size_t i = 1; i < music.size(); i++) {
+        Mix_FreeMusic(music[i]);
+    }
+}
+
 Status ResourceManager::init() {
     textures.reserve(128);
     soundEffects.reserve(16);
@@ -41,6 +53,8 @@ Status ResourceManager::init() {
     t.originalSize.width = fallbackTextureWidth;
     t.originalSize.height = fallbackTextureHeight;
     textures.push_back(t);
+    memset((void*)&t, 0, sizeof(TextureHandle));
+    textures.push_back(t); //no texture, placeholder for a transparent texture
     
     soundEffects[0] = nullptr;
     music[0] = nullptr;
@@ -49,7 +63,7 @@ Status ResourceManager::init() {
 }
 
 SDL_Texture* ResourceManager::createFallbackTexture() {
-    SDL_Rect rect = {0, 0, fallbackTextureWidth, fallbackTextureHeight};
+    SDL_Rect rect = {0, 0, (int)fallbackTextureWidth, (int)fallbackTextureHeight};
     SDL_Surface* s = SDL_CreateRGBSurface(
         0, (int)fallbackTextureWidth, (int)fallbackTextureHeight,
         32, 0, 0, 0, 0
@@ -108,6 +122,21 @@ uint32_t ResourceManager::registerTexture(const char* path) {
         return this->textures.size() - 1;
     }
     else return 0;
+}
+
+TextureHandle ResourceManager::getTextureHandle(uint32_t id) const {
+    if(id > this->textures.size()) return this->textures[0]; //fallback texture
+    return this->textures[id];
+}
+
+SDL_Texture* ResourceManager::getTexture(uint32_t id) {
+    if(id > this->textures.size()) return this->textures[0].texture;
+    return this->textures[id].texture;
+}
+
+Size ResourceManager::getTextureOriginalSize(uint32_t id) const {
+    if(id > this->textures.size()) return this->textures[0].originalSize; //fallback texture
+    return this->textures[id].originalSize;
 }
 
 Status SoundEffect::loadSoundEffect(const char* path) {
