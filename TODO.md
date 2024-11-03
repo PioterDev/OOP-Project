@@ -1,0 +1,3 @@
+- make LMB + mouse movement move the camera
+- make zoom scroll zoom towards the current position of the cursor
+- finish PhysicalObject implementation
