@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL.h>
+#include <SDL_events.h>
 
 #define isFunctionalKey(key) \
     ((key) >= SDLK_LCTRL && (key) <= SDLK_RGUI) || \

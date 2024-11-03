@@ -32,8 +32,7 @@ using namespace Enums;
  * `__FILE__`, `__LINE__` and `__func__` macros.
  */
 #define LogTrace(logger, message) do { \
-    logger.print_shared(); \
-    logger.print(" [Trace] [", __FILE__, "/", __func__, ":", __LINE__, "] ", message, "\n");  \
+    logger.trace("[", __FILE__, "/", __func__, ":", __LINE__, "] ", message); \
 } while(0)
 #define LogDebug(logger, message)
 #endif /* LOGLEVEL == Trace */
@@ -54,24 +53,15 @@ class Logger {
 
         void setDateString(bool full);
         
-        inline bool checkTimestamp() {
-            return time(nullptr) > latest;
-        }
-        
+        bool checkTimestamp() { return time(nullptr) > latest; }
     public:
+        ~Logger();
+        
         /**
          * @brief Prints the log prefix shared across all log levels...
          * which just prints the date.
-         * 
          */
-        inline void printShared() {
-            if(checkTimestamp()) setDateString(printFullDate);
-#if printFullDate
-            stream << '[' << date << ']';
-#else
-            stream << '[' << date + 11 << ']';
-#endif
-        }
+        void printShared();
 
         /**
          * @brief Get the internal date string. DO NOT FREE IT!!
@@ -80,9 +70,7 @@ class Logger {
          * 
          * @return `const char*` to the date string
          */
-        inline const char* getDateString(bool full) {
-            return full ? date : date + 11;
-        }
+        const char* getDateString(bool full) { return full ? date : date + 11; }
 
         /**
          * @brief Get the internal date string, but if it's out-of-date, update it beforehand. DO NOT FREE IT!!
@@ -91,10 +79,7 @@ class Logger {
          * 
          * @return `const char*` to the date string
          */
-        inline const char* getCurrentDateString(bool full) {
-            if(checkTimestamp()) setDateString(printFullDate);
-            return full ? date : date + 11;
-        }
+        const char* getCurrentDateString(bool full);
 
         /**
          * @brief Initializes the logger.
@@ -112,37 +97,40 @@ class Logger {
          */
         NoDiscard Status init(const char* pathToFile);
 
-        ~Logger();
-
         void flush() { this->stream << endl; }
 
-        template<class...Args> inline void print(Args...args) {
+        template<class...Args> void print(Args...args) {
             (this->stream << ... << args);
         }
 
-        template<class...Args> inline void debug(Args... args) {
-            printShared();
+        template<class...Args> void debug(Args... args) {
+            this->printShared();
             (this->stream << " [Debug] " << ... << args) << endl;
         }
 
-        template<class...Args> inline void info(Args... args) {
-            printShared();
+        template<class...Args> void info(Args... args) {
+            this->printShared();
             (this->stream << " [Info] " << ... << args) << endl;
         }
 
-        template<class...Args> inline void warn(Args... args) {
-            printShared();
+        template<class...Args> void warn(Args... args) {
+            this->printShared();
             (this->stream << " [Warning] " << ... << args) << endl;
         }
 
-        template<class...Args> inline void error(Args... args) {
-            printShared();
+        template<class...Args> void error(Args... args) {
+            this->printShared();
             (this->stream << " [Error] " << ... << args) << endl;
         }
 
-        template<class...Args> inline void fatal(Args... args) {
-            printShared();
+        template<class...Args> void fatal(Args... args) {
+            this->printShared();
             (this->stream << " [Fatal] " << ... << args) << endl;
+        }
+
+        template<class...Args> void trace(Args... args) {
+            this->printShared();
+            (this->stream << " [Trace] " << ... << args) << endl;
         }
 };
 
