@@ -4,7 +4,11 @@
 
 #include <string>
 
+#include "Game/Main/MainRegistry.hpp"
+
 using std::string;
+
+extern const char* defaultObjectName;
 
 /**
  * @brief A generic game object, meant to be
@@ -25,8 +29,9 @@ using std::string;
  * 
  * 2) 64 flags - true/false values, indexed from 0 to 63
  * 
- * This class doesn't define any use for flags, so any child
- * class is free to define its own use for them.
+ * This class reserves flag 0 to mark the object as scheduled
+ * for deletion. Child classes shall not use this flag as it will
+ * delete the object.
  * 
  * 3) A pointer to a C-style string, whose contents cannot be modified.
  * 
@@ -42,21 +47,7 @@ class GameObject {
          * the first 32 bits are for the instance number,
          * the next 32 bits are for the type ID.
          */
-        union {
-            uint64_t uuid;
-            char bytes[sizeof(uint64_t)];
-            /**
-             * @brief We're both assuming little-endian system
-             * AND using what's considered undefined
-             * behavior by C++ - fabulous!
-             */
-            struct {
-                //Instance number of the object
-                uint32_t instance;
-                //A uniquely identifiable object type
-                uint32_t type;
-            } parts;
-        } uuid;
+        UUID uuid;
 
         /**
          * @brief GameObject class reserves
@@ -71,7 +62,10 @@ class GameObject {
         
         /**
          * @brief Pointer to a C string containing
-         * the object name. Will generally bind to some registry.
+         * the object name. Will generally bind to
+         * a read-only memory segment (a string literal)
+         * or an override in the registry. Defaults to an
+         * empty string ("").
          * 
          * The reason why it's not an `std::string`
          * is that every instantiated object would create a copy
@@ -84,24 +78,14 @@ class GameObject {
          * every object instance bound to the now invalid pointer shall
          * be updated.
          */
-        const char* name;
-
+        const char* name = defaultObjectName;
     protected:
         /**
-         * @brief Sets the name of the object. It only sets the reference,
-         * not the value, be doubly careful as `std::string`
-         * can relocate in memory, invalidating the previous pointer.
+         * @brief Sets the name of the object.
          * 
-         * It shouldn't be much of an issue though as object names will generally
-         * be unchanged throughout execution...
-         * 
-         * @param name name
-         */
-        void setName(const string& name) { this->name = name.c_str();}
-
-        /**
-         * @brief Sets the name of the object. It only sets the reference,
-         * not the value, be careful.
+         * If you want the name to be modifiable at runtime, you
+         * have to use an externally modifiable `char*`,
+         * not a literal (literals are read-only), .
          * 
          * @param name name
          */
@@ -149,8 +133,7 @@ class GameObject {
          */
         void clearFlag(uint32_t flag) { this->flags.all &= ~((uint64_t)1 << flag); }
         /**
-         * @brief Clears all flags in the object.
-         * 
+         * @brief Clears all flags in the object. Generally discouraged.
          */
         void clearFlags() { this->flags.all = (uint64_t)0; }
         /**
@@ -159,8 +142,27 @@ class GameObject {
          * @param flag index from 0 to 64 of the bit to flip
          */
         void flipFlag(uint32_t flag) { this->flags.all ^= ((uint64_t)1 << flag); }
-
+        /**
+         * @brief Marks the object for deletion. The behavior of using
+         * the object after marking it deleted is undefined. Don't do that :)
+         */
+        void markForDeletion() { this->setFlag(0); }
     public:
+        /**
+         * @brief Constructor for a GameObject.
+         * 
+         * @param objectID ID of the object
+         * @param name name of the object
+         */
+        GameObject(const uint32_t objectID, const char* name) : name(name) { this->uuid.parts.type = objectID; }
+        /**
+         * @brief Constructor for a GameObject.
+         * Doesn't set a name,
+         * which is rather difficult to change after initialization.
+         * @param objectID ID of the object
+         */
+        GameObject(const uint32_t objectID) { this->uuid.parts.type = objectID; }
+        
         virtual ~GameObject() = 0;
 
         /**

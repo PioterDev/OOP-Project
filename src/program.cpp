@@ -1,7 +1,5 @@
 #include "Bindings.h"
 
-
-
 #include "deus.hpp"
 #include "program.hpp"
 
@@ -10,9 +8,12 @@ static constexpr int Img_Init_Flags = IMG_INIT_JPG | IMG_INIT_PNG;
 static constexpr int Mix_Init_Flags = MIX_INIT_MP3 | MIX_INIT_OGG | MIX_INIT_OPUS;
 
 // Program::InputHandler Program::inputHandler;
-ResourceManager       Program::resourceManager;
-Logger                Program::logger;
-SDL_Renderer*         Program::renderingContext = nullptr;
+ResourceManager     Program::resourceManager;
+Logger              Program::logger;
+SDL_Renderer*       Program::renderingContext = nullptr;
+uint64_t            Program::clockFrequency;
+const uint8_t*      Program::keyboardState;
+WindowParameters    Program::windowParameters;
 
 Status Program::initSystems() {
     const char* platform = SDL_GetPlatform();
@@ -88,15 +89,9 @@ Status Program::initSystems() {
     
     srand(time(nullptr));
     this->flags.running = true;
-    logger.info("Hello");
-    clockFrequency = SDL_GetPerformanceFrequency();
-
-    // SDL_Surface* s = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0);
-    // SDL_FillRect(s, NULL, 0x21376900);
-    // SDL_Cursor* cursor = SDL_CreateColorCursor(s, 0, 0);
-    // SDL_SetCursor(cursor);
-    // SDL_Surface* icon = IMG_Load("greg.png");
-    // SDL_SetWindowIcon(this->window, icon);
+    
+    Program::clockFrequency = SDL_GetPerformanceFrequency();
+    Program::keyboardState = SDL_GetKeyboardState((int*)&this->numberOfKeyboardKeys);
     
     return Status::SUCCESS;
 }

@@ -1,0 +1,38 @@
+#include "Game/World.hpp"
+
+Status World::populateChunk(const Point which, const uint32_t blockID) {
+    Chunk* chunk = this->chunks[which];
+    if(chunk != nullptr) return Status::ALREADY_EXISTS;
+
+    chunk = (Chunk*)malloc(sizeof(Chunk));
+    if(chunk == nullptr) return Status::ALLOC_FAILURE;
+
+    memset(chunk, blockID, sizeof(Chunk));
+    
+    this->chunks[which] = chunk;
+    return Status::SUCCESS;
+}
+
+const Block* World::getBlockAt(int32_t x, int32_t y) {
+    const Chunk* chunk = this->getChunk(x >= 0 ? x/16 : x/16 - 1, y >= 0 ? y/16 : y/16 - 1);
+    if(chunk == nullptr) return nullptr;
+
+    return Blocks::getBlockWithID(
+        chunk->blockIDs[y >= 0 ? y%16 : y%16 + 16][x >= 0 ? x%16 : x%16 + 16]
+    );
+}
+
+void World::printChunk(int32_t x, int32_t y) {
+    Logger& logger = Program::getLogger();
+    const Chunk* chunk = this->chunks[{x, y}];
+    if(chunk == nullptr) {
+        logger.print("No chunk\n");
+        return;
+    }
+    for(int i = 0; i < 16; i++) {
+        for(int j = 0; j < 16; j++) {
+            logger.print(chunk->blockIDs[i][j], " ");
+        }
+        logger.print("\n");
+    }
+}

@@ -4,7 +4,8 @@
 
 #include <chrono>
 #include <thread>
-#include <SDL.h>
+
+#include <SDL_render.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
 
@@ -28,10 +29,10 @@ struct alignas(8) ProgramFlags {
     u8 running : 1 = false;
 };
 
-struct WindowParameters {
+typedef struct {
     string name = "Window";
     Size size = {1280, 720};
-};
+} WindowParameters;
 
 struct alignas(4) AudioParameters {
     u8 audioChannelAmount = 16; //16 audio channels by default
@@ -51,65 +52,32 @@ class Program {
          */
         NoDiscard Status initSystems();
 
-        uint64_t getClockFrequency() const { return this->clockFrequency; }
+        static uint64_t getClockFrequency() { return Program::clockFrequency; }
 
         static SDL_Renderer* getRenderingContext() { return renderingContext; }
         static Logger& getLogger() { return logger; }
         // static InputHandler& getInputHandler() { return inputHandler; }
         static ResourceManager& getResourceManager() { return resourceManager; }
 
-        // /**
-        //  * @brief Get the explanation for the latest error that happened on this thread.
-        //  * 
-        //  * Only the latest error is returned, even if multiple errors happened in-between.
-        //  * 
-        //  * The error string is only changed when an error occurs, therefore
-        //  * only call this function if an error occurs.
-        //  * 
-        //  * @return error explanation or empty string if error has been cleared with `ClearError()`,
-        //  * do not free as it's ahandle to internally allocated data
-        //  */
-        // static const char* GetLatestError() { return latestError.c_str(); };
-        // /**
-        //  * @brief Get the explanation for the latest error that happened on the calling thread.
-        //  * 
-        //  * Only the latest error is returned, even if multiple errors happened in-between.
-        //  * 
-        //  * The error string is only changed when an error occurs, therefore
-        //  * only call this function if an error occurs.
-        //  * 
-        //  * @return error explanation or empty string if error has been cleared with `ClearError()`,
-        //  * do not free as it's ahandle to internally allocated data.
-        //  */
-        // static const string& GetLatestErrorString() { return latestError; }
+        static Size getScreenSize() { return windowParameters.size; }
 
-        // /**
-        //  * @brief Get the error code for the latest error that happened on the calling thread.
-        //  * 
-        //  * Only the latest error is returned, even if multiple errors happened in-between.
-        //  * 
-        //  * The error string is only changed when an error occurs, therefore
-        //  * only call this function if an error occurs.
-        //  * 
-        //  * @return error code or Status::SUCCESS if error has been cleared with `ClearError()`.
-        //  */
-        // static Status GetLatestErrorCode() { return latestErrorCode; }
+        uint32_t getNumberOfKeys() const { return this->numberOfKeyboardKeys; }
 
-        // static void ClearError() {
-        //     latestError = "";
-        //     latestErrorCode = Status::SUCCESS;
-        // }
+        static const uint8_t* keyboardState;
     protected:
         struct ProgramFlags flags;
+
+        uint32_t numberOfKeyboardKeys;
 
         /* static thread_local string latestError;
         static thread_local Status latestErrorCode; */
 
-        uint64_t clockFrequency;
+        static uint64_t clockFrequency;
+        uint64_t timeSinceStart;
 
         //Video-related members
         SDL_Window* window;
-        struct WindowParameters windowParameters;
+        static WindowParameters windowParameters;
         static SDL_Renderer* renderingContext;
 
         //Audio-related members

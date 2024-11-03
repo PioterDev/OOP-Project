@@ -1,7 +1,7 @@
 #include "Bindings.h"
 
-#include "logging.hpp"
-#include "program.hpp"
+#include <SDL_messagebox.h>
+
 #include "game.hpp"
 
 int main(Unused int argc, Unused char** argv) {

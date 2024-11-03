@@ -1,8 +1,9 @@
 #include "game.hpp"
 #include "Game/GameObject.hpp"
-#include "Game/RenderableObject.hpp"
+#include "Game/PhysicalObject.hpp"
+#include "Game/UIElement.hpp"
 
-GameRegistry Game::registry;
+MainRegistry Game::registry;
 GameRenderer Game::renderer;
 InputHandler Game::inputHandler;
 
@@ -20,50 +21,16 @@ Status Game::init() {
     return s;
 }
 
-RenderableObject::RenderableObject(uint32_t textureHandleIndex) {
-    this->setVisible();
-    Game::getRenderer().registerRenderableObject(this);
-    this->textureData.bindTexture(
-        Program::getResourceManager().getTextureHandle(
-            textureHandleIndex
-        )
-    );
-    this->textureData.setTexturePortionOriginal();
-    
-    this->textureData.targetPortion.w = 256;
-    this->textureData.targetPortion.h = 256;
-    this->textureData.targetPortion.x = 1280/2 - 256/2;
-    this->textureData.targetPortion.y = 720/2 - 256/2;
-}
-
-RenderableObject::RenderableObject(uint32_t textureHandleIndex, const SDL_Rect& r) {
-    this->setVisible();
-    Game::getRenderer().registerRenderableObject(this);
-    this->textureData.bindTexture(
-        Program::getResourceManager().getTextureHandle(
-            textureHandleIndex
-        )
-    );
-    this->textureData.setTexturePortionOriginal();
-    this->textureData.targetPortion = r;
-}
-
 void Game::run() {
     // std::thread renderThread = this->renderer.startRender();
-    RenderableObject obj(GameRegistry::gregTextureIndex);
-    RenderableObject* objs[16];
-    SDL_Rect r = {0, 0, 64, 64};
-    for(int i = 0; i < 16; i++) {
-        objs[i] = new RenderableObject(GameRegistry::gregTextureIndex, r);
-        r.x += 64;
-    }
+    UIElement obj(MainRegistry::someObjectID, MainRegistry::stoneTextureIndex);
+    obj.setPositionOnScreen(100, 100).setSizeOnScreen(256, 256);
+
+    this->world.populateChunk({0, 0}, Blocks::cobblestone->getInstanceID());
     while(this->flags.running) {
         this->inputHandler.processInput(this);
-        this->renderer.renderInPlace();
+        this->renderer.renderInPlace(this);
     }
 
-    for(int i = 0; i < 16; i++) {
-        delete objs[i];
-    }
     // renderThread.join();
 }

@@ -20,6 +20,7 @@ namespace Enums {
     enum class Status {
         SUCCESS,
         FAILURE,
+        ALLOC_FAILURE,
         LOGGER_FAILURE,
         SDL_INIT_FAILURE,
         SDL_IMAGE_INIT_FAILURE,
@@ -33,7 +34,8 @@ namespace Enums {
         TEXTURE_QUERY_FAILURE,
         SOUND_LOAD_FAILURE,
         MUSIC_LOAD_FAILURE,
-        FALLBACK_TEXTURE_CREATION_FAILURE
+        FALLBACK_TEXTURE_CREATION_FAILURE,
+        ALREADY_EXISTS
     };
 
     typedef enum {
@@ -58,70 +60,165 @@ namespace Enums {
         STOP,     //loop should stop and execution ended
         PAUSE,    //loop should be skipped and execution suspended
     };
+
+    /* enum class MathFunctionType {
+        POLYNOMIAL,
+        EXPONENTIAL,
+        LOGARITHMIC,
+        TRIGONOMETRIC,
+        HYPERBOLIC,
+
+    }; */
+
+    enum class ShapeType {
+        SQUARE,
+        RECTANGLE,
+        CIRCLE,
+        ELLIPSE
+    };
 }
 
 namespace Structs {
     /**
      * @brief 2D point with integer coordinates.
-     * 
      */
-    typedef struct {
+    typedef struct Vector2i32 {
         int32_t x, y;
-    } Point2D_i32;
+        bool operator==(const Vector2i32& other) const {
+            return x == other.x && y == other.y;
+        }
+    } Vector2i32;
 
     /**
      * @brief 2D point with floating point coordinates.
      * 
      */
-    typedef struct {
+    typedef struct Vector2f {
         float x, y;
-    } Point2D_f32;
+        bool operator==(const Vector2f& other) { return x == other.x && y == other.y; }
+    } Vector2f;
 
     /**
      * @brief 2D point with 64-bit integer coordinates.
      * 
      */
-    typedef struct {
+    typedef struct Vector2i64 {
         int64_t x, y;
-    } Point2D_i64;
+        bool operator==(const Vector2i64& other) { return x == other.x && y == other.y; }
+    } Vector2i64;
 
     /**
      * @brief 2D point with double-precision floating point coordinates.
      * 
+     * Do not confuse with a 2D vector.
+     * 
+     * This name is misleading, but uhm...yeah.
      */
-    typedef struct {
+    typedef struct Vector2d {
         double x, y;
-    } Point2D_f64;
+        bool operator==(const Vector2d& other) { return x == other.x && y == other.y; }
+    } Vector2d;
 
     /* Default Point struct */
-    typedef Point2D_i32 Point;
+    typedef Vector2i32 Point;
+    typedef Vector2i32 BlockPos;
     /* Default floating point Point struct */
-    typedef Point2D_f32 PointF;
+    typedef Vector2f PointF;
+
 
     /**
-     * @brief Rectangular size.
-     * 
+     * @brief Struct for counting stuff in 2 dimensions, 16-bit uints.
+     */
+    typedef struct {
+        uint16_t x, y;
+    } Count16;
+
+    /**
+     * @brief Struct for counting stuff in 2 dimensions, 32-bit uints.
+     */
+    typedef struct {
+        uint32_t x, y;
+    } Count32;
+
+    /**
+     * @brief Struct for counting stuff in 2 dimensions, 64-bit uints.
+     */
+    typedef struct {
+        uint64_t x, y;
+    } Count64;
+
+    /**
+     * @brief Rectangular size, 32-bit uints.
      */
     typedef struct {
         uint32_t width, height;
     } Size32;
 
     /**
-     * @brief Rectangular size with 64-bit unsigned integers.
-     * 
+     * @brief Rectangular size, 64-bit bit uints.
      */
     typedef struct {
         uint64_t width, height;
     } Size64;
 
+    /**
+     * @brief Rectangular size, floats.
+     */
+    typedef struct {
+        float width, height;
+    } SizeF32;
+
+    /**
+     * @brief Rectangular size, doubles.
+     */
+    typedef struct {
+        double width, height;
+    } SizeF64;
+
     /* Default Size struct */
     typedef Size32 Size;
 
+    typedef struct {
+        Enums::ShapeType shape;
+        PointF center;
+        union {
+            float diagonal; //square
+            struct {
+                float x, y;
+            } diagonals; //rectangle
+            float radius; //circle
+            struct {
+                float x, y;
+            } radii; //ellipse
+        };
+    } Shape;
 
+    typedef struct {
+        float x1, y1;
+        float x2, y2;
+    } AABB;
 
     /* typedef struct {
 
     } Vector2D; */
 }
 
-#define LOGLEVEL 1
+namespace Unions {
+    typedef union {
+        uint64_t uuid;
+        char bytes[sizeof(uint64_t)];
+        /**
+         * @brief We're both assuming little-endian system
+         * AND using what's considered undefined
+         * behavior by C++ - fabulous!
+         */
+        struct {
+            //Instance number of the object
+            uint32_t instance;
+            //A uniquely identifiable object type
+            uint32_t type;
+        } parts;
+    } UUID;
+};
+
+#define LOGLEVEL 0

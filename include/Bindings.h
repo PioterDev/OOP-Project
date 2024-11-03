@@ -75,7 +75,8 @@ extern "C" {
 #ifndef WINDOWS
 #define WINDOWS 1
 #endif /* Windows */
-#include <windows.h>
+#include <profileapi.h>
+#include <synchapi.h>
 #elif defined(__linux__)
 #ifndef LINUX
 #define LINUX 1
@@ -93,9 +94,9 @@ extern "C" {
 #ifdef _MSC_VER
 #define ForceInline __forceinline /* MSVC */
 #elif ((defined(__GNUC__) && (__GNUC__ >= 4)) || defined(__clang__))
-#define ForceInline static inline __attribute__((always_inline))
+#define ForceInline inline __attribute__((always_inline))
 #else
-#define ForceInline static inline
+#define ForceInline inline
 #endif /* Compiler */
 #endif /* Defining ForceInline */
 
@@ -162,8 +163,10 @@ ForceInline uint64_t getClockTime() {
 #define sleep(ms) Sleep(ms)
 #elif defined(LINUX)
 #define sleep(ms) usleep(1000 * ms)
+#else
+#define sleep
 #endif /* OS */
-#endif /* sleep(ms) */
+#endif /* sleep */
 
 #ifdef __cplusplus
 }

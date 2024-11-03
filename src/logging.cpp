@@ -35,3 +35,17 @@ void Logger::setDateString(bool full) {
         );
     }
 }
+
+void Logger::printShared() {
+    if(this->checkTimestamp()) this->setDateString(printFullDate);
+#if printFullDate
+    this->stream << '[' << this->date << ']';
+#else
+    this->stream << '[' << this->date + 11 << ']';
+#endif
+}
+
+const char* Logger::getCurrentDateString(bool full) {
+    if(this->checkTimestamp()) this->setDateString(printFullDate);
+    return full ? this->date : this->date + 11;
+}

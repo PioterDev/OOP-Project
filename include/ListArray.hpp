@@ -19,7 +19,7 @@ template<typename T> class ListArray {
             struct ListArrayNode* next;
             uint32_t nodeSize;
             uint32_t usedSize;
-            T objects[0];
+            T objects[1];
         } ListArrayNode;
 
         ListArrayNode* head;
@@ -84,7 +84,7 @@ template<typename T> class ListArray {
         template<typename F> void forEach(F func) {
             ListArrayNode* current = this->head;
             while(current != nullptr) {
-                for(size_t i = 0; i < (current->usedSize - 16ull) / sizeof(T); i++) {
+                for(size_t i = 0; i < (current->usedSize - (uint64_t)16) / sizeof(T); i++) {
                     func(current->objects[i]);
                 }
                 current = current->next;

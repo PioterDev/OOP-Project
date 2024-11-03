@@ -2,33 +2,50 @@
 
 #include "Bindings.h"
 
-#include "Game/RenderableObject.hpp"
+#include "Game/UIElement.hpp"
+#include "Game/PhysicalObject.hpp"
 #include "ListArray.hpp"
 #include "program.hpp"
 
 // void startRender(RenderThreadParameters* params);
+class Game;
 
 class GameRenderer {
     friend class Game;
     friend class InputHandler;
 
     private:
-        ListArray<RenderableObject*> objectsToRender;
+        ListArray<PhysicalObject*> physicalObjectsToRender;
+        ListArray<UIElement*> uiElements;
+        
         uint32_t fps = 144;
-        ThreadStatus status = ThreadStatus::CONTINUE;
         int64_t start, end, delta, overhead, frameTime;
         double scalingFactor = 1.0;
+
+        //Registers the timestamp when rendering
+        //the latest frame has ended
+        uint64_t lastFrameAt;
+        //Counts the number of frames since rendering started
+        uint64_t numberOfFramesRendered = 0;
+        
+        Point cameraPosition = {0, 0};
+
+        void moveCamera(int32_t offX, int32_t offY);
     public:
-        GameRenderer() : objectsToRender(1024) {}
+        GameRenderer() : physicalObjectsToRender(1024), uiElements(1024) {}
 
-        void registerRenderableObject(RenderableObject* obj) {
-            objectsToRender.append(obj);
-        }
+        void registerUIElement(UIElement* element) { uiElements.append(element); }
 
-        void render();
-        void renderInPlace();
+        void registerPhysicalObject(PhysicalObject* obj) { physicalObjectsToRender.append(obj); }
 
-        std::thread startRender() {
-            return std::thread([this] { this->render(); });
-        }
+        // void render();
+        void renderInPlace(Game* game);
+
+        // std::thread startRender() {
+        //     return std::thread([this] { this->render(); });
+        // }
+
+        uint64_t getTimeSinceLastFrame() const { return SDL_GetPerformanceCounter() - this->lastFrameAt; }
+
+        Point getCameraPosition() const { return this->cameraPosition; }
 };
