@@ -1,6 +1,6 @@
 .vscode/
-build/
-out/log/
+build/*.o
+out/log/*.log
 out/*.dll
 out/*.exe
 uml/*
