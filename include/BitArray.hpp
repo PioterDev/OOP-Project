@@ -4,6 +4,8 @@
 
 #include <stdexcept>
 
+#include "deus.hpp"
+
 /**
  * @brief A bit array implementation as an alternative to
  * std::vector<bool> (this thing is...not great).
@@ -12,12 +14,12 @@
  */
 class BitArray {
     private:
-        uint64_t numberOfBits;
-        uint64_t numberOfBitsAvailable;
-        uint8_t* bits = nullptr;
+        u64 numberOfBits;
+        u64 numberOfBitsAvailable;
+        u8* bits = nullptr;
 
-        ForceInline uint64_t roundUpToPowerOf2(uint64_t in) {
-            uint64_t out = in;
+        ForceInline u64 roundUpToPowerOf2(u64 in) {
+            u64 out = in;
             out--;
             out |= out >> 1;
             out |= out >> 2;
@@ -29,7 +31,7 @@ class BitArray {
             return out;
         }
 
-        bool reallocate(uint64_t minimumNewSize);
+        bool reallocate(u64 minimumNewSize);
     public:
         /**
          * @brief Constructs a BitArray.
@@ -38,7 +40,7 @@ class BitArray {
          * 
          * @throws std::bad_alloc on allocation failure
          */
-        BitArray(uint64_t initialSize);
+        BitArray(u64 initialSize);
         
         ~BitArray() {
             free(this->bits);
@@ -53,7 +55,7 @@ class BitArray {
          * 
          * @throws std::bad_alloc on reallocation failure
          */
-        void set(uint64_t bit);
+        void set(u64 bit);
 
         /**
          * @brief Clears he selected bit.
@@ -64,7 +66,7 @@ class BitArray {
          * 
          * @throws std::bad_alloc on reallocation failure
          */
-        void clear(uint64_t bit);
+        void clear(u64 bit);
 
         /**
          * @brief Checks if `bit`'s bit is set. If `bit`
@@ -74,7 +76,7 @@ class BitArray {
          * 
          * @return whether `bit` is set
          */
-        bool operator[](uint64_t bit) { return at(bit); }
+        bool operator[](u64 bit) { return at(bit); }
 
         /**
          * @brief Checks if `bit`'s bit is set. If `bit`
@@ -84,14 +86,14 @@ class BitArray {
          * 
          * @return whether `bit` is set
          */
-        bool at(uint64_t bit);
+        bool at(u64 bit);
 
         /**
          * @brief Get size of the bit array.
          * 
          * @return size of the bit array in bits (!!!)
          */
-        uint64_t size() const { return this->numberOfBits; }
+        u64 size() const { return this->numberOfBits; }
         /**
          * @brief Get capacity of the bit array.
          * 
@@ -99,5 +101,5 @@ class BitArray {
          * 
          * The capacity will always be a power of 2.
          */
-        uint64_t capacity() const { return this->numberOfBitsAvailable; }
+        u64 capacity() const { return this->numberOfBitsAvailable; }
 };

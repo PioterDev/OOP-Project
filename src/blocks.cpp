@@ -2,7 +2,7 @@
 #include "Game/Main/MainRegistry.hpp"
 
 vector<Block*> Blocks::blocks;
-uint32_t Blocks::numberOfBlocksRegistered = 0;
+u32 Blocks::numberOfBlocksRegistered = 0;
 
 Block* Blocks::cobblestone = nullptr;
 
@@ -42,7 +42,7 @@ Block* Blocks::cobblestone = nullptr;
  * blocks are registered will break compatibility with already existing
  * worlds.
  */
-uint32_t Blocks::init(uint32_t blockID) {
+u32 Blocks::init(u32 blockID) {
     Blocks::blocks.reserve(1024);
     static Block cobblestone(blockID, "Cobblestone", MainRegistry::stoneTextureIndex);
     Blocks::cobblestone = &cobblestone;
@@ -55,11 +55,11 @@ void Blocks::addBlock(Block* block) {
     Blocks::numberOfBlocksRegistered++;
 }
 
-uint32_t Blocks::getCurrentBlockID() {
+u32 Blocks::getCurrentBlockID() {
     return numberOfBlocksRegistered;
 }
 
-Block* Blocks::getBlockWithID(uint32_t id) {
+Block* Blocks::getBlockWithID(u32 id) {
     if(Blocks::blocks.size() >= id) return Blocks::blocks[0];
     return Blocks::blocks[id];
 }

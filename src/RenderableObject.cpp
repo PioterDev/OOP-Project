@@ -1,34 +1,34 @@
 #include "Game/Render/RenderableObject.hpp"
 
 RenderableObjectBase::RenderableObjectBase(
-    const uint32_t objectID
+    const u32 objectID
 ) : GameObject(objectID) {
     this->setVisible();
 }
 
 RenderableObjectBase::RenderableObjectBase(
-    const uint32_t objectID, const char* name
+    const u32 objectID, const char* name
 ) : GameObject(objectID, name) {
     this->setVisible();
 }
 
 RenderableObjectBase::RenderableObjectBase(
-    const uint32_t objectID,
-    const uint32_t textureHandleIndex
+    const u32 objectID,
+    const u32 textureHandleIndex
 ) : GameObject(objectID) {
     this->bindTexture(textureHandleIndex);
 }
 
 RenderableObjectBase::RenderableObjectBase(
-    const uint32_t objectID,
+    const u32 objectID,
     const char* name,
-    const uint32_t textureHandleIndex
+    const u32 textureHandleIndex
 ) : GameObject(objectID, name) {
     this->bindTexture(textureHandleIndex);
 }
 
 RenderableObjectBase& RenderableObjectBase::bindTexture(
-    uint32_t textureHandleIndex
+    u32 textureHandleIndex
 ) {
     this->textureHandle = Program::getResourceManager().getTextureHandle(textureHandleIndex);
     this->setVisible();
@@ -36,25 +36,25 @@ RenderableObjectBase& RenderableObjectBase::bindTexture(
 }
 
 RenderableObject::RenderableObject (
-    const uint32_t objectID
+    const u32 objectID
 ) : RenderableObjectBase(objectID) {}
 
 RenderableObject::RenderableObject(
-    const uint32_t objectID,
+    const u32 objectID,
     const char* name
 ) : RenderableObjectBase(objectID, name) {}
 
 RenderableObject::RenderableObject(
-    const uint32_t objectID,
-    const uint32_t textureHandleIndex
+    const u32 objectID,
+    const u32 textureHandleIndex
 ) : RenderableObjectBase(objectID, textureHandleIndex) {
     this->setTexturePortionOriginal();
 }
 
 RenderableObject::RenderableObject(
-    const uint32_t objectID,
+    const u32 objectID,
     const char* name,
-    const uint32_t textureHandleIndex
+    const u32 textureHandleIndex
 ) : RenderableObjectBase(objectID, name, textureHandleIndex) {
     this->setTexturePortionOriginal();
 }
@@ -117,7 +117,7 @@ RenderableObject& RenderableObject::setPositionOnScreenCentered(int x, int y) {
     return *this;
 }
 
-RenderableObject& RenderableObject::setSizeOnScreen(uint32_t width, uint32_t height) {
+RenderableObject& RenderableObject::setSizeOnScreen(u32 width, u32 height) {
     this->targetPortion.w = (int)width;
     this->targetPortion.h = (int)height;
     return *this;

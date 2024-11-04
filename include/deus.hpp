@@ -83,7 +83,7 @@ namespace Structs {
      * @brief 2D point with integer coordinates.
      */
     typedef struct Vector2i32 {
-        int32_t x, y;
+        i32 x, y;
         bool operator==(const Vector2i32& other) const {
             return x == other.x && y == other.y;
         }
@@ -103,7 +103,7 @@ namespace Structs {
      * 
      */
     typedef struct Vector2i64 {
-        int64_t x, y;
+        i64 x, y;
         bool operator==(const Vector2i64& other) { return x == other.x && y == other.y; }
     } Vector2i64;
 
@@ -130,35 +130,35 @@ namespace Structs {
      * @brief Struct for counting stuff in 2 dimensions, 16-bit uints.
      */
     typedef struct {
-        uint16_t x, y;
+        u16 x, y;
     } Count16;
 
     /**
      * @brief Struct for counting stuff in 2 dimensions, 32-bit uints.
      */
     typedef struct {
-        uint32_t x, y;
+        u32 x, y;
     } Count32;
 
     /**
      * @brief Struct for counting stuff in 2 dimensions, 64-bit uints.
      */
     typedef struct {
-        uint64_t x, y;
+        u64 x, y;
     } Count64;
 
     /**
      * @brief Rectangular size, 32-bit uints.
      */
     typedef struct {
-        uint32_t width, height;
+        u32 width, height;
     } Size32;
 
     /**
      * @brief Rectangular size, 64-bit bit uints.
      */
     typedef struct {
-        uint64_t width, height;
+        u64 width, height;
     } Size64;
 
     /**
@@ -205,8 +205,8 @@ namespace Structs {
 
 namespace Unions {
     typedef union {
-        uint64_t uuid;
-        char bytes[sizeof(uint64_t)];
+        u64 uuid;
+        char bytes[sizeof(u64)];
         /**
          * @brief We're both assuming little-endian system
          * AND using what's considered undefined
@@ -214,9 +214,9 @@ namespace Unions {
          */
         struct {
             //Instance number of the object
-            uint32_t instance;
+            u32 instance;
             //A uniquely identifiable object type
-            uint32_t type;
+            u32 type;
         } parts;
     } UUID;
 };

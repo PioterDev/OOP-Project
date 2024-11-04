@@ -43,10 +43,10 @@ class RenderableObject : public RenderableObjectBase {
         SDL_RendererFlip flip = SDL_FLIP_NONE;
 
     public:
-        RenderableObject(const uint32_t objectID);
-        RenderableObject(const uint32_t objectID, const char* name);
-        RenderableObject(const uint32_t objectID, const uint32_t textureHandleIndex);
-        RenderableObject(const uint32_t objectID, const char* name, const uint32_t textureHandleIndex);
+        RenderableObject(const u32 objectID);
+        RenderableObject(const u32 objectID, const char* name);
+        RenderableObject(const u32 objectID, const u32 textureHandleIndex);
+        RenderableObject(const u32 objectID, const char* name, const u32 textureHandleIndex);
 
         /**
          * @brief Sets the texture's portion to use.
@@ -192,7 +192,7 @@ class RenderableObject : public RenderableObjectBase {
          * @param height screen height taken up by the object
          * @return this, for chaining
          */
-        RenderableObject& setSizeOnScreen(uint32_t width, uint32_t height);
+        RenderableObject& setSizeOnScreen(u32 width, u32 height);
 
         /**
          * @brief Sets the object's flip to none.

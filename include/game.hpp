@@ -39,7 +39,7 @@ class Game : public Program {
         NoDiscard Status init();
         void run();
 
-        static uint64_t getTimeSinceLastFrame() { return renderer.getTimeSinceLastFrame(); }
+        static u64 getTimeSinceLastFrame() { return renderer.getTimeSinceLastFrame(); }
 
         World& getWorld() { return this->world; }
 };

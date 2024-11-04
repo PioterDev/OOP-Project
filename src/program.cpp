@@ -3,7 +3,7 @@
 #include "deus.hpp"
 #include "program.hpp"
 
-static constexpr uint32_t SDL_InitFlags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS | SDL_INIT_TIMER;
+static constexpr u32 SDL_InitFlags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS | SDL_INIT_TIMER;
 static constexpr int Img_Init_Flags = IMG_INIT_JPG | IMG_INIT_PNG;
 static constexpr int Mix_Init_Flags = MIX_INIT_MP3 | MIX_INIT_OGG | MIX_INIT_OPUS;
 
@@ -11,7 +11,7 @@ static constexpr int Mix_Init_Flags = MIX_INIT_MP3 | MIX_INIT_OGG | MIX_INIT_OPU
 ResourceManager     Program::resourceManager;
 Logger              Program::logger;
 SDL_Renderer*       Program::renderingContext = nullptr;
-uint64_t            Program::clockFrequency;
+u64                 Program::clockFrequency;
 const uint8_t*      Program::keyboardState;
 WindowParameters    Program::windowParameters;
 

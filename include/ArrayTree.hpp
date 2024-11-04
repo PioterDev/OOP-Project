@@ -12,18 +12,18 @@ template<typename T> class ArrayTree {
         typedef struct ArrayTreeNode {
             struct ArrayTreeNode* left;
             struct ArrayTreeNode* right;
-            uint32_t nodeSize;
-            uint32_t usedSize;
-            uint8_t leftHeight;
-            uint8_t rightHeight;
-            uint16_t padding1;
-            uint32_t padding2;
+            u32 nodeSize;
+            u32 usedSize;
+            u8 leftHeight;
+            u8 rightHeight;
+            u16 padding1;
+            u32 padding2;
             T elements[];
         } ArrayTreeNode;
 
         ArrayTreeNode* root;
-        uint32_t numberOfNodes = 0;
-        uint32_t nodeSize = 1024;
+        u32 numberOfNodes = 0;
+        u32 nodeSize = 1024;
 
         ArrayTreeNode* createNode(size_t size) {
             ArrayTreeNode* node = (ArrayTreeNode*)malloc(size);
@@ -44,7 +44,7 @@ template<typename T> class ArrayTree {
             free(root);
         }
     public:
-        ArrayTree(uint32_t nodeSize) {
+        ArrayTree(u32 nodeSize) {
             this->nodeSize = nodeSize;
             this->root = createNode(nodeSize);
         }

@@ -2,14 +2,14 @@
 #include "Game/UIElement.hpp"
 
 UIElement::UIElement(
-    const uint32_t objectID,
-    const uint32_t textureHandleIndex
+    const u32 objectID,
+    const u32 textureHandleIndex
 ) : RenderableObject(objectID, textureHandleIndex) {
     Game::getRenderer().registerUIElement(this);
 }
 
 UIElement::UIElement(
-    const uint32_t objectID
+    const u32 objectID
 ) : RenderableObject(objectID) {
     Game::getRenderer().registerUIElement(this);
 }

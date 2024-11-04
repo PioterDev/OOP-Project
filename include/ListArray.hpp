@@ -17,15 +17,15 @@ template<typename T> class ListArray {
     private:
         typedef struct ListArrayNode {
             struct ListArrayNode* next;
-            uint32_t nodeSize;
-            uint32_t usedSize;
+            u32 nodeSize;
+            u32 usedSize;
             T objects[1];
         } ListArrayNode;
 
         ListArrayNode* head;
         ListArrayNode* tail;
-        uint32_t numberOfNodes = 0;
-        uint32_t nodeSize = 1024;
+        u32 numberOfNodes = 0;
+        u32 nodeSize = 1024;
 
         ListArrayNode* createNode(size_t size) {
             ListArrayNode* node = (ListArrayNode*)malloc(size);
@@ -39,7 +39,7 @@ template<typename T> class ListArray {
             return node;
         }
     public:
-        ListArray(uint32_t nodeSize) {
+        ListArray(u32 nodeSize) {
             this->nodeSize = nodeSize;
             this->head = createNode(nodeSize);
             if(this->head == nullptr) return;
@@ -79,12 +79,12 @@ template<typename T> class ListArray {
             return Status::SUCCESS;
         }
 
-        uint32_t getNumberOfNodes() const { return this->numberOfNodes; }
+        u32 getNumberOfNodes() const { return this->numberOfNodes; }
 
         template<typename F> void forEach(F func) {
             ListArrayNode* current = this->head;
             while(current != nullptr) {
-                for(size_t i = 0; i < (current->usedSize - (uint64_t)16) / sizeof(T); i++) {
+                for(size_t i = 0; i < (current->usedSize - (u64)16) / sizeof(T); i++) {
                     func(current->objects[i]);
                 }
                 current = current->next;

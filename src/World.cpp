@@ -1,6 +1,6 @@
 #include "Game/World.hpp"
 
-Status World::populateChunk(const Point which, const uint32_t blockID) {
+Status World::populateChunk(const Point which, const u32 blockID) {
     Chunk* chunk = this->chunks[which];
     if(chunk != nullptr) return Status::ALREADY_EXISTS;
 
@@ -13,7 +13,7 @@ Status World::populateChunk(const Point which, const uint32_t blockID) {
     return Status::SUCCESS;
 }
 
-const Block* World::getBlockAt(int32_t x, int32_t y) {
+const Block* World::getBlockAt(i32 x, i32 y) {
     const Chunk* chunk = this->getChunk(x >= 0 ? x/16 : x/16 - 1, y >= 0 ? y/16 : y/16 - 1);
     if(chunk == nullptr) return nullptr;
 
@@ -22,7 +22,7 @@ const Block* World::getBlockAt(int32_t x, int32_t y) {
     );
 }
 
-void World::printChunk(int32_t x, int32_t y) {
+void World::printChunk(i32 x, i32 y) {
     Logger& logger = Program::getLogger();
     const Chunk* chunk = this->chunks[{x, y}];
     if(chunk == nullptr) {

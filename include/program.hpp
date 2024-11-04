@@ -52,7 +52,7 @@ class Program {
          */
         NoDiscard Status initSystems();
 
-        static uint64_t getClockFrequency() { return Program::clockFrequency; }
+        static u64 getClockFrequency() { return Program::clockFrequency; }
 
         static SDL_Renderer* getRenderingContext() { return renderingContext; }
         static Logger& getLogger() { return logger; }
@@ -61,19 +61,19 @@ class Program {
 
         static Size getScreenSize() { return windowParameters.size; }
 
-        uint32_t getNumberOfKeys() const { return this->numberOfKeyboardKeys; }
+        u32 getNumberOfKeys() const { return this->numberOfKeyboardKeys; }
 
         static const uint8_t* keyboardState;
     protected:
         struct ProgramFlags flags;
 
-        uint32_t numberOfKeyboardKeys;
+        u32 numberOfKeyboardKeys;
 
         /* static thread_local string latestError;
         static thread_local Status latestErrorCode; */
 
-        static uint64_t clockFrequency;
-        uint64_t timeSinceStart;
+        static u64 clockFrequency;
+        u64 timeSinceStart;
 
         //Video-related members
         SDL_Window* window;

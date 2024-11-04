@@ -4,8 +4,8 @@
 #include "program.hpp"
 #include "resources.hpp"
 
-static constexpr uint32_t fallbackTextureWidth = 64;
-static constexpr uint32_t fallbackTextureHeight = 64;
+static constexpr u32 fallbackTextureWidth = 64;
+static constexpr u32 fallbackTextureHeight = 64;
 
 Status tryOpeningFile(const char* path) {
     FILE* f = fopen(path, "r");
@@ -96,7 +96,7 @@ SDL_Texture* ResourceManager::createFallbackTexture() {
 
 }
 
-uint32_t ResourceManager::registerTexture(const char* path) {
+u32 ResourceManager::registerTexture(const char* path) {
     Program::getLogger().info("Registering texture at ", path);
 
     this->latestStatus = tryOpeningFile(path);
@@ -124,17 +124,17 @@ uint32_t ResourceManager::registerTexture(const char* path) {
     else return 0;
 }
 
-TextureHandle ResourceManager::getTextureHandle(uint32_t id) const {
+TextureHandle ResourceManager::getTextureHandle(u32 id) const {
     if(id > this->textures.size()) return this->textures[0]; //fallback texture
     return this->textures[id];
 }
 
-SDL_Texture* ResourceManager::getTexture(uint32_t id) {
+SDL_Texture* ResourceManager::getTexture(u32 id) {
     if(id > this->textures.size()) return this->textures[0].texture;
     return this->textures[id].texture;
 }
 
-Size ResourceManager::getTextureOriginalSize(uint32_t id) const {
+Size ResourceManager::getTextureOriginalSize(u32 id) const {
     if(id > this->textures.size()) return this->textures[0].originalSize; //fallback texture
     return this->textures[id].originalSize;
 }

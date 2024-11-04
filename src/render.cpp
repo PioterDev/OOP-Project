@@ -4,10 +4,10 @@
 constexpr double sizeOfBlockTexture = 64.0;
 //Don't use this, doesn't work that well.
 /* void GameRenderer::render() {
-    int64_t frequency = (int64_t)SDL_GetPerformanceFrequency();
-    int64_t delta = 0, frameTime = 0;
-    int64_t overhead = 0; //if the thread sleeps for too long in one iteration, make it sleep shorter in another iteration
-    int64_t start, end;
+    i64 frequency = (i64)SDL_GetPerformanceFrequency();
+    i64 delta = 0, frameTime = 0;
+    i64 overhead = 0; //if the thread sleeps for too long in one iteration, make it sleep shorter in another iteration
+    i64 start, end;
     double scalingFactor = 1.0;
 
     while(true) {
@@ -91,43 +91,43 @@ void GameRenderer::renderInPlace(Game* game) {
         );
     }); */
     double pixelsPerBlock = sizeOfBlockTexture * this->scalingFactor;
-    int32_t pixelsPerBlockInt = (int32_t)pixelsPerBlock;
+    i32 pixelsPerBlockInt = (i32)pixelsPerBlock;
     /* Point topLeftVisibleChunkPosition = {
         floorf((float)this->cameraPosition.x / pixelsPerChunk),
         -floorf((float)this->cameraPosition.y / pixelsPerChunk)
     };
     Point numberOfChunksToRender = {0, 0};
-    for(int32_t i = this->cameraPosition.x; i <= this->cameraPosition.x + (int32_t)screenSize.width; i += pixelsPerChunkInt) {
+    for(i32 i = this->cameraPosition.x; i <= this->cameraPosition.x + (i32)screenSize.width; i += pixelsPerChunkInt) {
         numberOfChunksToRender.x++;
     }
-    for(int32_t i = this->cameraPosition.y; i <= this->cameraPosition.y + (int32_t)screenSize.height; i += pixelsPerChunkInt) {
+    for(i32 i = this->cameraPosition.y; i <= this->cameraPosition.y + (i32)screenSize.height; i += pixelsPerChunkInt) {
         numberOfChunksToRender.y++;
     }
 
-    for(int32_t i = topLeftVisibleChunkPosition.x; i < topLeftVisibleChunkPosition.x + numberOfChunksToRender.x; i++) {
-        for(int32_t j = topLeftVisibleChunkPosition.y; j < topLeftVisibleChunkPosition.y + numberOfChunksToRender.y; j--) {
+    for(i32 i = topLeftVisibleChunkPosition.x; i < topLeftVisibleChunkPosition.x + numberOfChunksToRender.x; i++) {
+        for(i32 j = topLeftVisibleChunkPosition.y; j < topLeftVisibleChunkPosition.y + numberOfChunksToRender.y; j--) {
             const Chunk* currentChunk = game->getWorld().getChunk(i, j);
             if(currentChunk == nullptr) continue;
-            int32_t k = (int32_t)floorf((float)this->cameraPosition.x / pixelsPerBlock);
+            i32 k = (i32)floorf((float)this->cameraPosition.x / pixelsPerBlock);
             if(k < 0)
         }
     } */
     BlockPos topLeftVisibleBlock = {
-        (int32_t)floor((double)this->cameraPosition.x / pixelsPerBlock),
-        (int32_t)floor((double)this->cameraPosition.y / pixelsPerBlock)
+        (i32)floor((double)this->cameraPosition.x / pixelsPerBlock),
+        (i32)floor((double)this->cameraPosition.y / pixelsPerBlock)
     };
 
     r.w = r.h = pixelsPerBlockInt;
     r.y = topLeftVisibleBlock.y * pixelsPerBlockInt - this->cameraPosition.y;
     for(
-        int32_t i = topLeftVisibleBlock.y;
-        i <= topLeftVisibleBlock.y + (int32_t)ceil((double)screenSize.height/pixelsPerBlock);
+        i32 i = topLeftVisibleBlock.y;
+        i <= topLeftVisibleBlock.y + (i32)ceil((double)screenSize.height/pixelsPerBlock);
         i++, r.y += pixelsPerBlockInt
     ) {
         r.x = topLeftVisibleBlock.x * pixelsPerBlockInt - this->cameraPosition.x;
         for(
-            int32_t j = topLeftVisibleBlock.x;
-            j <= topLeftVisibleBlock.x + (int32_t)ceil((double)screenSize.width/pixelsPerBlock);
+            i32 j = topLeftVisibleBlock.x;
+            j <= topLeftVisibleBlock.x + (i32)ceil((double)screenSize.width/pixelsPerBlock);
             j++, r.x += pixelsPerBlockInt
         ) {
             const Block* block = game->getWorld().getBlockAt(j, -i);
@@ -166,7 +166,7 @@ void GameRenderer::renderInPlace(Game* game) {
 
     //delta = target frametime - time elapsed - overhead from previous frames
     this->delta = this->frameTime - (this->end - this->start) - this->overhead;
-    this->delta = this->delta * (int64_t)1000 / (int64_t)Program::getClockFrequency(); //to get miliseconds
+    this->delta = this->delta * (i64)1000 / (i64)Program::getClockFrequency(); //to get miliseconds
     if(this->delta > 0) sleep(this->delta);
 
     
@@ -174,7 +174,7 @@ void GameRenderer::renderInPlace(Game* game) {
     this->overhead = this->end - this->start - this->frameTime;
 }
 
-void GameRenderer::moveCamera(int32_t offX, int32_t offY) {
+void GameRenderer::moveCamera(i32 offX, i32 offY) {
     this->cameraPosition.x += offX;
     this->cameraPosition.y += offY;
 }

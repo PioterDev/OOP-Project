@@ -18,10 +18,10 @@ class RenderableObjectBase : public GameObject {
     protected:
         TextureHandle textureHandle;
     public:
-        RenderableObjectBase(const uint32_t objectID);
-        RenderableObjectBase(const uint32_t objectID, const char* name);
-        RenderableObjectBase(const uint32_t objectID, const uint32_t textureHandleIndex);
-        RenderableObjectBase(const uint32_t objectID, const char* name, const uint32_t textureHandleIndex);
+        RenderableObjectBase(const u32 objectID);
+        RenderableObjectBase(const u32 objectID, const char* name);
+        RenderableObjectBase(const u32 objectID, const u32 textureHandleIndex);
+        RenderableObjectBase(const u32 objectID, const char* name, const u32 textureHandleIndex);
         
         /**
          * @brief "Renders" the object.
@@ -59,5 +59,5 @@ class RenderableObjectBase : public GameObject {
          * @param textureHandleIndex obtained from the texture registry
          * @return this, for chaining
          */
-        RenderableObjectBase& bindTexture(uint32_t textureHandleIndex);
+        RenderableObjectBase& bindTexture(u32 textureHandleIndex);
 };

@@ -35,22 +35,22 @@ class MainRegistry {
         /////////////////////////
         /* Texture IDs section */
         /////////////////////////
-        static uint32_t gregTextureIndex;
-        static uint32_t stoneTextureIndex;
+        static u32 gregTextureIndex;
+        static u32 stoneTextureIndex;
         
 
 
         ////////////////////////
         /* Object IDs section */
         ////////////////////////
-        static uint32_t someObjectID;
+        static u32 someObjectID;
         
 
         
         ///////////////////////
         /* Block IDs section */
         ///////////////////////
-        static uint32_t startingBlockID;
-        static uint32_t endingBlockID;
+        static u32 startingBlockID;
+        static u32 endingBlockID;
         
 };

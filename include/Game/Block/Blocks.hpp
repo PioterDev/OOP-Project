@@ -10,15 +10,15 @@
 class Blocks {
     private:
         static vector<Block*> blocks;
-        static uint32_t numberOfBlocksRegistered;
+        static u32 numberOfBlocksRegistered;
     public:
         static void addBlock(Block* block);
 
-        static uint32_t getCurrentBlockID();
+        static u32 getCurrentBlockID();
 
-        static Block* getBlockWithID(uint32_t id);
+        static Block* getBlockWithID(u32 id);
 
-        static uint32_t init(uint32_t blockID);
+        static u32 init(u32 blockID);
         
         static Block* cobblestone;
 };

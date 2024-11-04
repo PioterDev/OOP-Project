@@ -16,10 +16,10 @@ class Block : public RenderableObjectBase {
          */
         float density;
     public:
-        Block(const uint32_t objectID);
-        Block(const uint32_t objectID, const char* name);
-        Block(const uint32_t objectID, const uint32_t textureHandleIndex);
-        Block(const uint32_t objectID, const char* name, const uint32_t textureHandleIndex);
+        Block(const u32 objectID);
+        Block(const u32 objectID, const char* name);
+        Block(const u32 objectID, const u32 textureHandleIndex);
+        Block(const u32 objectID, const char* name, const u32 textureHandleIndex);
 
         Block& setDensity(float density);
 

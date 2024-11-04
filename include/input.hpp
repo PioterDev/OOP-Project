@@ -17,7 +17,7 @@ struct EventBuffer {
     //A circular buffer of latest external events
     SDL_Event buffer[64];
     //Current event index
-    uint32_t index = 0;
+    u32 index = 0;
 };
 
 /**

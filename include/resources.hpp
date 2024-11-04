@@ -64,7 +64,7 @@ class ResourceManager {
          * Texture at index 0 is always valid and used as a fallback
          * if loading the texture from `path` fails.
          */
-        uint32_t registerTexture(const char* path);
+        u32 registerTexture(const char* path);
         
         /**
          * @brief Get a handle to the texture with the given ID.
@@ -77,11 +77,11 @@ class ResourceManager {
          * it is dangerous, risks memory leaks and potentially crashes.
          * Instead use the ResourceManager, as it has a broader context.
          */
-        TextureHandle getTextureHandle(uint32_t id) const;
+        TextureHandle getTextureHandle(u32 id) const;
 
-        SDL_Texture* getTexture(uint32_t id);
+        SDL_Texture* getTexture(u32 id);
         
-        Size getTextureOriginalSize(uint32_t id) const;
+        Size getTextureOriginalSize(u32 id) const;
 };
 
 /**
@@ -99,13 +99,13 @@ class SoundEffect {
 
     private:
         Mix_Chunk* soundEffect = nullptr;
-        uint32_t volume = 128;
+        u32 volume = 128;
     public:
-        void setVolume(uint32_t newVolume) {
+        void setVolume(u32 newVolume) {
             Mix_VolumeChunk(this->soundEffect, newVolume);
             this->volume = newVolume <= 128 ? newVolume : 128;
         }
-        uint32_t getVolume() const { return this->volume; }
+        u32 getVolume() const { return this->volume; }
 
         NoDiscard Status loadSoundEffect(const char* path);
         NoDiscard Status loadSoundEffect(const string& path) { return loadSoundEffect(path.c_str()); }

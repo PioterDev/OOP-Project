@@ -18,19 +18,19 @@ class GameRenderer {
         ListArray<PhysicalObject*> physicalObjectsToRender;
         ListArray<UIElement*> uiElements;
         
-        uint32_t fps = 144;
-        int64_t start, end, delta, overhead, frameTime;
+        u32 fps = 144;
+        i64 start, end, delta, overhead, frameTime;
         double scalingFactor = 1.0;
 
         //Registers the timestamp when rendering
         //the latest frame has ended
-        uint64_t lastFrameAt;
+        u64 lastFrameAt;
         //Counts the number of frames since rendering started
-        uint64_t numberOfFramesRendered = 0;
+        u64 numberOfFramesRendered = 0;
         
         Point cameraPosition = {0, 0};
 
-        void moveCamera(int32_t offX, int32_t offY);
+        void moveCamera(i32 offX, i32 offY);
     public:
         GameRenderer() : physicalObjectsToRender(1024), uiElements(1024) {}
 
@@ -45,7 +45,7 @@ class GameRenderer {
         //     return std::thread([this] { this->render(); });
         // }
 
-        uint64_t getTimeSinceLastFrame() const { return SDL_GetPerformanceCounter() - this->lastFrameAt; }
+        u64 getTimeSinceLastFrame() const { return SDL_GetPerformanceCounter() - this->lastFrameAt; }
 
         Point getCameraPosition() const { return this->cameraPosition; }
 };

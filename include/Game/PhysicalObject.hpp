@@ -40,8 +40,8 @@ class PhysicalObject : public RenderableObject {
         Vector2f getPosition() const { return this->position; }
         PhysicalObject& setPosition(Vector2f pos) {
             this->position = pos;
-            this->positionRounded.x = (int32_t)roundf(pos.x);
-            this->positionRounded.y = (int32_t)roundf(pos.y);
+            this->positionRounded.x = (i32)roundf(pos.x);
+            this->positionRounded.y = (i32)roundf(pos.y);
             return *this;
         }
         Point getPositionRounded() const { return this->positionRounded; }

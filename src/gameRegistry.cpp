@@ -7,15 +7,15 @@ const char* defaultObjectName = "";
 /////////////////////////
 /* Texture IDs section */
 /////////////////////////
-uint32_t MainRegistry::gregTextureIndex;
-uint32_t MainRegistry::stoneTextureIndex;
+u32 MainRegistry::gregTextureIndex;
+u32 MainRegistry::stoneTextureIndex;
 
 
 
 ////////////////////////
 /* Object IDs section */
 ////////////////////////
-uint32_t MainRegistry::someObjectID;
+u32 MainRegistry::someObjectID;
 
 
 
@@ -24,9 +24,9 @@ uint32_t MainRegistry::someObjectID;
 ///////////////////////
 
 //ID of the first registered block type
-uint32_t MainRegistry::startingBlockID;
+u32 MainRegistry::startingBlockID;
 //ID of the last registered block type + 1
-uint32_t MainRegistry::endingBlockID;
+u32 MainRegistry::endingBlockID;
 
 
 
@@ -50,7 +50,7 @@ void MainRegistry::init() {
     ////////////////////////
 
 
-    uint32_t lowestID = 16; //first 16 are reserved
+    u32 lowestID = 16; //first 16 are reserved
     ///////////////////////
     /* Block IDs section */
     ///////////////////////
