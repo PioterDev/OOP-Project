@@ -2,6 +2,8 @@
 
 #include <SDL_events.h>
 
+#include "deus.hpp"
+
 #define isFunctionalKey(key) \
     ((key) >= SDLK_LCTRL && (key) <= SDLK_RGUI) || \
     ((key) >= SDLK_AUDIONEXT && (key) <= SDLK_AUDIOMUTE) || \

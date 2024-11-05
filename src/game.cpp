@@ -23,8 +23,8 @@ Status Game::init() {
 
 void Game::run() {
     // std::thread renderThread = this->renderer.startRender();
-    UIElement obj(MainRegistry::someObjectID, MainRegistry::stoneTextureIndex);
-    obj.setPositionOnScreen(100, 100).setSizeOnScreen(256, 256);
+    UIElement obj(MainRegistry::someObjectID, MainRegistry::gregTextureIndex);
+    obj.setSizeOnScreen(640, 360).setPositionOnScreenCentered(640, 360);
 
     this->world.populateChunk({0, 0}, Blocks::cobblestone->getInstanceID());
     while(this->flags.running) {

@@ -7,6 +7,8 @@
 
 #include "deus.hpp"
 
+using namespace Enums;
+
 template<typename T> class ArrayTree {
     private:
         typedef struct ArrayTreeNode {

@@ -40,7 +40,7 @@ void MainRegistry::init() {
     /////////////////////////
     /* Texture IDs section */
     /////////////////////////
-    MainRegistry::gregTextureIndex = Program::getResourceManager().registerTexture("./assets/bzns.png");
+    MainRegistry::gregTextureIndex = Program::getResourceManager().registerTexture("./assets/abruz.png");
     MainRegistry::stoneTextureIndex = Program::getResourceManager().registerTexture("./assets/cobblestone.png");
 
 

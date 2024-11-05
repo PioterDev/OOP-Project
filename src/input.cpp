@@ -221,8 +221,12 @@ void InputHandler::processInput(Game* game) {
 
             case SDL_MOUSEWHEEL: {
                 if(game->renderer.scalingFactor < 0.05 && latestEvent.wheel.y < 0) break;
-                game->renderer.scalingFactor += (double)latestEvent.wheel.y * 0.01;
-
+                if(latestEvent.wheel.y < 0) {
+                    game->renderer.scalingFactor -= (double)latestEvent.wheel.preciseY * (double)latestEvent.wheel.preciseY * 0.01;
+                }
+                else {
+                    game->renderer.scalingFactor += (double)latestEvent.wheel.preciseY * (double)latestEvent.wheel.preciseY * 0.01;
+                }
                 break;
             }
             case SDL_MOUSEMOTION: {
