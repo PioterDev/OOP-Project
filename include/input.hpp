@@ -48,5 +48,5 @@ class InputHandler {
             return latestEvents.buffer[latestEvents.index];
         }
         
-        void processInput(Game* game);
+        void processInput(Game& game);
 };

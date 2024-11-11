@@ -19,6 +19,7 @@ template<typename T> class ListArray {
             struct ListArrayNode* next;
             u32 nodeSize;
             u32 usedSize;
+            //ah yes...undefined behavior, love it
             T objects[1];
         } ListArrayNode;
 

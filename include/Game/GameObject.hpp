@@ -163,7 +163,7 @@ class GameObject {
          */
         GameObject(const uint32_t objectID) { this->uuid.parts.type = objectID; }
         
-        virtual ~GameObject() = 0;
+        ~GameObject() {}
 
         /**
          * @brief Get the name of the object as C string.

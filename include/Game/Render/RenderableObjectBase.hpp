@@ -22,7 +22,7 @@ class RenderableObjectBase : public GameObject {
         RenderableObjectBase(const u32 objectID, const char* name);
         RenderableObjectBase(const u32 objectID, const u32 textureHandleIndex);
         RenderableObjectBase(const u32 objectID, const char* name, const u32 textureHandleIndex);
-        
+
         /**
          * @brief "Renders" the object.
          * 
@@ -60,4 +60,5 @@ class RenderableObjectBase : public GameObject {
          * @return this, for chaining
          */
         RenderableObjectBase& bindTexture(u32 textureHandleIndex);
+
 };
