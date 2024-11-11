@@ -17,19 +17,35 @@ using std::string, std::vector;
 using namespace Enums;
 using namespace Structs;
 
+class RenderableObject;
+
+
+//TODO: rethink how resource handling is done
+//in terms of ownership (i.e. whether objects should access
+//a resource directly or through the ResourceManager)
 typedef struct {
     SDL_Texture* texture = nullptr;
     Size originalSize = {0, 0};
 } TextureHandle;
 
+typedef struct {
+    SDL_Texture* texture = nullptr;
+    Size originalSize = {0, 0};
+    u32 flags = 0;
+    u32 milisecondsToRemove = 0;
+    u64 lastAccessedAt = 0;
+} TextureData;
+
 class ResourceManager {
     friend class Program;
 
     private:
-        vector<TextureHandle> textures;
+        vector<TextureData> textures;
         vector<Mix_Chunk*> soundEffects;
         vector<Mix_Music*> music;
         Status latestStatus = Status::SUCCESS;
+
+        
 
         /**
          * @brief Creates a fallback texture.
@@ -66,6 +82,7 @@ class ResourceManager {
          */
         u32 registerTexture(const char* path);
         
+
         /**
          * @brief Get a handle to the texture with the given ID.
          * 
@@ -77,11 +94,15 @@ class ResourceManager {
          * it is dangerous, risks memory leaks and potentially crashes.
          * Instead use the ResourceManager, as it has a broader context.
          */
-        TextureHandle getTextureHandle(u32 id) const;
-
+        TextureHandle getTextureHandle(u32 id);
         SDL_Texture* getTexture(u32 id);
-        
         Size getTextureOriginalSize(u32 id) const;
+
+        void setTextureColorMod(RenderableObject& object);
+        void setTextureColorModGlobal(RenderableObject& object);
+
+        void setTextureAlphaMod(RenderableObject& object);
+        void setTextureAlphaModGlobal(RenderableObject& object);
 };
 
 /**

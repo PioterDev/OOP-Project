@@ -44,7 +44,7 @@ Status ResourceManager::init() {
     textures.reserve(128);
     soundEffects.reserve(16);
     music.reserve(4);
-    TextureHandle t;
+    TextureData t;
     t.texture = this->createFallbackTexture();
     if(t.texture == nullptr) {
         this->latestStatus = Status::FALLBACK_TEXTURE_CREATION_FAILURE;
@@ -101,7 +101,7 @@ u32 ResourceManager::registerTexture(const char* path) {
 
     this->latestStatus = tryOpeningFile(path);
     if(this->latestStatus == Status::SUCCESS) {
-        TextureHandle t;
+        TextureData t;
         t.texture = IMG_LoadTexture(Program::getRenderingContext(), path);
         if(t.texture == nullptr) {
             Program::getLogger().error("Cannot load texture: ", IMG_GetError());
@@ -124,18 +124,26 @@ u32 ResourceManager::registerTexture(const char* path) {
     else return 0;
 }
 
-TextureHandle ResourceManager::getTextureHandle(u32 id) const {
-    if(id > this->textures.size()) return this->textures[0]; //fallback texture
-    return this->textures[id];
+TextureHandle ResourceManager::getTextureHandle(u32 id) {
+    TextureHandle handle;
+    if(id >= this->textures.size()) {
+        handle.texture = this->textures[0].texture; //fallback texture
+        handle.originalSize = this->textures[0].originalSize;
+    }
+    else {
+        handle.texture = this->textures[id].texture;
+        handle.originalSize = this->textures[id].originalSize;
+    }
+    return handle;
 }
 
 SDL_Texture* ResourceManager::getTexture(u32 id) {
-    if(id > this->textures.size()) return this->textures[0].texture;
+    if(id >= this->textures.size()) return this->textures[0].texture;
     return this->textures[id].texture;
 }
 
 Size ResourceManager::getTextureOriginalSize(u32 id) const {
-    if(id > this->textures.size()) return this->textures[0].originalSize; //fallback texture
+    if(id >= this->textures.size()) return this->textures[0].originalSize; //fallback texture
     return this->textures[id].originalSize;
 }
 
