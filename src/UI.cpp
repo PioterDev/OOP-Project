@@ -1,6 +1,20 @@
 #include "game.hpp"
 #include "Game/UIElement.hpp"
 
+
+
+UIElement::UIElement(
+    const u32 objectID
+) : RenderableObject(objectID) {
+    Game::getRenderer().registerUIElement(this);
+}
+
+UIElement::UIElement(
+    const u32 objectID, const char* name
+) : RenderableObject(objectID, name) {
+    Game::getRenderer().registerUIElement(this);
+}
+
 UIElement::UIElement(
     const u32 objectID,
     const u32 textureHandleIndex
@@ -9,13 +23,15 @@ UIElement::UIElement(
 }
 
 UIElement::UIElement(
-    const u32 objectID
-) : RenderableObject(objectID) {
+    const u32 objectID, const char* name, const u32 textureHandleIndex
+) : RenderableObject(objectID, name, textureHandleIndex) {
     Game::getRenderer().registerUIElement(this);
 }
 
+
+
 void UIElement::render() {
-    return;
+    return; //for now no render logic
 }
 
 void UIElement::onHover() {}

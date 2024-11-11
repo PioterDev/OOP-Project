@@ -13,7 +13,9 @@
 class UIElement : public RenderableObject {
     public:
         UIElement(const u32 objectID);
+        UIElement(const u32 objectID, const char* name);
         UIElement(const u32 objectID, const u32 textureHandleIndex);
+        UIElement(const u32 objectID, const char* name, const u32 textureHandleIndex);
 
         virtual void onHover();
         virtual void onKeyPress(SDL_Keycode key);
