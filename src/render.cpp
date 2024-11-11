@@ -66,9 +66,7 @@ constexpr double sizeOfBlockTexture = 64.0;
     }
 } */
 
-void GameRenderer::renderInPlace(Game* game) {
-    this->start = SDL_GetPerformanceCounter();
-    this->frameTime = Program::getClockFrequency() / this->fps;
+void GameRenderer::renderInPlace(Game& game) {
     Size screenSize = Program::getScreenSize();
     SDL_Rect r;
 
@@ -90,28 +88,10 @@ void GameRenderer::renderInPlace(Game* game) {
             object->flip
         );
     }); */
+
     double pixelsPerBlock = sizeOfBlockTexture * this->scalingFactor;
     i32 pixelsPerBlockInt = (i32)pixelsPerBlock;
-    /* Point topLeftVisibleChunkPosition = {
-        floorf((float)this->cameraPosition.x / pixelsPerChunk),
-        -floorf((float)this->cameraPosition.y / pixelsPerChunk)
-    };
-    Point numberOfChunksToRender = {0, 0};
-    for(i32 i = this->cameraPosition.x; i <= this->cameraPosition.x + (i32)screenSize.width; i += pixelsPerChunkInt) {
-        numberOfChunksToRender.x++;
-    }
-    for(i32 i = this->cameraPosition.y; i <= this->cameraPosition.y + (i32)screenSize.height; i += pixelsPerChunkInt) {
-        numberOfChunksToRender.y++;
-    }
 
-    for(i32 i = topLeftVisibleChunkPosition.x; i < topLeftVisibleChunkPosition.x + numberOfChunksToRender.x; i++) {
-        for(i32 j = topLeftVisibleChunkPosition.y; j < topLeftVisibleChunkPosition.y + numberOfChunksToRender.y; j--) {
-            const Chunk* currentChunk = game->getWorld().getChunk(i, j);
-            if(currentChunk == nullptr) continue;
-            i32 k = (i32)floorf((float)this->cameraPosition.x / pixelsPerBlock);
-            if(k < 0)
-        }
-    } */
     BlockPos topLeftVisibleBlock = {
         (i32)floor((double)this->cameraPosition.x / pixelsPerBlock),
         (i32)floor((double)this->cameraPosition.y / pixelsPerBlock)
@@ -130,7 +110,7 @@ void GameRenderer::renderInPlace(Game* game) {
             j <= topLeftVisibleBlock.x + (i32)ceil((double)screenSize.width/pixelsPerBlock);
             j++, r.x += pixelsPerBlockInt
         ) {
-            const Block* block = game->getWorld().getBlockAt(j, -i);
+            const Block* block = game.getWorld().getBlockAt(j, -i);
             if(block == nullptr) continue;
             if(block->getTexture() == nullptr) continue;
 
@@ -139,7 +119,7 @@ void GameRenderer::renderInPlace(Game* game) {
                 block->getTexture(),
                 nullptr, &r
             );
-        } 
+        }
     }
 
     this->uiElements.forEach([](UIElement* element) {
@@ -160,18 +140,8 @@ void GameRenderer::renderInPlace(Game* game) {
 
     SDL_RenderPresent(Program::getRenderingContext());
     
-    // loop_end:
-    this->end = this->lastFrameAt = SDL_GetPerformanceCounter();
+    this->lastFrameAt = SDL_GetPerformanceCounter();
     this->numberOfFramesRendered++;
-
-    //delta = target frametime - time elapsed - overhead from previous frames
-    this->delta = this->frameTime - (this->end - this->start) - this->overhead;
-    this->delta = this->delta * (i64)1000 / (i64)Program::getClockFrequency(); //to get miliseconds
-    if(this->delta > 0) sleep(this->delta);
-
-    
-    this->end = SDL_GetPerformanceCounter();
-    this->overhead = this->end - this->start - this->frameTime;
 }
 
 void GameRenderer::moveCamera(i32 offX, i32 offY) {

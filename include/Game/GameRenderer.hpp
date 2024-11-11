@@ -18,8 +18,7 @@ class GameRenderer {
         ListArray<PhysicalObject*> physicalObjectsToRender;
         ListArray<UIElement*> uiElements;
         
-        u32 fps = 144;
-        i64 start, end, delta, overhead, frameTime;
+        u32 fps = 60;
         double scalingFactor = 1.0;
 
         //Registers the timestamp when rendering
@@ -39,7 +38,7 @@ class GameRenderer {
         void registerPhysicalObject(PhysicalObject* obj) { physicalObjectsToRender.append(obj); }
 
         // void render();
-        void renderInPlace(Game* game);
+        void renderInPlace(Game& game);
 
         // std::thread startRender() {
         //     return std::thread([this] { this->render(); });
