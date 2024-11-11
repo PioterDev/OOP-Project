@@ -1,5 +1,12 @@
 #pragma once
 
+/**
+ * @brief A header file containing
+ * #defines, enums, unions and structs, hence "deus".
+ * It also contains useful typedefs
+ * 
+ */
+
 typedef uint8_t  u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
@@ -15,7 +22,6 @@ namespace Enums {
     /**
      * @brief Enum for returning
      * the status of an operation.
-     * 
      */
     enum class Status {
         SUCCESS,

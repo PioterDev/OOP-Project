@@ -4,7 +4,7 @@
 
 #include "game.hpp"
 
-int main(Unused int argc, Unused char** argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
     Game game;
     Status status = game.init();
     if(status != Status::SUCCESS) {
@@ -20,8 +20,13 @@ int main(Unused int argc, Unused char** argv) {
         );
         return static_cast<int>(status);
     }
+    try {
+        game.run();
+    }
+    catch(int code) {
+        //TODO: finish this
+    }
 
-    game.run();
 
     return 0;
 }

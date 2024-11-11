@@ -49,8 +49,49 @@
 #else
 #define NoDiscard
 #endif /* Compiler */
-#endif /* Check C++ standard */
+#endif /* C++17 */
 #endif /* Defining NoDiscard */
+
+#ifndef NoDiscardReason
+#if __cplusplus >= 202002L
+#define NoDiscardReason(reason) [[nodiscard(reason)]]
+#else
+#if defined(__GNUC__) || defined(__clang__)
+#define NoDiscardReason(reason) __atrribute__((warn_unused_result))
+#else
+#define NoDiscardReason(reason)
+#endif /* Compiler */
+#endif /* C++20 */
+#endif /* Defining NoDiscardReason */
+
+// #ifndef Unused
+// #if __cplusplus >= 201703L
+// #define Unused [[maybe_unused]]
+// #else
+// #if defined(__GNUC__) || defined(__clang__)
+// #define Unused __attribute__((unused))
+// #else
+// #define Unused
+// #endif /* Compiler */
+// #endif /* C++11 */
+// #endif /* Defining Unused */
+
+#ifndef Likely
+#if __cplusplus >= 202002L
+#define Likely [[likely]]
+#else
+#define Likely
+#endif /* C++20 */
+#endif /* Defining Likely */
+
+#ifndef Unlikely
+#if __cplusplus >= 202002L
+#define Unlikely [[unlikely]]
+#else
+#define Unlikely
+#endif /* C++20 */
+#endif /* Defining Unlikely */
+
 extern "C" {
 #else
 #include <assert.h>
@@ -67,8 +108,41 @@ extern "C" {
 #else
 #define NoDiscard
 #endif /* Compiler */
-#endif /* Check C standard */
+#endif /* C23 */
 #endif /* Defining NoDiscard */
+
+#ifndef NoDiscardReason
+#if __STDC_VERSION__ >= 202311L
+#define NoDiscardReason(reason) [[nodiscard(reason)]]
+#else
+#if defined(__GNUC__) || defined(__clang__)
+#define NoDiscardReason(reason) __attribute__((warn_unused_result))
+#else
+#define NoDiscardReason(reason)
+#endif /* Compiler */
+#endif /* C23 */
+#endif /* Defining NoDiscardReason */
+
+#ifndef Unused
+#if __STDC_VERSION__ >= 202311L
+#define Unused [[maybe_unused]]
+#else
+#if defined(__GNUC__) || defined(__clang__)
+#define Unused __attribute__((unused))
+#else
+#define Unused
+#endif /* Compiler */
+#endif /* C23 */
+#endif /* Defining Unused */
+
+#ifndef Likely
+#define Likely
+#endif
+
+#ifndef Unlikely
+#define Unlikely
+#endif
+
 #endif /* C++ */
 
 #if defined(_WIN32) || defined(WIN32) || defined(__WIN32__) || defined(__NT__)
@@ -100,29 +174,7 @@ extern "C" {
 #endif /* Compiler */
 #endif /* Defining ForceInline */
 
-#ifndef Unused
-#ifdef __cplusplus
-#if __cplusplus >= 201103L
-#define Unused [[maybe_unused]]
-#else 
-#if defined(__GNUC__) || defined(__clang__)
-#define Unused __attribute__((unused))
-#else
-#define Unused
-#endif /* Compiler */
-#endif /* C++11 */
-#else
-#if __STDC_VERSION__ >= 202311L
-#define Unused [[maybe_unused]]
-#else
-#if defined(__GNUC__) || defined(__clang__)
-#define Unused __attribute__((unused))
-#else
-#define Unused
-#endif /* Compiler */
-#endif /* C23 */
-#endif /* C++ */
-#endif /* Defining Unused */
+
 
 /**
  * @brief Get the monotonic clock resolution based on the underlying OS.
