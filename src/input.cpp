@@ -182,7 +182,7 @@ int getKeystringIndex(SDL_Keycode key) {
     return index;
 }
 
-void InputHandler::processInput(Game* game) {
+void InputHandler::processInput(Game& game) {
     //Aliases
     #define latestEvent latestEvents.buffer[latestEvents.index]
     constexpr size_t bufferSize = sizeof(latestEvents.buffer) / sizeof(SDL_Event);
@@ -190,16 +190,16 @@ void InputHandler::processInput(Game* game) {
     while(SDL_PollEvent(&latestEvent)) {
         switch(latestEvent.type) {
             case SDL_QUIT:
-                game->flags.running = false;
-                // game->renderer.status = ThreadStatus::STOP;
+                game.flags.running = false;
+                // game.renderer.status = ThreadStatus::STOP;
                 break;
             case SDL_WINDOWEVENT:
                 switch(latestEvent.window.event) {
                     case SDL_WINDOWEVENT_RESIZED:
                         //reload all textures
-                        game->windowParameters.size.width = latestEvent.window.data1;
-                        game->windowParameters.size.height = latestEvent.window.data2;
-                        Program::getLogger().info(
+                        game.windowParameters.size.width = latestEvent.window.data1;
+                        game.windowParameters.size.height = latestEvent.window.data2;
+                        Program::getLogger().debug(
                             "Resized window to ",
                             latestEvent.window.data1,
                             "x",
@@ -220,12 +220,12 @@ void InputHandler::processInput(Game* game) {
             }
 
             case SDL_MOUSEWHEEL: {
-                if(game->renderer.scalingFactor < 0.05 && latestEvent.wheel.y < 0) break;
+                if(game.renderer.scalingFactor < 0.05 && latestEvent.wheel.y < 0) break;
                 if(latestEvent.wheel.y < 0) {
-                    game->renderer.scalingFactor -= (double)latestEvent.wheel.preciseY * (double)latestEvent.wheel.preciseY * 0.01;
+                    game.renderer.scalingFactor -= (double)latestEvent.wheel.preciseY * (double)latestEvent.wheel.preciseY * 0.01;
                 }
                 else {
-                    game->renderer.scalingFactor += (double)latestEvent.wheel.preciseY * (double)latestEvent.wheel.preciseY * 0.01;
+                    game.renderer.scalingFactor += (double)latestEvent.wheel.preciseY * (double)latestEvent.wheel.preciseY * 0.01;
                 }
                 break;
             }
@@ -237,10 +237,12 @@ void InputHandler::processInput(Game* game) {
         latestEvents.index = (latestEvents.index + 1) % bufferSize;
     }
     
-    if(Program::keyboardState[SDL_SCANCODE_RIGHT])  game->renderer.moveCamera(1,  0);
-    if(Program::keyboardState[SDL_SCANCODE_LEFT])   game->renderer.moveCamera(-1, 0);
-    if(Program::keyboardState[SDL_SCANCODE_DOWN])   game->renderer.moveCamera(0,  1);
-    if(Program::keyboardState[SDL_SCANCODE_UP])     game->renderer.moveCamera(0, -1);
+    game.updateMouse();
+
+    if(Program::keyboardState[SDL_SCANCODE_RIGHT])  game.renderer.moveCamera(1,  0);
+    if(Program::keyboardState[SDL_SCANCODE_LEFT])   game.renderer.moveCamera(-1, 0);
+    if(Program::keyboardState[SDL_SCANCODE_DOWN])   game.renderer.moveCamera(0,  1);
+    if(Program::keyboardState[SDL_SCANCODE_UP])     game.renderer.moveCamera(0, -1);
 
     #undef latestEvent
 }

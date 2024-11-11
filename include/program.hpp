@@ -63,6 +63,13 @@ class Program {
 
         u32 getNumberOfKeys() const { return this->numberOfKeyboardKeys; }
 
+        Point getMousePosition() const { return this->mousePosition; }
+        void updateMouse() {
+            this->mouseButtons = SDL_GetMouseState(
+                &this->mousePosition.x, &this->mousePosition.y
+            );
+        }
+
         static const uint8_t* keyboardState;
     protected:
         struct ProgramFlags flags;
@@ -79,6 +86,8 @@ class Program {
         SDL_Window* window;
         static WindowParameters windowParameters;
         static SDL_Renderer* renderingContext;
+        Point mousePosition;
+        u32 mouseButtons;
 
         //Audio-related members
         struct AudioParameters audioParameters;
