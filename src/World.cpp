@@ -1,12 +1,15 @@
 #include "Game/World.hpp"
 
-Status World::populateChunk(const Point which, const u32 blockID) {
+Status World::populateChunk(const ChunkPos which, const u32 blockID) {
     Chunk* chunk = this->chunks[which];
     if(chunk != nullptr) return Status::ALREADY_EXISTS;
 
     chunk = (Chunk*)malloc(sizeof(Chunk));
     if(chunk == nullptr) return Status::ALLOC_FAILURE;
 
+    //for now the entire chunk will be made with just 1 block
+    //this will change when a proper procedural world generation
+    //will be implemented
     memset(chunk, blockID, sizeof(Chunk));
     
     this->chunks[which] = chunk;

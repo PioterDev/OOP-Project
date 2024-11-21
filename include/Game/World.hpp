@@ -20,12 +20,12 @@ typedef struct {
 } Chunk;
 
 class PointHash {
-    public: size_t operator()(const Point& p) const { return p.x * p.x + p.y + p.y; }
+    public: size_t operator()(const ChunkPos& p) const { return p.x * p.x + p.y * p.y; }
 };
 
 class World : public GameObject {
     protected:
-        unordered_map<Point, Chunk*, PointHash> chunks;
+        unordered_map<ChunkPos, Chunk*, PointHash> chunks;
     public:
         World(const u32 objectID) : GameObject(objectID), chunks(256) {}
         World(const u32 objectID, const char* name) : GameObject(objectID, name), chunks(256) {}
@@ -36,14 +36,15 @@ class World : public GameObject {
             }
         }
 
-        const Chunk* getChunk(const Point which) { return this->chunks[which]; }
         const Chunk* getChunk(const i32 x, const i32 y) { return this->chunks[{x, y}]; }
+        const Chunk* getChunk(const ChunkPos which) { return this->chunks[which]; }
         
-        Status populateChunk(const Point which, const u32 blockID);
+        Status populateChunk(const ChunkPos which, const u32 blockID);
 
         const Block* getBlockAt(i32 x, i32 y);
         const Block* getBlockAt(BlockPos pos) { return this->getBlockAt(pos.x, pos.y); }
 
         void printChunk(i32 x, i32 y);
+        void printChunk(ChunkPos pos) { this->printChunk(pos.x, pos.y); }
 
 };

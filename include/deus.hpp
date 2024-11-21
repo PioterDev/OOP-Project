@@ -130,6 +130,7 @@ namespace Structs {
     /* Default Point struct */
     typedef Vector2i32 Point;
     typedef Vector2i32 BlockPos;
+    typedef Vector2i32 ChunkPos;
     /* Default floating point Point struct */
     typedef Vector2f PointF;
 
