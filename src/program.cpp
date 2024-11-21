@@ -97,6 +97,7 @@ Status Program::initSystems() {
 }
 
 Program::~Program() {
+    this->resourceManager.shutdown();
     if(this->renderingContext != nullptr) SDL_DestroyRenderer(renderingContext);
     if(this->window != nullptr) SDL_DestroyWindow(window);
     // if(this->flags.SDL_TTF_Initalized) TTF_Quit();

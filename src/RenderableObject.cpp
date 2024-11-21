@@ -14,23 +14,23 @@ RenderableObjectBase::RenderableObjectBase(
 
 RenderableObjectBase::RenderableObjectBase(
     const u32 objectID,
-    const u32 textureHandleIndex
-) : GameObject(objectID) {
-    this->bindTexture(textureHandleIndex);
+    const TextureHandle textureHandle
+) : GameObject(objectID), textureHandle(textureHandle) {
+    this->setVisible();
 }
 
 RenderableObjectBase::RenderableObjectBase(
     const u32 objectID,
     const char* name,
-    const u32 textureHandleIndex
-) : GameObject(objectID, name) {
-    this->bindTexture(textureHandleIndex);
+    const TextureHandle textureHandle
+) : GameObject(objectID, name), textureHandle(textureHandle)  {
+    this->setVisible();
 }
 
 RenderableObjectBase& RenderableObjectBase::bindTexture(
-    u32 textureHandleIndex
+    TextureHandle textureHandle
 ) {
-    this->textureHandle = Program::getResourceManager().getTextureHandle(textureHandleIndex);
+    this->textureHandle = textureHandle;
     this->setVisible();
     return *this;
 }
@@ -46,16 +46,16 @@ RenderableObject::RenderableObject(
 
 RenderableObject::RenderableObject(
     const u32 objectID,
-    const u32 textureHandleIndex
-) : RenderableObjectBase(objectID, textureHandleIndex) {
+    const TextureHandle textureHandle
+) : RenderableObjectBase(objectID, textureHandle) {
     this->setTexturePortionOriginal();
 }
 
 RenderableObject::RenderableObject(
     const u32 objectID,
     const char* name,
-    const u32 textureHandleIndex
-) : RenderableObjectBase(objectID, name, textureHandleIndex) {
+    const TextureHandle textureHandle
+) : RenderableObjectBase(objectID, name, textureHandle) {
     this->setTexturePortionOriginal();
 }
 
@@ -66,8 +66,9 @@ RenderableObject& RenderableObject::setTexturePortion(const SDL_Rect& r) {
 
 RenderableObject& RenderableObject::setTexturePortionOriginal() {
     this->texturePortion.x = this->texturePortion.y = 0;
-    this->texturePortion.h = (int)this->textureHandle.originalSize.height;
-    this->texturePortion.w = (int)this->textureHandle.originalSize.width;
+    Size s = Program::getResourceManager().getTextureOriginalSize(this->textureHandle);
+    this->texturePortion.w = (int)s.width;
+    this->texturePortion.h = (int)s.height;
     return *this;
 }
 
@@ -77,32 +78,37 @@ RenderableObject& RenderableObject::setTargetPortion(const SDL_Rect& r) {
 }
 
 RenderableObject& RenderableObject::scaleX(float scale) {
-    this->targetPortion.w = (int)(scale * (float)this->textureHandle.originalSize.width);
+    this->targetPortion.w = (int)(scale * (float)Program::getResourceManager().getTextureOriginalSize(this->textureHandle).width);
+
     return *this;
 }
 
 RenderableObject& RenderableObject::scaleY(float scale) {
-    this->targetPortion.h = (int)(scale * (float)this->textureHandle.originalSize.height);
+    this->targetPortion.h = (int)(scale * (float)Program::getResourceManager().getTextureOriginalSize(this->textureHandle).height);
+
     return *this;
 }
 
 RenderableObject& RenderableObject::scale(float scale) {
-    this->targetPortion.w = (int)(scale * (float)this->textureHandle.originalSize.width);
-    this->targetPortion.h = (int)(scale * (float)this->textureHandle.originalSize.height);
+    this->targetPortion.w = (int)(scale * (float)Program::getResourceManager().getTextureOriginalSize(this->textureHandle).width);
+    this->targetPortion.h = (int)(scale * (float)Program::getResourceManager().getTextureOriginalSize(this->textureHandle).height);
+
     return *this;
 }
 
 RenderableObject& RenderableObject::scale(float scaleX, float scaleY) {
-    this->targetPortion.w = (int)(scaleX * (float)this->textureHandle.originalSize.width);
-    this->targetPortion.h = (int)(scaleY * (float)this->textureHandle.originalSize.height);
+    this->targetPortion.w = (int)(scaleX * (float)Program::getResourceManager().getTextureOriginalSize(this->textureHandle).width);
+    this->targetPortion.h = (int)(scaleY * (float)Program::getResourceManager().getTextureOriginalSize(this->textureHandle).height);
+    
     return *this;
 }
 
-void RenderableObject::rotate(double degrees) {
+RenderableObject& RenderableObject::rotate(double degrees) {
+    this->angle += degrees;
     if(this->angle > 360.0) {
         this->angle -= 360.0;
     }
-    this->angle += degrees;
+    return *this;
 }
 
 RenderableObject& RenderableObject::setPositionOnScreen(int x, int y) {
@@ -137,5 +143,70 @@ RenderableObject& RenderableObject::flipHorizontally() {
 RenderableObject& RenderableObject::flipVertically() {
     if(this->flip == SDL_FLIP_NONE) this->flip = SDL_FLIP_VERTICAL;
     else if(this->flip == SDL_FLIP_VERTICAL) this->flip = SDL_FLIP_NONE;
+    return *this;
+}
+
+RenderableObject& RenderableObject::setModulation(
+    const u8 red, const u8 green, const u8 blue, const u8 alpha
+) {
+    this->colorModulation.red    = red;
+    this->colorModulation.green  = green;
+    this->colorModulation.blue   = blue;
+    this->colorModulation.alpha  = alpha;
+    return *this;
+}
+
+RenderableObject& RenderableObject::setModulation(const u32 rgba) {
+    *(u32*)(&this->colorModulation) = rgba; //this is super hacky and may not work on big endian systems, but who cares
+    return *this;
+}
+
+RenderableObject& RenderableObject::setModulationRed(const u8 mod) {
+    this->colorModulation.red = mod;
+    return *this;
+}
+
+RenderableObject& RenderableObject::setModulationGreen(const u8 mod) {
+    this->colorModulation.green = mod;
+    return *this;
+}
+
+RenderableObject& RenderableObject::setModulationBlue(const u8 mod) {
+    this->colorModulation.blue = mod;
+    return *this;
+}
+
+RenderableObject& RenderableObject::setModulationAlpha(const u8 mod) {
+    this->colorModulation.alpha = mod;
+    return *this;
+}
+
+RenderableObject& RenderableObject::setBlendNone() {
+    this->blendMode = SDL_BLENDMODE_NONE;
+    return *this;
+}
+
+RenderableObject& RenderableObject::setBlendAlpha() {
+    this->blendMode = SDL_BLENDMODE_BLEND;
+    return *this;
+}
+
+RenderableObject& RenderableObject::setBlendAdditive() {
+    this->blendMode = SDL_BLENDMODE_ADD;
+    return *this;
+}
+
+RenderableObject& RenderableObject::setBlendModulate() {
+    this->blendMode = SDL_BLENDMODE_MOD;
+    return *this;
+}
+
+RenderableObject& RenderableObject::setBlendMultiplicative() {
+    this->blendMode = SDL_BLENDMODE_MUL;
+    return *this;
+}
+
+RenderableObject& RenderableObject::setBlendMode(SDL_BlendMode blendMode) {
+    this->blendMode = blendMode;
     return *this;
 }

@@ -24,8 +24,8 @@ class Block : public RenderableObjectBase {
         
         Block(const u32 objectID);
         Block(const u32 objectID, const char* name);
-        Block(const u32 objectID, const u32 textureHandleIndex);
-        Block(const u32 objectID, const char* name, const u32 textureHandleIndex);
+        Block(const u32 objectID, const TextureHandle textureHandle);
+        Block(const u32 objectID, const char* name, const TextureHandle textureHandle);
 
         Block& setDensity(float density);
 

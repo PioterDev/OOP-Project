@@ -18,8 +18,8 @@ Block::Block(
 
 Block::Block(
     const u32 objectID,
-    const u32 textureHandleIndex
-) : RenderableObjectBase(objectID, textureHandleIndex) {
+    const TextureHandle textureHandle
+) : RenderableObjectBase(objectID, textureHandle) {
     this->setInstanceID(Blocks::getCurrentBlockID());
     Blocks::addBlock(this);
 }
@@ -27,8 +27,8 @@ Block::Block(
 Block::Block(
     const u32 objectID,
     const char* name,
-    const u32 textureHandleIndex
-) : RenderableObjectBase(objectID, name, textureHandleIndex) {
+    const TextureHandle textureHandle
+) : RenderableObjectBase(objectID, name, textureHandle) {
     this->setInstanceID(Blocks::getCurrentBlockID());
     Blocks::addBlock(this);
 }

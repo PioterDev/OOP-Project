@@ -43,10 +43,22 @@ void GameRenderer::renderInPlace(Game& game) {
         }
     }
 
-    this->uiElements.forEach([](UIElement* element) {
+    this->uiElements.forEach([](UIElement*& element) {
         if(!element->isVisible()) return;
         element->render();
-        if(element->getTexture() == nullptr) return;
+        SDL_Texture* texture = element->getTexture();
+        if(!texture) return;
+        Color colorMod = element->getModulation();
+        SDL_BlendMode blendMode = element->getBlendMode();
+        
+        if(*((i32*)&colorMod) != (i32)-1) {
+            SDL_SetTextureColorMod(texture, colorMod.red, colorMod.green, colorMod.blue);
+            SDL_SetTextureAlphaMod(texture, colorMod.alpha);
+        }
+        
+        if(blendMode != SDL_BLENDMODE_NONE) {
+            SDL_SetTextureBlendMode(texture, blendMode);
+        }
 
         SDL_RenderCopyEx(
             Program::getRenderingContext(),
@@ -57,6 +69,17 @@ void GameRenderer::renderInPlace(Game& game) {
             nullptr,
             element->flip
         );
+        
+        //restore original color modulation
+        if(*((i32*)&colorMod) != (i32)-1) {
+            SDL_SetTextureColorMod(texture, 255, 255, 255);
+            SDL_SetTextureAlphaMod(texture, 255);
+        }
+
+        if(blendMode != SDL_BLENDMODE_NONE) {
+            SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_NONE);
+        }
+
     });
 
     SDL_RenderPresent(Program::getRenderingContext());

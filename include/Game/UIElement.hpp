@@ -11,11 +11,13 @@
  * a keyboard, mouse, controller, etc.
  */
 class UIElement : public RenderableObject {
+    friend class GameRenderer;
+    
     public:
         UIElement(const u32 objectID);
         UIElement(const u32 objectID, const char* name);
-        UIElement(const u32 objectID, const u32 textureHandleIndex);
-        UIElement(const u32 objectID, const char* name, const u32 textureHandleIndex);
+        UIElement(const u32 objectID, const TextureHandle textureHandle);
+        UIElement(const u32 objectID, const char* name, const TextureHandle textureHandle);
 
         virtual void onHover();
         virtual void onKeyPress(SDL_Keycode key);

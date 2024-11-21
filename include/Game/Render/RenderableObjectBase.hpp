@@ -22,8 +22,8 @@ class RenderableObjectBase : public GameObject {
     public:
         RenderableObjectBase(const u32 objectID);
         RenderableObjectBase(const u32 objectID, const char* name);
-        RenderableObjectBase(const u32 objectID, const u32 textureHandleIndex);
-        RenderableObjectBase(const u32 objectID, const char* name, const u32 textureHandleIndex);
+        RenderableObjectBase(const u32 objectID, const TextureHandle textureHandle);
+        RenderableObjectBase(const u32 objectID, const char* name, const TextureHandle textureHandle);
 
         /**
          * @brief "Renders" the object.
@@ -51,9 +51,11 @@ class RenderableObjectBase : public GameObject {
          * @brief Get the raw pointer to the texture bound to
          * this object.
          * 
-         * @return Pointer to texture or nullptr if no texture is bound
+         * @return Pointer to texture or nullptr if no texture is bound.
+         * 
+         * This is an externally managed resource, treat it with care.
          */
-        SDL_Texture* getTexture() const { return this->textureHandle.texture; }
+        SDL_Texture* getTexture() const { return Program::getResourceManager().getTexture(this->textureHandle); }
 
         /**
          * @brief Binds a texture to the object.
@@ -61,6 +63,6 @@ class RenderableObjectBase : public GameObject {
          * @param textureHandleIndex obtained from the texture registry
          * @return this, for chaining
          */
-        RenderableObjectBase& bindTexture(u32 textureHandleIndex);
+        RenderableObjectBase& bindTexture(TextureHandle textureHandle);
 
 };

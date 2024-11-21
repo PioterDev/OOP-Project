@@ -61,6 +61,14 @@ class Program {
 
         static Size getScreenSize() { return windowParameters.size; }
 
+        /**
+         * @brief Get the window associated with the program.
+         * 
+         * @return SDL_Window*, this is a handle to internal resource,
+         * do not modify
+         */
+        SDL_Window* getWindow() { return this->window; }
+
         u32 getNumberOfKeys() const { return this->numberOfKeyboardKeys; }
 
         Point getMousePosition() const { return this->mousePosition; }

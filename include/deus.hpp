@@ -26,7 +26,12 @@ namespace Enums {
     enum class Status {
         SUCCESS,
         FAILURE,
+        NULL_PASSED,
         ALLOC_FAILURE,
+        ACCESS_DENIED,
+        NONEXISTENT,
+        ALREADY_EXISTS,
+        OUT_OF_BOUNDS,
         LOGGER_FAILURE,
         SDL_INIT_FAILURE,
         SDL_IMAGE_INIT_FAILURE,
@@ -34,14 +39,11 @@ namespace Enums {
         SDL_MIXER_RESERVE_CHANNELS_FAILURE,
         WINDOW_CREATION_FAILURE,
         RENDERER_CREATION_FAILURE,
-        ACCESS_DENIED,
-        NONEXISTENT,
         TEXTURE_LOAD_FAILURE,
         TEXTURE_QUERY_FAILURE,
         SOUND_LOAD_FAILURE,
         MUSIC_LOAD_FAILURE,
         FALLBACK_TEXTURE_CREATION_FAILURE,
-        ALREADY_EXISTS
     };
 
     typedef enum {
@@ -207,6 +209,13 @@ namespace Structs {
     /* typedef struct {
 
     } Vector2D; */
+
+    typedef struct {
+        u8 red;
+        u8 green;
+        u8 blue;
+        u8 alpha;
+    } Color;
 }
 
 namespace Unions {

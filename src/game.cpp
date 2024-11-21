@@ -21,11 +21,14 @@ Status Game::init() {
 void Game::run() {
     i64 start = 0, end = 0, delta = 0, overhead = 0, frameTime = 0;
     
-    UIElement obj(MainRegistry::someObjectID, MainRegistry::gregTextureIndex);
-    obj.setSizeOnScreen(100, 100).setPositionOnScreenCentered(640, 360);
+    ///Section for testing ///
+    UIElement obj(MainRegistry::someObjectID, MainRegistry::stoneTextureIndex);
+    obj.setSizeOnScreen(200, 200).setPositionOnScreenCentered(640, 360).setBlendModulate().setModulation(255, 255, 0, 255).rotate(15.0).flipVertically();
 
     this->world.populateChunk({0, 0}, Blocks::cobblestone->getInstanceID());
     this->world.populateChunk({1, 1}, Blocks::cobblestone->getInstanceID());
+    ///End of section for testing ///
+
     while(this->flags.running) {
         start = SDL_GetPerformanceCounter();
         frameTime = this->clockFrequency / this->renderer.fps;
