@@ -30,10 +30,11 @@ extern const char* defaultObjectName;
  * 2) 64 flags - true/false values, indexed from 0 to 63
  * 
  * This class reserves flag 0 to mark the object as scheduled
- * for deletion. Child classes shall not use this flag as it will
- * delete the object.
+ * for deletion. Child classes shall not use this flag as it may
+ * cause a memory leak.
  * 
- * 3) A pointer to a C-style string, whose contents cannot be modified.
+ * 3) A pointer to a C-style string, whose contents cannot be
+ * modified directly.
  * 
  * Child classes should use it to bind to a name contained in the
  * game registry, but are free to bind to whatever they want,
@@ -65,11 +66,13 @@ class GameObject {
          * the object name. Will generally bind to
          * a read-only memory segment (a string literal)
          * or an override in the registry. Defaults to an
-         * empty string ("").
+         * empty C string ("").
          * 
          * The reason why it's not an `std::string`
          * is that every instantiated object would create a copy
-         * of the name, which is inefficient, while `std::string&`
+         * of the name potentially on the heap, which by itself
+         * is inefficient, but also takes 32 bytes of memory,
+         * while `std::string&`
          * introduces a layer of memory indirection,
          * which is also unwanted.
          * 
@@ -84,8 +87,9 @@ class GameObject {
          * @brief Sets the name of the object.
          * 
          * If you want the name to be modifiable at runtime, you
-         * have to use an externally modifiable `char*`,
-         * not a literal (literals are read-only), .
+         * have to use an externally modifiable `char*`, possibly from
+         * the game's registry,
+         * not a literal (literals are read-only).
          * 
          * @param name name
          */

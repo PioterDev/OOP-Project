@@ -2,12 +2,12 @@
 
 #include <SDL_messagebox.h>
 
-#include "game.hpp"
+#include "Game/Main/Game.hpp"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
     Game game;
     Status status = game.init();
-    if(status != Status::SUCCESS) {
+    if(status != Status::SUCCESS) Unlikely {
         char message[128];
         snprintf(
             message, sizeof(message), 
@@ -25,6 +25,19 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
     }
     catch(int code) {
         //TODO: finish this
+    }
+    catch(const std::bad_alloc& e) {
+        char message[128];
+        snprintf(
+            message, sizeof(message),
+            "The program encountered a fatal exception: OutOfMemory and"
+            "cannot continue normally."
+        );
+        SDL_ShowSimpleMessageBox(
+            SDL_MESSAGEBOX_ERROR, "No memory",
+            message, game.getWindow()
+        );
+        return static_cast<int>(Status::ALLOC_FAILURE);
     }
 
 

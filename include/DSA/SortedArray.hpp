@@ -38,7 +38,7 @@ template<typename T> class SortedArray {
         SortedArray(const size_t initialCapacity, const bool zeroInit) : capacity(initialCapacity) {
             if(zeroInit) this->data = (T*)calloc(initialCapacity, sizeof(T));
             else this->data = (T*)malloc(initialCapacity * sizeof(T));
-            if(this->data == nullptr) throw std::bad_alloc();
+            if(this->data == nullptr) Unlikely throw std::bad_alloc();
         }
 
         ~SortedArray() {
@@ -53,7 +53,7 @@ template<typename T> class SortedArray {
          * @throws std::out_of_range if attempted accessing out of bounds
          */
         T& operator[](const size_t index) {
-            if(index >= size) /*Unlikely*/ throw std::out_of_range("Dupa sraka");
+            if(index >= size) Unlikely throw std::out_of_range("Dupa sraka");
             return data[index];
         }
 
@@ -65,7 +65,7 @@ template<typename T> class SortedArray {
         void push(const T& element) {
             if(this->size == this->capacity) {
                 T* newData = (T*)realloc(this->data, this->capacity * 2 * sizeof(T));
-                if(newData == nullptr) throw std::bad_alloc();
+                if(newData == nullptr) Unlikely throw std::bad_alloc();
                 this->data = newData;
                 this->capacity *= (size_t)2;
             }
@@ -82,7 +82,7 @@ template<typename T> class SortedArray {
         void push(const T element) {
             if(this->size == this->capacity) {
                 T* newData = (T*)realloc(this->data, this->capacity * 2 * sizeof(T));
-                if(newData == nullptr) throw std::bad_alloc();
+                if(newData == nullptr) Unlikely throw std::bad_alloc();
                 this->data = newData;
                 this->capacity *= (size_t)2;
             }
@@ -99,7 +99,7 @@ template<typename T> class SortedArray {
          * @throws nullptr if attempted pop on empty array
          */
         T pop() {
-            if(this->size == 0) throw nullptr;
+            if(this->size == 0) Unlikely throw nullptr;
             return this->data[--this->size];
         }
 

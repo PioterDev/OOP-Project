@@ -56,7 +56,7 @@ void Blocks::addBlock(Block* block) {
 }
 
 u32 Blocks::getCurrentBlockID() {
-    return numberOfBlocksRegistered;
+    return Blocks::numberOfBlocksRegistered;
 }
 
 Block* Blocks::getBlockWithID(u32 id) {

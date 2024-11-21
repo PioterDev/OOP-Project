@@ -1,5 +1,5 @@
-#include "game.hpp"
-#include "Game/GameObject.hpp"
+#include "Game/Main/Game.hpp"
+#include "Game/Main/GameObject.hpp"
 #include "Game/PhysicalObject.hpp"
 #include "Game/UIElement.hpp"
 
@@ -10,8 +10,7 @@ InputHandler Game::inputHandler;
 Game::~Game() {}
 
 Status Game::init() {
-    Status s = Status::SUCCESS;
-    s = this->initSystems();
+    Status s = this->initSystems();
     if(s != Status::SUCCESS) return s;
 
     this->registry.init();
@@ -20,7 +19,6 @@ Status Game::init() {
 }
 
 void Game::run() {
-    // std::thread renderThread = this->renderer.startRender();
     i64 start = 0, end = 0, delta = 0, overhead = 0, frameTime = 0;
     
     UIElement obj(MainRegistry::someObjectID, MainRegistry::gregTextureIndex);
@@ -40,7 +38,7 @@ void Game::run() {
 
  
         end = SDL_GetPerformanceCounter();
-        //delta = target frametime - time elapsed - overhead from previous frames
+        //Delta = Target frametime - Time elapsed - Overhead from previous frames
         delta = frameTime - (end - start) - overhead;
         delta = delta * (i64)1000 / (i64)this->clockFrequency;
         if(delta > 0) sleep(delta);
@@ -48,6 +46,4 @@ void Game::run() {
         end = SDL_GetPerformanceCounter();
         overhead = end - start - frameTime;
     }
-
-    // renderThread.join();
 }

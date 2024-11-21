@@ -1,11 +1,13 @@
 #pragma once
 
-#include "Game/GameObject.hpp"
+#include "Game/Main/GameObject.hpp"
 #include "resources.hpp"
 #include "program.hpp"
 
 /**
  * @brief A base class for renderable objects.
+ * Provides the bare minimum functionality for putting
+ * the object on the screen.
  * 
  * Reserves flag 1:
  * 

@@ -3,19 +3,25 @@
 #include "Bindings.h"
 
 #include "deus.hpp"
-#include "Game/GameObject.hpp"
+#include "Game/Main/GameObject.hpp"
 #include "Game/Render/RenderableObjectBase.hpp"
 
 using namespace Structs;
 
+/**
+ * @brief A block is the most basic
+ * representation of a part of the world it
+ * resides in.
+ */
 class Block : public RenderableObjectBase {
     protected:
-        static const AABB blockAABB;
         /**
          * @brief Material density of the block
          */
         float density;
     public:
+        static const AABB standardBlockAABB;
+        
         Block(const u32 objectID);
         Block(const u32 objectID, const char* name);
         Block(const u32 objectID, const u32 textureHandleIndex);
@@ -23,5 +29,5 @@ class Block : public RenderableObjectBase {
 
         Block& setDensity(float density);
 
-        void render() override {}
+        void render() override {} //blocks do not use render() by default
 };

@@ -1,7 +1,7 @@
 #include <SDL.h>
 
 #include "input.hpp"
-#include "game.hpp"
+#include "Game/Main/Game.hpp"
 
 const char keynames[179][32] = {
     //0
@@ -196,7 +196,6 @@ void InputHandler::processInput(Game& game) {
             case SDL_WINDOWEVENT:
                 switch(latestEvent.window.event) {
                     case SDL_WINDOWEVENT_RESIZED:
-                        //reload all textures
                         game.windowParameters.size.width = latestEvent.window.data1;
                         game.windowParameters.size.height = latestEvent.window.data2;
                         Program::getLogger().debug(

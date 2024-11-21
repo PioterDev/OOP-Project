@@ -4,7 +4,7 @@
 
 #include <vector>
 
-#include "BitArray.hpp"
+#include "DSA/BitArray.hpp"
 #include "deus.hpp"
 
 using std::vector;

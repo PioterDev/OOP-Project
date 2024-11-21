@@ -8,7 +8,7 @@
 #include "deus.hpp"
 #include "Game/Block/Block.hpp"
 #include "Game/Block/Blocks.hpp"
-#include "Game/GameObject.hpp"
+#include "Game/Main/GameObject.hpp"
 #include "program.hpp"
 
 using std::unordered_map;

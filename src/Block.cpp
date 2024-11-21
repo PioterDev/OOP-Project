@@ -1,7 +1,7 @@
 #include "Game/Block/Block.hpp"
 #include "Game/Block/Blocks.hpp"
 
-const AABB Block::blockAABB = {0.0, 0.0, 1.0, 1.0};
+const AABB Block::standardBlockAABB = {0.0, 0.0, 1.0, 1.0};
 
 Block::Block(const u32 objectID) : RenderableObjectBase(objectID) {
     this->setInstanceID(Blocks::getCurrentBlockID());
