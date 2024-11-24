@@ -26,11 +26,11 @@ template<typename T> class ListArray {
         ListArrayNode* head;
         ListArrayNode* tail;
         u32 numberOfNodes = 0;
-        u32 nodeSize = 1024;
+        u32 nodeSize = 4'096;
 
         ListArrayNode* createNode(size_t size) {
             ListArrayNode* node = (ListArrayNode*)malloc(size);
-            if(node == nullptr) return nullptr;
+            if(node == nullptr) throw std::bad_alloc();
 
             node->next = nullptr;
             node->nodeSize = size;
@@ -40,11 +40,15 @@ template<typename T> class ListArray {
             return node;
         }
     public:
+        ListArray() {
+            this->head = createNode(nodeSize);
+            this->tail = this->head;
+        }
+
         ListArray(u32 nodeSize) {
             this->nodeSize = nodeSize;
             this->head = createNode(nodeSize);
-            if(this->head == nullptr) return;
-            tail = this->head;
+            this->tail = this->head;
         }
 
         ~ListArray() {
@@ -57,27 +61,23 @@ template<typename T> class ListArray {
             }
         }
 
-        Status prepend(T obj) {
-            if(head->usedSize + sizeof(T) > head->nodeSize) {
+        void prepend(T obj) {
+            if(this->head->usedSize + sizeof(T) > this->head->nodeSize) {
                 ListArrayNode* newHead = createNode(this->nodeSize);
-                if(newHead == nullptr) return Status::FAILURE;
-                newHead->next = head;
-                head = newHead;
+                newHead->next = this->head;
+                this->head = newHead;
             }
-            head->objects[(head->usedSize - 16ull) / sizeof(T)] = obj;
-            head->usedSize += sizeof(T);
-            return Status::SUCCESS;
+            this->head->objects[(head->usedSize - 16ull) / sizeof(T)] = obj;
+            this->head->usedSize += sizeof(T);
         }
         
-        Status append(T obj) {
-            if(tail->usedSize + sizeof(T) > tail->nodeSize) {
-                tail->next = createNode(this->nodeSize);
-                if(tail->next == nullptr) return Status::FAILURE;
-                tail = tail->next;
+        void append(T obj) {
+            if(this->tail->usedSize + sizeof(T) > this->tail->nodeSize) {
+                this->tail->next = createNode(this->nodeSize);
+                this->tail = this->tail->next;
             }
-            tail->objects[(tail->usedSize - 16ull) / sizeof(T)] = obj;
-            tail->usedSize += sizeof(T);
-            return Status::SUCCESS;
+            this->tail->objects[(this->tail->usedSize - (u64)16) / sizeof(T)] = obj;
+            this->tail->usedSize += sizeof(T);
         }
 
         u32 getNumberOfNodes() const { return this->numberOfNodes; }

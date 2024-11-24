@@ -31,7 +31,7 @@ class GameRenderer {
 
         void moveCamera(i32 offX, i32 offY);
     public:
-        GameRenderer() : physicalObjectsToRender(1024), uiElements(1024) {}
+        GameRenderer() : physicalObjectsToRender(4096), uiElements(4096) {}
 
         void registerUIElement(UIElement* element) { uiElements.append(element); }
 
