@@ -92,6 +92,30 @@
 #endif /* C++20 */
 #endif /* Defining Unlikely */
 
+#ifndef Deprecated
+#if __cplusplus >= 201402L
+#define Deprecated [[deprecated]]
+#else
+#if defined(__GNUC__) || defined(__clang__)
+#define Deprecated __attribute__((deprecated))
+#elif defined(_MSC_VER)
+#define Deprecated __declspec(deprecated)
+#endif /* Compilers */
+#endif /* C++14 */
+#endif /* Defining Deprecated */
+
+#ifndef DeprecatedMsg
+#if __cplusplus >= 201402L
+#define DeprecatedMsg(msg) [[deprecated(msg)]]
+#else
+#if defined(__GNUC__) || defined(__clang__)
+#define DeprecatedMsg __attribute__((deprecated(msg)))
+#elif defined(_MSC_VER)
+#define Deprecated __declspec(deprecated(msg))
+#endif /* Compilers */
+#endif /* C++14 */
+#endif /* Defining DeprecatedMsg */
+
 extern "C" {
 #else
 #include <assert.h>
@@ -143,15 +167,58 @@ extern "C" {
 #define Unlikely
 #endif
 
+#ifndef Deprecated
+#if __STDC_VERSION__ >= 202311L
+#define Deprecated [[deprecated]]
+#else
+#if defined(__GNUC__) || defined(__clang__)
+#define Deprecated __attribute__((deprecated))
+#else
+#define Deprecated
+#endif /* Compilers */
+#endif /* C23 */
+#endif /* Defining Deprecated */
+
+#ifndef DeprecatedMsg
+#if __STDC_VERSION__ >= 202311L
+#define DeprecatedMsg(msg) [[deprecated(msg)]]
+#else
+#if defined(__GNUC__) || defined(__clang__)
+#define DeprecatedMsg(msg) __attribute__((deprecated(msg)))
+#else
+#define DeprecatedMsg(msg)
+#endif /* Compilers */
+#endif /* C23 */
+#endif /* Defining Deprecated */
+
 #endif /* C++ */
 
+#ifndef Packed
+#if defined(__GNUC__) || defined(__clang__)
+#define Packed __attribute__((packed))
+#else
+#define Packed
+#endif /* Compiler */
+#endif /* Defining Packed */
+
+#ifndef PackedAligned
+#if defined(__GNUC__) || defined(__clang__)
+#define PackedAligned(n) __attribute__((packed, aligned(n)))
+#else
+#define PackedAligned(n)
+#endif /* Compiler */
+#endif /* Defining Packed */
+
+#ifndef CompilePlatform
 #if defined(_WIN32) || defined(WIN32) || defined(__WIN32__) || defined(__NT__)
+#define CompilePlatform "Windows"
 #ifndef WINDOWS
 #define WINDOWS 1
 #endif /* Windows */
 #include <profileapi.h>
 #include <synchapi.h>
 #elif defined(__linux__)
+#define CompilePlatform "Linux"
 #ifndef LINUX
 #define LINUX 1
 #endif /* Linux */
@@ -163,12 +230,13 @@ extern "C" {
 #else
 #error "Unsupported platform"
 #endif /* OS */
+#endif /* Compile platform */
 
 #ifndef ForceInline
-#ifdef _MSC_VER
-#define ForceInline __forceinline /* MSVC */
-#elif ((defined(__GNUC__) && (__GNUC__ >= 4)) || defined(__clang__))
+#if ((defined(__GNUC__) && (__GNUC__ >= 4)) || defined(__clang__))
 #define ForceInline inline __attribute__((always_inline))
+#elif defined(_MSC_VER)
+#define ForceInline __forceinline /* MSVC */
 #else
 #define ForceInline inline
 #endif /* Compiler */
@@ -216,7 +284,7 @@ ForceInline uint64_t getClockTime() {
 #elif defined(LINUX)
 #define sleep(ms) usleep(1000 * ms)
 #else
-#define sleep
+#define sleep(ms)
 #endif /* OS */
 #endif /* sleep */
 
