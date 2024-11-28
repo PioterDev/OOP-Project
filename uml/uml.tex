@@ -50,7 +50,6 @@
 
 
 \begin{document}
-    
     \begin{tikzpicture}
         \node[draw] at (0, 29.5) {
             Funkcje oznaczone kolorem {\color{virtual}magenta} są wirtualne,
@@ -61,7 +60,7 @@
         \node[draw] at (0, 28.9) {
             (!) oznacza, że wartość zwrócona nie powinna być zignorowana.
             "u8", "u16", "u32", "u64", "i8", "i16", "i32" oraz "i64" to skróty
-            od typów liczbowych standardu POSIX.
+            od typów liczbowych w standardzie języka C.
         };
 
         
@@ -125,16 +124,19 @@
 
 
         \begin{class}[text width=9cm]{Program}{-35, 18}
-            \att{\pub}{\static{keyboardState}}{u8}
+            \att{\pro}{\static{keyboardState}}{u8}
             \att{\pro}{flags}{ProgramFlags}
             \att{\pro}{numberOfKeyboardKeys}{u32}
             
             \att{\pro}{\static{clockFrequency}}{u64}
-            \att{\pro}{timeSinceStart}{u64}
+            \att{\pro}{startTimestamp}{u64}
 
             \att{\pro}{window}{SDL\_Window*}
-            \att{\pro}{\static{windowParameters}}{WindowParameters}
+            \att{\pro}{windowParameters}{WindowParameters}
             \att{\pro}{\static{renderingContext}}{SDL\_Renderer*}
+            \att{\pro}{backgroundColor}{Color}
+            \att{\pro}{mousePosition}{Point}
+            \att{\pro}{mouseButtons}{u32}
 
             \att{\pro}{audioParameters}{AudioParameters}
 
@@ -142,7 +144,7 @@
             \att{\pro}{\static{resourceManager}}{ResourceManager}
 
 
-            \op{\pub}{$sim$Program}{}{\void}
+            \op{\pub}{$\sim$Program}{}{\void}
 
             \op{\pub}{initSystems}{}{Status (!)}
 
@@ -152,9 +154,10 @@
             \op{\pub}{\static{getLogger}}{}{Logger\&}
             \op{\pub}{\static{getResourceManager}}{}{ResourceManager\&}
 
-            \op{\pub}{\static{getScreenSize}}{}{Size}
+            \op{\pub}{getWindowSize}{}{Size}
 
             \op{\pub}{getNumberOfKeys}{}{u32}
+            \op{\pub}{\static{getKeyboardState}}{}{const u8*}
 
         \end{class}
         
