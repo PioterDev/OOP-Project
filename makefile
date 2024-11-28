@@ -57,3 +57,6 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.cpp
 # Clean rule
 clean:
 	rm -f $(EXEC) $(OBJS)
+
+cleanWin:
+	del /S build\*.o
