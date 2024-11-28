@@ -4,12 +4,21 @@
 constexpr double sizeOfBlockTexture = 64.0;
 
 void GameRenderer::renderInPlace(Game& game) {
-    Size screenSize = Program::getScreenSize();
+    Size windowSize = game.getWindowSize();
     SDL_Rect r;
+    Color backgroundColor = game.getBackgroundColor();
 
-    SDL_RenderClear(Program::getRenderingContext());
-    SDL_SetRenderDrawColor(Program::getRenderingContext(), 80, 80, 80, SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(game.getRenderingContext());
+    SDL_SetRenderDrawColor(
+        game.getRenderingContext(),
+        backgroundColor.red,
+        backgroundColor.green,
+        backgroundColor.green,
+        backgroundColor.alpha
+    );
 
+
+    /// Block rendering ///
     double pixelsPerBlock = sizeOfBlockTexture * this->scalingFactor;
     i32 pixelsPerBlockInt = (i32)pixelsPerBlock;
 
@@ -20,15 +29,17 @@ void GameRenderer::renderInPlace(Game& game) {
 
     r.w = r.h = pixelsPerBlockInt;
     r.y = topLeftVisibleBlock.y * pixelsPerBlockInt - this->cameraPosition.y;
+    //The renderer iterates over blocks vertically and horizontally
+    //starting from the upper-left visible one
     for(
         i32 i = topLeftVisibleBlock.y;
-        i <= topLeftVisibleBlock.y + (i32)ceil((double)screenSize.height/pixelsPerBlock);
+        i <= topLeftVisibleBlock.y + (i32)ceil((double)windowSize.height/pixelsPerBlock);
         i++, r.y += pixelsPerBlockInt
     ) {
         r.x = topLeftVisibleBlock.x * pixelsPerBlockInt - this->cameraPosition.x;
         for(
             i32 j = topLeftVisibleBlock.x;
-            j <= topLeftVisibleBlock.x + (i32)ceil((double)screenSize.width/pixelsPerBlock);
+            j <= topLeftVisibleBlock.x + (i32)ceil((double)windowSize.width/pixelsPerBlock);
             j++, r.x += pixelsPerBlockInt
         ) {
             const Block* block = game.getWorld().getBlockAt(j, -i);
@@ -36,14 +47,17 @@ void GameRenderer::renderInPlace(Game& game) {
             if(block->getTexture() == nullptr) continue;
 
             SDL_RenderCopy(
-                Program::getRenderingContext(),
+                game.getRenderingContext(),
                 block->getTexture(),
                 nullptr, &r
             );
         }
     }
+    /// End of block rendering ///
 
-    this->uiElements.forEach([](UIElement*& element) {
+    //"&game = game" bruh, lambdas are weird
+    this->uiElements.forEach([&game = game](UIElement*& element) {
+        if(!element) return;
         if(!element->isVisible()) return;
         element->render();
         SDL_Texture* texture = element->getTexture();
@@ -51,6 +65,7 @@ void GameRenderer::renderInPlace(Game& game) {
         Color colorMod = element->getModulation();
         SDL_BlendMode blendMode = element->getBlendMode();
         
+        //A hacky way to check if all fields in colorMod are 255
         if(*((i32*)&colorMod) != (i32)-1) {
             SDL_SetTextureColorMod(texture, colorMod.red, colorMod.green, colorMod.blue);
             SDL_SetTextureAlphaMod(texture, colorMod.alpha);
@@ -61,12 +76,12 @@ void GameRenderer::renderInPlace(Game& game) {
         }
 
         SDL_RenderCopyEx(
-            Program::getRenderingContext(),
+            game.getRenderingContext(),
             element->getTexture(),
             &element->texturePortion,
             &element->targetPortion,
             element->angle,
-            nullptr,
+            nullptr, //might later add a center point to renderable objects I guess
             element->flip
         );
         
@@ -82,7 +97,7 @@ void GameRenderer::renderInPlace(Game& game) {
 
     });
 
-    SDL_RenderPresent(Program::getRenderingContext());
+    SDL_RenderPresent(game.getRenderingContext());
     
     this->lastFrameAt = SDL_GetPerformanceCounter();
     this->numberOfFramesRendered++;

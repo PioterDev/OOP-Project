@@ -54,12 +54,12 @@ class Program {
 
         static u64 getClockFrequency() { return Program::clockFrequency; }
 
-        static SDL_Renderer* getRenderingContext() { return renderingContext; }
-        static Logger& getLogger() { return logger; }
+        static SDL_Renderer* getRenderingContext() { return Program::renderingContext; }
+        static Logger& getLogger() { return Program::logger; }
         // static InputHandler& getInputHandler() { return inputHandler; }
-        static ResourceManager& getResourceManager() { return resourceManager; }
+        static ResourceManager& getResourceManager() { return Program::resourceManager; }
 
-        static Size getScreenSize() { return windowParameters.size; }
+        Size getWindowSize() const { return this->windowParameters.size; }
 
         /**
          * @brief Get the window associated with the program.
@@ -68,6 +68,10 @@ class Program {
          * do not modify
          */
         SDL_Window* getWindow() { return this->window; }
+
+        Color getBackgroundColor() const { return this->backgroundColor; }
+        void setBackgroundColor(const Color color) { this->backgroundColor = color; }
+        void setBackgroundColor(const u8 red, const u8 green, const u8 blue, const u8 alpha) { this->backgroundColor = {red, green, blue, alpha}; }
 
         u32 getNumberOfKeys() const { return this->numberOfKeyboardKeys; }
 
@@ -78,22 +82,25 @@ class Program {
             );
         }
 
-        static const uint8_t* keyboardState;
+        static const uint8_t* getKeyboardState() { return Program::keyboardState; }
+
     protected:
         struct ProgramFlags flags;
 
+        static const uint8_t* keyboardState;
         u32 numberOfKeyboardKeys;
 
         /* static thread_local string latestError;
         static thread_local Status latestErrorCode; */
 
         static u64 clockFrequency;
-        u64 timeSinceStart;
+        u64 startTimestamp;
 
         //Video-related members
         SDL_Window* window;
-        static WindowParameters windowParameters;
+        WindowParameters windowParameters;
         static SDL_Renderer* renderingContext;
+        Color backgroundColor;
         Point mousePosition;
         u32 mouseButtons;
 

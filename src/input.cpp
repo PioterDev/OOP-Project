@@ -191,7 +191,6 @@ void InputHandler::processInput(Game& game) {
         switch(latestEvent.type) {
             case SDL_QUIT:
                 game.flags.running = false;
-                // game.renderer.status = ThreadStatus::STOP;
                 break;
             case SDL_WINDOWEVENT:
                 switch(latestEvent.window.event) {
@@ -211,6 +210,12 @@ void InputHandler::processInput(Game& game) {
                 break;
                 
             case SDL_KEYDOWN: {
+                if(latestEvent.key.keysym.sym == SDLK_a) {
+                    
+                }
+                else if(latestEvent.key.keysym.sym == SDLK_d) {
+                    
+                }
                 break;
             }
 
@@ -237,11 +242,13 @@ void InputHandler::processInput(Game& game) {
     }
     
     game.updateMouse();
+    
+    const u8* keyboardState = Program::getKeyboardState();
 
-    if(Program::keyboardState[SDL_SCANCODE_RIGHT])  game.renderer.moveCamera(1,  0);
-    if(Program::keyboardState[SDL_SCANCODE_LEFT])   game.renderer.moveCamera(-1, 0);
-    if(Program::keyboardState[SDL_SCANCODE_DOWN])   game.renderer.moveCamera(0,  1);
-    if(Program::keyboardState[SDL_SCANCODE_UP])     game.renderer.moveCamera(0, -1);
+    if(keyboardState[SDL_SCANCODE_RIGHT])  game.renderer.moveCamera(1,  0);
+    if(keyboardState[SDL_SCANCODE_LEFT])   game.renderer.moveCamera(-1, 0);
+    if(keyboardState[SDL_SCANCODE_DOWN])   game.renderer.moveCamera(0,  1);
+    if(keyboardState[SDL_SCANCODE_UP])     game.renderer.moveCamera(0, -1);
 
     #undef latestEvent
 }
