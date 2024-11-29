@@ -52,15 +52,29 @@
 \begin{document}
     \begin{tikzpicture}
         \node[draw] at (0, 29.5) {
-            Funkcje oznaczone kolorem {\color{virtual}magenta} są wirtualne,
-            a funkcje oznaczone kolorem {\color{purevirtual}fioletowym} są abstrakcyjne.
-            Z kolei funkcje i atrybuty oznaczone kolorem {\color{orange}pomarańczowym} zostaną zmienione.
-            Oznaczenia kolorem {\color{static}niebieskim} oznaczaja statyczność. 
+            Methods colored in {\color{virtual}magenta}
+            are virtual, while methods colored in
+            {\color{purevirtual}violet} are abstract.
+            Methods and attributes colored in
+            {\color{orange}orange} will change.
+            {\color{static}Blue} coloring means "static".
+
+            % Funkcje oznaczone kolorem {\color{virtual}magenta}
+            % są wirtualne, a funkcje oznaczone kolorem
+            % {\color{purevirtual}fioletowym} są abstrakcyjne.
+            % Z kolei funkcje i atrybuty oznaczone kolorem
+            % {\color{orange}pomarańczowym} zostaną zmienione.
+            % Oznaczenia kolorem {\color{static}niebieskim}
+            % oznaczaja statyczność.
         };
         \node[draw] at (0, 28.9) {
-            (!) oznacza, że wartość zwrócona nie powinna być zignorowana.
-            "u8", "u16", "u32", "u64", "i8", "i16", "i32" oraz "i64" to skróty
-            od typów liczbowych w standardzie języka C.
+            (!) means that the return value shall not be ignored.
+            "u8", "u16", "u32", "u64", "i8", "i16", "i32" and "i64"
+            are abbreviations of integer types in the C standard.
+
+            % (!) oznacza, że wartość zwrócona nie powinna być zignorowana.
+            % "u8", "u16", "u32", "u64", "i8", "i16", "i32" oraz "i64" to skróty
+            % od typów liczbowych standardu POSIX.
         };
 
         
@@ -70,7 +84,7 @@
         \end{scope}
 
         \begin{class}[text width=8cm]{ResourceManager}{-35, 28}
-            \att{\pri}{textures}{vector<SDL\_Texture*>}
+            \att{\pri}{textures}{vector<TextureData>}
             \att{\pri}{soundEffects}{vector<Mix\_Chunk*>}
             \att{\pri}{music}{vector<Mix\_Music*>}
             \att{\pri}{latestStatus}{Status}
@@ -78,12 +92,13 @@
             \op{\pub}{$\sim$ResourceManager}{}{\void}
 
             \op{\pub}{init}{}{Status}
+            \op{\pub}{shutdown}{}{\void}
             
             \op{\pub}{getLatestStatus}{}{Status}
             
-            \op{\pub}{registerTexture}{path}{u32}
+            \op{\pub}{registerTexture}{path: \cstring, flags: TextureFlags, maxTimeLoaded: u32}{u32}
+            \op{\pri}{loadTexture}{handle: TextureHandle}{u32}
             
-            \op{\pub}{getTextureHandle}{id: u32}{TextureHandle}
             \op{\pub}{getTexture}{id: u32}{SDL\_Texture*}
             \op{\pub}{getTextureOriginalSize}{id: u32}{Size}
             
@@ -118,7 +133,7 @@
             
             \op{\pub}{getLatestEvent}{}{const SDL\_Event\&}
 
-            \op{\pub}{processInput}{game: Game*}{\void}
+            \op{\pub}{processInput}{game: Game\&}{\void}
         \end{class}
 
 
@@ -159,6 +174,8 @@
             \op{\pub}{getNumberOfKeys}{}{u32}
             \op{\pub}{\static{getKeyboardState}}{}{const u8*}
 
+            \op{\pub}{getMousePosition}{}{Point}
+            \op{\pub}{updateMouse}{}{\void}
         \end{class}
         
         \aggregation{Program}{logger}{}{Logger}
@@ -169,12 +186,6 @@
             \att{\pri}{uiElements}{ListArray<UIElement*>}
             
             \att{\pri}{fps}{u32}
-            \att{\pri}{\willchange{start}}{i64}
-            \att{\pri}{\willchange{end}}{i64}
-            \att{\pri}{\willchange{delta}}{i64}
-            \att{\pri}{\willchange{overhead}}{i64}
-            \att{\pri}{\willchange{frameTime}}{i64}
-
             \att{\pri}{scalingFactor}{double}
 
             \att{\pri}{\willchange{lastFrameAt}}{u64}
@@ -197,6 +208,7 @@
 
         \begin{class}[text width=8cm]{MainRegistry}{-25, -12}
             \att{\pri}{overrides}{BitArray}
+            \att{\pub}{A multitude of different IDs}{u32}
 
             \op{\pub}{MainRegistry}{}{this}
             \op{\pub}{$\sim$MainRegistry}{}{\void}
@@ -252,10 +264,10 @@
             \att{\pro}{flags}{u64}
             \att{\pro}{name}{\cstring}
 
-            \op{\pub}{GameObject}{objectID: u32, name: \cstring}{this}
             \op{\pub}{GameObject}{objectID: u32}{this}
+            \op{\pub}{GameObject}{objectID: u32, name: \cstring}{this}
 
-            \op{\pub}{\purevirtual{$\sim$GameObject}}{}{\void}
+            \op{\pub}{$\sim$GameObject}{}{\void}
             
             \op{\pub}{getName}{}{\cstring}
             \op{\pro}{setName}{name: String}{\void}
@@ -278,12 +290,12 @@
         \begin{class}[text width=9cm]{RenderableObjectBase}{-10, 17}
             \inherit{GameObject}
             
-            \att{\pri}{textureHandle}{TextureHandle}
+            \att{\pro}{textureHandle}{TextureHandle}
 
             \op{\pub}{RenderableObjectBase}{objectID: u32}{this}
             \op{\pub}{RenderableObjectBase}{objectID: u32, name: \cstring}{this}
-            \op{\pub}{RenderableObjectBase}{objectID: u32, textureHandleIndex: u32}{this}
-            \op{\pub}{RenderableObjectBase}{objectID: u32, name: \cstring, textureHandleIndex: u32}{this}
+            \op{\pub}{RenderableObjectBase}{objectID: u32, textureHandle: TextureHandle}{this}
+            \op{\pub}{RenderableObjectBase}{objectID: u32, name: \cstring, textureHandle: TextureHandle}{this}
             
             \op{\pub}{\purevirtual{render}}{}{\void}
 
@@ -293,7 +305,7 @@
             \op{\pub}{flipVisible}{}{\void}
 
             \op{\pub}{getTexture}{}{SDL\_Texture*}
-            \op{\pub}{bindTexture}{textureHandleIndex: u32}{this}
+            \op{\pub}{bindTexture}{textureHandle: TextureHandle}{this}
         \end{class}
 
         \begin{class}[text width=9cm]{World}{10, 17}
@@ -306,15 +318,16 @@
 
             \op{\pub}{$\sim$World}{}{\void}
 
-            \op{\pub}{getChunk}{which: Point}{const Chunk*}
+            \op{\pub}{getChunk}{which: ChunkPos}{const Chunk*}
             \op{\pub}{getChunk}{x: i32, y: i32}{const Chunk*}
 
-            \op{\pub}{\willchange{populateChunk}}{which: Point, blockID: u32}{Status}
+            \op{\pub}{\willchange{populateChunk}}{which: ChunkPos, blockID: u32}{Status}
 
             \op{\pub}{getBlockAt}{x: i32, y: i32}{const Block*}
             \op{\pub}{getBlockAt}{pos: BlockPos}{const Block*}
 
             \op{\pub}{printChunk}{x: i32, y: i32}{\void}
+            \op{\pub}{printChunk}{pos: ChunkPos}{\void}
         \end{class}
 
         \begin{class}[text width=9cm]{RenderableObject}{0, 9}
@@ -324,23 +337,27 @@
             \att{\pro}{targetPortion}{rectangle}
             \att{\pro}{angle}{double}
             \att{\pro}{flip}{SDL\_RendererFlip}
+            \att{\pro}{colorModulation}{u32[4]}
+            \att{\pro}{blendMode}{SDL\_BlendMode}
 
             \op{\pub}{RenderableObject}{objectID: u32}{this}
             \op{\pub}{RenderableObject}{objectID: u32, name: \cstring}{this}
-            \op{\pub}{RenderableObject}{objectID: u32, textureHandleIndex: u32}{this}
-            \op{\pub}{RenderableObject}{objectID: u32, name: \cstring, textureHandleIndex: u32}{this}
+            \op{\pub}{RenderableObject}{objectID: u32, textureHandle: TextureHandle}{this}
+            \op{\pub}{RenderableObject}{objectID: u32, name: \cstring, textureHandle: TextureHandle}{this}
             
             \op{\pub}{getTexturePortion}{}{const rectangle\&}
+            \op{\pub}{getTexturePortionCopy}{}{rectangle}
             \op{\pub}{setTexturePortion}{r: rectangle}{this}
             \op{\pub}{setTexturePortionOriginal}{}{\void}
 
             \op{\pub}{getTargetPortion}{}{const rectangle\&}
+            \op{\pub}{getTargetPortionCopy}{}{rectangle}
             \op{\pub}{setTargetPortion}{r: rectangle}{this}
 
             \op{\pub}{scaleX}{scale: float}{this}
             \op{\pub}{scaleY}{scale: float}{this}
             \op{\pub}{scale}{scale: float}{this}
-            \op{\pub}{scaleX}{scaleX: float, scaleY: float}{this}
+            \op{\pub}{scale}{scaleX: float, scaleY: float}{this}
 
             \op{\pub}{rotate}{degrees: double}{\void}
 
@@ -351,28 +368,46 @@
             \op{\pub}{unflip}{}{this}
             \op{\pub}{flipHorizontally}{}{this}
             \op{\pub}{flipVertically}{}{this}
+
+            \op{\pub}{setModulation}{red: u8, green: u8, blue: u8, alpha: u8}{this}
+            \op{\pub}{setModulation}{rgba: u32}{this}
+            \op{\pub}{setModulationRed}{mod: u8}{this}
+            \op{\pub}{setModulationGreen}{mod: u8}{this}
+            \op{\pub}{setModulationBlue}{mod: u8}{this}
+            \op{\pub}{setModulationAlpha}{mod: u8}{this}
+            \op{\pub}{getModulation}{}{Color}
+            \op{\pub}{getModulationInt}{}{u32}
+
+            \op{\pub}{setBlendNone}{}{this}
+            \op{\pub}{setBlendAlpha}{}{this}
+            \op{\pub}{setBlendAdditive}{}{this}
+            \op{\pub}{setBlendModulate}{}{this}
+            \op{\pub}{setBlendMultiplicative}{}{this}
+            \op{\pub}{setBlendMode}{blendMode: SDL\_BlendMode}{this}
+            \op{\pub}{getBlendMode}{}{SDL\_BlendMode}
+            
         \end{class}
 
         \begin{class}[text width=9cm]{Block}{-15, 9}
             \inherit{RenderableObjectBase}
 
-            \att{\pro}{\static{blockAABB}}{AABB}
+            \att{\pro}{\static{standardBlockAABB}}{AABB}
 
             \op{\pub}{Block}{objectID: u32}{this}
             \op{\pub}{Block}{objectID: u32, name: \cstring}{this}
-            \op{\pub}{Block}{objectID: u32, textureHandleIndex: u32}{this}
-            \op{\pub}{Block}{objectID: u32, name: \cstring, textureHandleIndex: u32}{this}
+            \op{\pub}{Block}{objectID: u32, textureHandle: TextureHandle}{this}
+            \op{\pub}{Block}{objectID: u32, name: \cstring, textureHandle: TextureHandle}{this}
             
             \op{\pub}{\virtual{render}}{}{\void (override)}
         \end{class}
 
-        \begin{class}[text width=7cm]{UIElement}{7, -5}
+        \begin{class}[text width=7cm]{UIElement}{7, -15}
             \inherit{RenderableObject}
 
             \op{\pub}{UIElement}{objectID: u32}{this}
             \op{\pub}{UIElement}{objectID: u32, name: \cstring}{this}
-            \op{\pub}{UIElement}{objectID: u32, textureHandleIndex: u32}{this}
-            \op{\pub}{UIElement}{objectID: u32, name: \cstring, textureHandleIndex: u32}{this}
+            \op{\pub}{UIElement}{objectID: u32, textureHandle: TextureHandle}{this}
+            \op{\pub}{UIElement}{objectID: u32, name: \cstring, textureHandle: TextureHandle}{this}
             
             \op{\pub}{\virtual{onHover}}{}{\void}
             \op{\pub}{\virtual{onKeyPress}}{key: SD\_Keycode}{\void}
