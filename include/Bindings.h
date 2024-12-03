@@ -245,9 +245,31 @@ extern "C" {
 
 
 /**
+ * @brief Get the monotonic clock timestamp based on the underlying OS.
+ * 
+ * @return Clock timestamp as uint64_t, i.e. 
+ */
+ForceInline uint64_t getClockTime() {
+#if defined(WINDOWS)
+    LARGE_INTEGER t;
+    assert(QueryPerformanceCounter(&t) != 0);
+    return (uint64_t)t.QuadPart;
+#elif defined(LINUX)
+    struct timespec t;
+    uint64_t s, ns;
+    assert(clock_gettime(CLOCK_MONOTONIC, &t) == 0);
+    s = t.tv_sec;
+    ns = t.tv_nsec;
+    clock_getres(CLOCK_MONOTONIC, &t);
+    return (uint64_t)(s * 1000000000 + ns) / t.tv_nsec;
+#endif /* OS */
+}
+
+/**
  * @brief Get the monotonic clock resolution based on the underlying OS.
  * 
- * @return Clock resolution as uint64_t
+ * @return Clock resolution as uint64_t, i.e. how many ticks of
+ * the clock are there in a second.
  */
 ForceInline uint64_t getClockResolution() {
 #if defined(WINDOWS)
@@ -257,24 +279,7 @@ ForceInline uint64_t getClockResolution() {
 #elif defined(LINUX)
     struct timespec t;
     assert(clock_getres(CLOCK_MONOTONIC, &t) == 0);
-    return (uint64_t)t.tv_nsec;
-#endif /* OS */
-}
-
-/**
- * @brief Get the monotonic clock timestamp based on the underlying OS.
- * 
- * @return Clock timestamp as uint64_t
- */
-ForceInline uint64_t getClockTime() {
-#if defined(WINDOWS)
-    LARGE_INTEGER t;
-    QueryPerformanceCounter(&t);
-    return (uint64_t)t.QuadPart;
-#elif defined(LINUX)
-    struct timespec t;
-    clock_gettime(CLOCK_MONOTONIC, &t);
-    return (uint64_t)t.tv_nsec;
+    return (uint64_t)(1000000000 / t.tv_nsec);
 #endif /* OS */
 }
 
