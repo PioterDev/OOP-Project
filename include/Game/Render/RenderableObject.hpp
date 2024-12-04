@@ -5,11 +5,13 @@
 #include "Game/Render/RenderableObjectBase.hpp"
 #include "program.hpp"
 
-//TODO: struct for temporary render data
-typedef struct {
-
-} PerFrameRenderData;
-
+/**
+ * @brief A renderable object is an object
+ * with the capability of being rendered on the screen
+ * with custom size, position, choosing a portion of the
+ * texture to use, rotation, color modulation
+ * and blending.
+ */
 class RenderableObject : public RenderableObjectBase {
     friend class ResourceManager;
     friend class GameRenderer;
@@ -65,7 +67,7 @@ class RenderableObject : public RenderableObjectBase {
         RenderableObject(const u32 objectID, const TextureHandle textureHandle);
         RenderableObject(const u32 objectID, const char* name, const TextureHandle textureHandle);
 
-
+        ~RenderableObject() = default;
         /**
          * @brief Sets the texture's portion to use.
          * 
@@ -117,7 +119,7 @@ class RenderableObject : public RenderableObjectBase {
          * different texture handles (i.e. the texture's size
          * will not change if for whatever reason
          * the texture handle is changed and its original size changes).
-         * @param scale new horizontal scale
+         * @param scale new horizontal scale. If `scale` is negative, it's not applied.
          * 
          * @return this, for chaining
          */
@@ -135,28 +137,11 @@ class RenderableObject : public RenderableObjectBase {
          * will not change if for whatever reason
          * the texture handle is changed and its original size changes).
          * 
-         * @param scale new vertical scale
+         * @param scale new vertical scale. If `scale` is negative, it's not applied.
          * 
          * @return this, for chaining
          */
         RenderableObject& scaleY(float scale);
-        /**
-         * @brief Scales the texture.
-         * 
-         * You can safely ignore the following information 
-         * if you won't have to change the texture throughout
-         * the lifetime of the object.
-         * 
-         * Scaling is applied immediately and is not retained throughout
-         * different texture handles (i.e. the texture's size
-         * will not change if for whatever reason
-         * the texture handle is changed and its original size changes).
-         * 
-         * @param scale new scale
-         * 
-         * @return this, for chaining
-         */
-        RenderableObject& scale(float scale);
         /**
          * @brief Scales the texture separately in the
          * X and Y axes.
@@ -170,12 +155,29 @@ class RenderableObject : public RenderableObjectBase {
          * will not change if for whatever reason
          * the texture handle is changed and its original size changes).
          * 
-         * @param scaleX new horizontal scale
-         * @param scaleY new vertical scale
+         * @param scaleX new horizontal scale. If `scaleX` is negative, it's not applied.
+         * @param scaleY new vertical scale. If `scaleY` is negative, it's not applied.
          * 
          * @return this, for chaining
          */
         RenderableObject& scale(float scaleX, float scaleY);
+        /**
+         * @brief Scales the texture.
+         * 
+         * You can safely ignore the following information 
+         * if you won't have to change the texture throughout
+         * the lifetime of the object.
+         * 
+         * Scaling is applied immediately and is not retained throughout
+         * different texture handles (i.e. the texture's size
+         * will not change if for whatever reason
+         * the texture handle is changed and its original size changes).
+         * 
+         * @param scale new scale. If `scale` is negative, it's not applied.
+         * 
+         * @return this, for chaining
+         */
+        RenderableObject& scale(float scale);
 
         /**
          * @brief Rotates the object around its center.
@@ -220,6 +222,102 @@ class RenderableObject : public RenderableObjectBase {
          * @return this, for chaining
          */
         RenderableObject& setSizeOnScreen(u32 width, u32 height);
+
+        /**
+         * @brief Moves the object by a given offset on the screen.
+         * 
+         * @param dx offset in the X axis
+         * @param dy offset in the Y axis
+         * @return this, for chaining 
+         */
+        RenderableObject& moveOnScreen(i32 dx, i32 dy);
+
+        /**
+         * @brief Stretches the object by a given factor in the X axis.
+         * 
+         * The difference between `stretch` and `scale` is that `scale` uses
+         * the size of a bound texture and applies scaling to it, while
+         * `stretch` uses the current size on screen of the object.
+         * 
+         * @param factor by how much to multiply current object's width.
+         * If `factor` is negative, it's not applied.
+         * @return this, for chaining
+         */
+        RenderableObject& stretchX(float factorX);
+        /**
+         * @brief Stretches the object by a given factor in the Y axis.
+         *
+         * The difference between `stretch` and `scale` is that `scale` uses
+         * the size of a bound texture and applies scaling to it, while
+         * `stretch` uses the current size on screen of the object.
+         * 
+         * @param factor by how much to multiply current object's height.
+         * If `factor` is negative, it's not applied.
+         * @return this, for chaining
+         */
+        RenderableObject& stretchY(float factor);
+        /**
+         * @brief Stretches the object by a given factor in
+         * the X and Y axis separately.
+         * 
+         * The difference between `stretch` and `scale` is that `scale` uses
+         * the size of a bound texture and applies scaling to it, while
+         * `stretch` uses the current size on screen of the object.
+         * 
+         * @param factorX by how much to multiply current object's width.
+         * If `factor` is negative, it's not applied.
+         * @param factorY by how much to multiply current object's height.
+         * If `factor` is negative, it's not applied.
+         * @return this, for chaining
+         */
+        RenderableObject& stretch(float factorX, float factorY);
+        /**
+         * @brief Stretches the object by a given factor in
+         * both axes.
+         * 
+         * The difference between `stretch` and `scale` is that `scale` uses
+         * the size of a bound texture and applies scaling to it, while
+         * `stretch` uses the current size on screen of the object.
+         * 
+         * @param factor by how much to multiply current object's width and height.
+         * If `factor` is negative, it's not applied.
+         * @return this, for chaining
+         */
+        RenderableObject& stretch(float factor);
+
+        /**
+         * @brief Stretches the object by a given number of pixels
+         * in the X axis from its upper left point.
+         * 
+         * @param dx 
+         * @return this, for chaining
+         */
+        RenderableObject& stretchX(i32 dx);
+        /**
+         * @brief Stretches the object by a given number of pixels
+         * in the Y axis from its upper left point.
+         * 
+         * @param dy 
+         * @return this, for chaining
+         */
+        RenderableObject& stretchY(i32 dy);
+        /**
+         * @brief Stretches the object by a given number of pixels
+         * in the X and Y axis separately from its upper left point.
+         * 
+         * @param dx 
+         * @param dy 
+         * @return this, for chaining
+         */
+        RenderableObject& stretch(i32 dx, i32 dy);
+        /**
+         * @brief Stretches the object by a given number of pixels
+         * in both axes from its upper left point.
+         * 
+         * @param d
+         * @return this, for chaining
+         */
+        RenderableObject& stretch(i32 d);
 
         /**
          * @brief Sets the object's flip to none.
