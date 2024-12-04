@@ -29,5 +29,5 @@ class Block : public RenderableObjectBase {
 
         Block& setDensity(float density);
 
-        void render() override {} //blocks do not use render() by default
+        virtual void render() override {} //blocks do not use render() by default
 };

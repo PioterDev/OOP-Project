@@ -154,20 +154,20 @@ class GameObject {
     public:
         /**
          * @brief Constructor for a GameObject.
-         * 
-         * @param objectID ID of the object
-         * @param name name of the object
-         */
-        GameObject(const uint32_t objectID, const char* name) : name(name) { this->uuid.parts.type = objectID; }
-        /**
-         * @brief Constructor for a GameObject.
          * Doesn't set a name,
          * which is rather difficult to change after initialization.
          * @param objectID ID of the object
          */
         GameObject(const uint32_t objectID) { this->uuid.parts.type = objectID; }
+        /**
+         * @brief Constructor for a GameObject.
+         * 
+         * @param objectID ID of the object
+         * @param name name of the object
+         */
+        GameObject(const uint32_t objectID, const char* name) : name(name) { this->uuid.parts.type = objectID; }
         
-        ~GameObject() {}
+        ~GameObject() = default;
 
         /**
          * @brief Get the name of the object as C string.
@@ -179,7 +179,7 @@ class GameObject {
         /**
          * @brief Get flags of the object.
          * 
-         * @return copy of the flags
+         * @return copy of the flags as a 64-bit integer
          */
         uint64_t getFlags() const { return this->flags.all; }
         /**

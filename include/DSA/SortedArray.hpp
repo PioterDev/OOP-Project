@@ -4,6 +4,12 @@
 
 #include <stdexcept>
 
+
+/**
+ * @brief Do not used for now, contains quite a few bugs.
+ * 
+ * @tparam T 
+ */
 template<typename T> class SortedArray {
     private:
         T* data = nullptr;

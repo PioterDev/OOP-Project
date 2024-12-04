@@ -25,6 +25,7 @@ class RenderableObjectBase : public GameObject {
         RenderableObjectBase(const u32 objectID, const TextureHandle textureHandle);
         RenderableObjectBase(const u32 objectID, const char* name, const TextureHandle textureHandle);
 
+        ~RenderableObjectBase() = default;
         /**
          * @brief "Renders" the object.
          * 
@@ -48,8 +49,7 @@ class RenderableObjectBase : public GameObject {
         void flipVisible() { this->flipFlag(1); }
 
         /**
-         * @brief Get the raw pointer to the texture bound to
-         * this object.
+         * @brief Get the texture bound to this object.
          * 
          * @return Pointer to texture or nullptr if no texture is bound.
          * 
