@@ -56,14 +56,14 @@ void GameRenderer::renderInPlace(Game& game) {
     /// End of block rendering ///
 
     //"&game = game" bruh, lambdas are weird
-    this->uiElements.forEach([&game = game](UIElement*& element) {
-        if(!element) return;
-        if(!element->isVisible()) return;
-        element->render();
-        SDL_Texture* texture = element->getTexture();
+    this->uiElements.forEach([&game = game](UIElement& element) {
+        if(!element.isVisible()) return;
+        element.render();
+
+        SDL_Texture* texture = element.getTexture();
         if(!texture) return;
-        Color colorMod = element->getModulation();
-        SDL_BlendMode blendMode = element->getBlendMode();
+        Color colorMod = element.getModulation();
+        SDL_BlendMode blendMode = element.getBlendMode();
         
         //A hacky way to check if all fields in colorMod are 255
         if(*((i32*)&colorMod) != (i32)-1) {
@@ -77,12 +77,12 @@ void GameRenderer::renderInPlace(Game& game) {
 
         SDL_RenderCopyEx(
             game.getRenderingContext(),
-            element->getTexture(),
-            &element->texturePortion,
-            &element->targetPortion,
-            element->angle,
+            element.getTexture(),
+            &element.texturePortion,
+            &element.targetPortion,
+            element.angle,
             nullptr, //might later add a center point to renderable objects I guess
-            element->flip
+            element.flip
         );
         
         //restore original color modulation
@@ -94,7 +94,6 @@ void GameRenderer::renderInPlace(Game& game) {
         if(blendMode != SDL_BLENDMODE_NONE) {
             SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_NONE);
         }
-
     });
 
     SDL_RenderPresent(game.getRenderingContext());

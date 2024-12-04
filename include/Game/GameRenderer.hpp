@@ -16,9 +16,9 @@ class GameRenderer {
 
     private:
         ListArray<PhysicalObject*> physicalObjectsToRender;
-        ListArray<UIElement*> uiElements;
+        ListArray<UIElement> uiElements;
         
-        u32 fps = 60;
+        u32 fps = 144;
         double scalingFactor = 1.0;
 
         //Registers the timestamp when rendering
@@ -33,7 +33,7 @@ class GameRenderer {
     public:
         GameRenderer() : physicalObjectsToRender(4096), uiElements(4096) {}
 
-        void registerUIElement(UIElement* element) { uiElements.append(element); }
+        UIElement& registerUIElement(UIElement element) { return uiElements.append(std::move(element)); }
 
         void registerPhysicalObject(PhysicalObject* obj) { physicalObjectsToRender.append(obj); }
 
@@ -45,6 +45,7 @@ class GameRenderer {
         // }
 
         u64 getTimeSinceLastFrame() const { return SDL_GetPerformanceCounter() - this->lastFrameAt; }
+        u64 getNumberOfFramesRendered() const { return this->numberOfFramesRendered; }
 
         Point getCameraPosition() const { return this->cameraPosition; }
 };
