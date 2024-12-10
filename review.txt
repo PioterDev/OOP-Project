@@ -1,0 +1,23 @@
+To: filnar04
+
+Are there classes? Yes
+Is there inheritance? Yes
+Is there polymorphism? Yes
+Not yet fully implemented, but eh.
+
+Things to improve:
+- not enough comments
+
+other than that lgtm ᓚᘏᗢ
+
+
+
+From: filnar04
+
+Classes: Yes
+Inheritance: Yes
+Polymorphism: Yes
+All requirements satisfied.
+
+Things to improve:
+- confusing function name (RenderableObjectBase.render doesn't actually do the rendering)
