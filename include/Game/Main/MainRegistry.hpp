@@ -39,6 +39,10 @@ class MainRegistry {
         static u32 stoneTextureIndex;
         
 
+        /////////////////////////
+        /*   Font IDs section  */
+        /////////////////////////
+        static u32 consolasFontIndex;
 
         ////////////////////////
         /* Object IDs section */

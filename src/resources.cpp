@@ -65,6 +65,9 @@ void ResourceManager::shutdown() {
     for(size_t i = 1; i < this->music.size(); i++) {
         Mix_FreeMusic(this->music[i]);
     }
+    for(size_t i = 0; i < this->fonts.size(); i++) {
+        TTF_CloseFont(this->fonts[i].font);
+    }
 }
 
 SDL_Texture* ResourceManager::createFallbackTexture() {
@@ -190,29 +193,66 @@ Size ResourceManager::getTextureOriginalSize(TextureHandle handle) {
     return textureSize;
 }
 
-Status SoundEffect::loadSoundEffect(const char* path) {
-    Status s = tryOpeningFile(path);
-    if(s == Status::SUCCESS) {
-        this->soundEffect = Mix_LoadWAV(path);
-        if(this->soundEffect == nullptr) {
-            Program::getLogger().error("Cannot load sound effect: ", Mix_GetError());
-            return Status::SOUND_LOAD_FAILURE;
-        }
-        return Status::SUCCESS;
-    }
-    else return s;
+u32 ResourceManager::loadSoundEffect(const char* path) {
+    Program::getLogger().info("Loading sound effect from ", path);
+    if((this->latestStatus = tryOpeningFile(path)) != Status::SUCCESS) return 0;
 
+    Mix_Chunk* chunk = Mix_LoadWAV(path);
+    if(chunk == nullptr) {
+        Program::getLogger().error("Cannot load sound effect: ", Mix_GetError());
+        this->latestStatus = Status::SOUND_LOAD_FAILURE;
+        return 0;
+    }
+    this->soundEffects.push_back(chunk);
+    return this->soundEffects.size() - 1;
 }
 
-Status Music::loadMusic(const char* path) {
-    Status s = tryOpeningFile(path);
-    if(s == Status::SUCCESS) {
-        this->music = Mix_LoadMUS(path);
-        if(this->music == nullptr) {
-            Program::getLogger().error("Cannot load music: ", Mix_GetError());
-            return Status::MUSIC_LOAD_FAILURE;
-        }
-        return Status::SUCCESS;
+Mix_Chunk* ResourceManager::getSoundEffect(u32 id) {
+    if(id >= this->soundEffects.size()) return nullptr;
+    return this->soundEffects[id];
+}
+
+
+u32 ResourceManager::loadMusic(const char* path) {
+    Program::getLogger().info("Loading music from ", path);
+    if((this->latestStatus = tryOpeningFile(path)) != Status::SUCCESS) return 0;
+
+    Mix_Music* music = Mix_LoadMUS(path);
+    if(music == nullptr) {
+        Program::getLogger().error("Cannot load music effect: ", Mix_GetError());
+        this->latestStatus = Status::MUSIC_LOAD_FAILURE;
+        return 0;
     }
-    else return s;
+    this->music.push_back(music);
+    return this->music.size() - 1;
+}
+
+Mix_Music* ResourceManager::getMusic(u32 id) {
+    if(id >= this->music.size()) return nullptr;
+    return this->music[id];
+}
+
+
+u32 ResourceManager::loadFont(const char* path) {
+    Program::getLogger().info("Loading font from ", path);
+    if((this->latestStatus = tryOpeningFile(path)) != Status::SUCCESS) return 0;
+
+    FontData fontData;
+    fontData.font = TTF_OpenFont(path, 128);
+    if(fontData.font == nullptr) {
+        Program::getLogger().error("Cannot load font: ", TTF_GetError());
+        this->latestStatus = Status::FONT_LOAD_FAILURE;
+        return 0;
+    }
+    TTF_SetFontStyle(fontData.font, TTF_STYLE_STRIKETHROUGH);
+    fontData.location = path;
+    fontData.style = FontStyle_Strikethrough;
+    this->fonts.push_back(fontData);
+
+    return this->fonts.size() - 1;
+}
+
+TTF_Font* ResourceManager::getFont(u32 id) {
+    if(id >= this->fonts.size()) return nullptr;
+    return this->fonts[id].font;
 }

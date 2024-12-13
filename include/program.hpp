@@ -8,6 +8,7 @@
 #include <SDL_render.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
+#include <SDL_ttf.h>
 
 #include "deus.hpp"
 #include "logging.hpp"

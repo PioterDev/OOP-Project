@@ -10,6 +10,10 @@ const char* defaultObjectName = "";
 u32 MainRegistry::gregTextureIndex;
 u32 MainRegistry::stoneTextureIndex;
 
+/////////////////////////
+/*   Font IDs section  */
+/////////////////////////
+u32 MainRegistry::consolasFontIndex;
 
 
 ////////////////////////
@@ -43,7 +47,10 @@ void MainRegistry::init() {
     MainRegistry::gregTextureIndex = Program::getResourceManager().registerTexture("./assets/abruz.png", TextureFlags_LoadImmediately, 0);
     MainRegistry::stoneTextureIndex = Program::getResourceManager().registerTexture("./assets/cobblestone.png", TextureFlags_LoadImmediately, 0);
 
-
+    /////////////////////////
+    /*   Font IDs section  */
+    /////////////////////////
+    MainRegistry::consolasFontIndex = Program::getResourceManager().loadFont("./assets/Consolas.ttf");
 
     ////////////////////////
     /* Object IDs section */

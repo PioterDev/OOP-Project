@@ -7,6 +7,7 @@
 #include <SDL_render.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
+#include <SDL_ttf.h>
 #include <string>
 #include <vector>
 
@@ -25,16 +26,36 @@ typedef enum {
     //Causes the texture to be loaded immediately
     TextureFlags_LoadImmediately = 1,
     //Copies the path into a dynamically allocated buffer
-    TextureFlags_CopyPath = 2,
+    TextureFlags_CopyPath = 1 << 1,
+    //Whether the texture is tied to a text box
+    TextureFlags_Text = 1 << 2,
 } TextureFlags;
 
 typedef struct {
-    SDL_Texture* texture = nullptr;
-    const char* location = nullptr;
-    u32 flags = 0;
-    u32 milisecondsToUnload = 0;
-    u64 lastAccessedAt = 0;
+    SDL_Texture* texture;
+    const char* location;
+    u32 flags;
+    u32 milisecondsToUnload;
+    u64 lastAccessedAt;
 } TextureData;
+
+/**
+ * @brief Font style enum, mapped
+ * to SDL_TTF's macros for convenience.
+ */
+typedef enum {
+    FontStyle_Normal = 0x0,
+    FontStyle_Bold = 0x1,
+    FontStyle_Italic = 0x2,
+    FontStyle_Underline = 0x4,
+    FontStyle_Strikethrough = 0x8
+} FontStyle;
+
+typedef struct {
+    TTF_Font* font;
+    const char* location;
+    FontStyle style;
+} FontData;
 
 class ResourceManager {
     friend class Program;
@@ -43,6 +64,7 @@ class ResourceManager {
         vector<TextureData> textures;
         vector<Mix_Chunk*> soundEffects;
         vector<Mix_Music*> music;
+        vector<FontData> fonts;
         Status latestStatus = Status::SUCCESS;
 
         /**
@@ -118,6 +140,17 @@ class ResourceManager {
          * @return size of the texture
          */
         Size getTextureOriginalSize(TextureHandle handle);
+
+
+        u32 loadSoundEffect(const char* path);
+        Mix_Chunk* getSoundEffect(u32 id);
+
+
+        u32 loadMusic(const char* path);
+        Mix_Music* getMusic(u32 id);
+
+        u32 loadFont(const char* path);
+        TTF_Font* getFont(u32 id);
 };
 
 /**

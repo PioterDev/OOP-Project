@@ -67,6 +67,12 @@ Status Program::initSystems() {
         this->flags.canPlaySound = true;
     }
 
+
+    if(TTF_Init() != 0) {
+        Program::logger.fatal("SDL_ttf initialization failed: ", TTF_GetError());
+        return Status::SDL_TTF_FAILURE;
+    }
+    this->flags.SDL_TTF_Initalized = true;
     //TODO: SDL_TTF
     
     this->window = SDL_CreateWindow(
@@ -106,7 +112,7 @@ Program::~Program() {
     this->resourceManager.shutdown();
     if(this->renderingContext != nullptr) SDL_DestroyRenderer(Program::renderingContext);
     if(this->window != nullptr) SDL_DestroyWindow(this->window);
-    // if(this->flags.SDL_TTF_Initalized) TTF_Quit();
+    if(this->flags.SDL_TTF_Initalized) TTF_Quit();
     if(this->flags.SDL_Mixer_Initialized) {
         Mix_CloseAudio();
         Mix_Quit();

@@ -36,6 +36,7 @@ namespace Enums {
         SDL_IMAGE_INIT_FAILURE,
         SDL_MIXER_INIT_FAILURE,
         SDL_MIXER_RESERVE_CHANNELS_FAILURE,
+        SDL_TTF_FAILURE,
         WINDOW_CREATION_FAILURE,
         RENDERER_CREATION_FAILURE,
         TEXTURE_LOAD_FAILURE,
@@ -43,6 +44,7 @@ namespace Enums {
         SOUND_LOAD_FAILURE,
         MUSIC_LOAD_FAILURE,
         FALLBACK_TEXTURE_CREATION_FAILURE,
+        FONT_LOAD_FAILURE
     };
 
     typedef enum {

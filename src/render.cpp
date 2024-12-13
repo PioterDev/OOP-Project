@@ -96,6 +96,22 @@ void GameRenderer::renderInPlace(Game& game) {
         }
     });
 
+    //TODO: formalize text rendering into a separate entity
+    //This can get complicated though as adding anything
+    //to the string to show requires recreating the entire texture
+    //but alas, let's hope that's a rare circumstance
+    SDL_Surface* s = TTF_RenderUTF8_Blended_Wrapped(
+        game.getResourceManager().getFont(MainRegistry::consolasFontIndex), "Hello, World!",
+        {0, 0, 0, 0}, game.getWindowSize().width
+    );
+    SDL_Texture* tex = SDL_CreateTextureFromSurface(game.getRenderingContext(), s);
+
+    SDL_Rect rr = {0, 0, 400, 100};
+    SDL_RenderCopy(game.getRenderingContext(), tex, nullptr, &rr);
+    
+    SDL_DestroyTexture(tex);
+    SDL_FreeSurface(s);
+
     SDL_RenderPresent(game.getRenderingContext());
     
     this->lastFrameAt = SDL_GetPerformanceCounter();
