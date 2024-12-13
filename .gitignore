@@ -6,3 +6,4 @@ out/*.exe
 uml/*
 !uml/*.tex
 !uml/*.pdf
+test/
