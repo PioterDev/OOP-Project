@@ -3,8 +3,7 @@
 /**
  * @brief A header file containing
  * #defines, enums, unions and structs, hence "deus".
- * It also contains useful typedefs
- * 
+ * It also contains useful typedefs.
  */
 
 typedef uint8_t  u8;
@@ -206,10 +205,6 @@ namespace Structs {
         float x1, y1;
         float x2, y2;
     } AABB;
-
-    /* typedef struct {
-
-    } Vector2D; */
 
     typedef struct {
         u8 red;

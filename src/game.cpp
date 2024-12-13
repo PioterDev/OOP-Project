@@ -1,7 +1,7 @@
 #include "Game/Main/Game.hpp"
 #include "Game/Main/GameObject.hpp"
-#include "Game/PhysicalObject.hpp"
-#include "Game/UIElement.hpp"
+#include "Game/Physics/PhysicalObject.hpp"
+#include "Game/Render/UIElement.hpp"
 
 MainRegistry Game::registry;
 GameRenderer Game::renderer;
@@ -39,7 +39,7 @@ void Game::run() {
         this->renderer.renderInPlace(*this);
         
 
- 
+
         end = SDL_GetPerformanceCounter();
         //Delta = Target frametime - Time elapsed - Overhead from previous frames
         delta = frameTime - (end - start) - overhead;

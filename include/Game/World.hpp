@@ -41,7 +41,20 @@ class World : public GameObject {
         
         Status populateChunk(const ChunkPos which, const u32 blockID);
 
+        /**
+         * @brief Get the Block at given position.
+         * 
+         * @param x 
+         * @param y 
+         * @return const Block* or NULL if there is no block
+         */
         const Block* getBlockAt(i32 x, i32 y);
+        /**
+         * @brief Get the Block at given position.
+         * 
+         * @param pos block position
+         * @return const Block* or NULL if there's no block
+         */
         const Block* getBlockAt(BlockPos pos) { return this->getBlockAt(pos.x, pos.y); }
 
         void printChunk(i32 x, i32 y);

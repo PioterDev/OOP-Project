@@ -19,15 +19,6 @@ using namespace Structs;
 
 class RenderableObject;
 
-
-//TODO: rethink how resource handling is done
-//in terms of ownership (i.e. whether objects should access
-//a resource directly or through the ResourceManager)
-/* typedef struct {
-    SDL_Texture* texture = nullptr;
-    Size originalSize = {0, 0};
-} TextureHandle; */
-
 typedef uint32_t TextureHandle;
 
 typedef enum {
@@ -53,8 +44,6 @@ class ResourceManager {
         vector<Mix_Chunk*> soundEffects;
         vector<Mix_Music*> music;
         Status latestStatus = Status::SUCCESS;
-
-        
 
         /**
          * @brief Creates a fallback texture.
@@ -109,12 +98,11 @@ class ResourceManager {
          */
         TextureHandle registerTexture(const char* path, const u32 flags, const u32 maxTimeLoaded);
         
-
         /**
          * @brief Get a pointer to the texture with a given handle.
          * It is a handle to internal data, do NOT modify.
          * 
-         * @param handle texture handle, obtained from
+         * @param handle handle to the texture, obtained from
          * `ResourceManager::registerTexture(path)`.
          * @return  pointer to internal texture data
          * 
@@ -123,11 +111,12 @@ class ResourceManager {
          * Instead use the ResourceManager, as it has a broader context.
          */
         SDL_Texture* getTexture(TextureHandle handle);
-
-        /* TextureHandle getTextureHandle(u32 id);
-        SDL_Texture* getTexture(u32 id);
-        Size getTextureOriginalSize(u32 id) const; */
-
+        /**
+         * @brief Query the texture for its original size.
+         * 
+         * @param handle handle to the texture
+         * @return size of the texture
+         */
         Size getTextureOriginalSize(TextureHandle handle);
 };
 

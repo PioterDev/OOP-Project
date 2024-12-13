@@ -32,21 +32,22 @@ Status tryOpeningFile(const char* path) {
 }
 
 Status ResourceManager::init() {
-    textures.reserve(128);
-    soundEffects.reserve(16);
-    music.reserve(4);
+    this->textures.reserve(128);
+    this->soundEffects.reserve(16);
+    this->music.reserve(4);
+    this->fonts.reserve(2);
     TextureData t;
     t.texture = this->createFallbackTexture();
     if(t.texture == nullptr) {
         this->latestStatus = Status::FALLBACK_TEXTURE_CREATION_FAILURE;
         return Status::FALLBACK_TEXTURE_CREATION_FAILURE;
     }
-    textures.push_back(t);
+    this->textures.push_back(t);
     memset((void*)&t, 0, sizeof(TextureData));
-    textures.push_back(t); //no texture, placeholder for a transparent texture
+    this->textures.push_back(t); //no texture, placeholder for a transparent texture
     
-    soundEffects.push_back(nullptr); //will be changed
-    music.push_back(nullptr);
+    this->soundEffects.push_back(nullptr); //will be changed
+    this->music.push_back(nullptr);
 
     return Status::SUCCESS;
 }
@@ -93,17 +94,12 @@ SDL_Texture* ResourceManager::createFallbackTexture() {
         Program::getRenderingContext(), s
     );
     SDL_FreeSurface(s);
-    if(t == nullptr) {
-        Program::getLogger().fatal("Cannot create a fallback texture: ", SDL_GetError());
-    }
+    if(t == nullptr) Program::getLogger().fatal("Cannot create a fallback texture: ", SDL_GetError());
     return t;
-
 }
 
 TextureHandle ResourceManager::registerTexture(const char* path, const u32 flags, const u32 maxTimeLoad) {
-    
     Program::getLogger().info("Registering texture at ", path);
-    
     if((this->latestStatus = tryOpeningFile(path)) != Status::SUCCESS) return fallbackHandle;
     
     TextureHandle handle = (TextureHandle)this->textures.size();

@@ -33,6 +33,7 @@ class Game : public Program {
             
         }
         ~Game();
+        
         static MainRegistry& getRegistry() { return registry; }
         static GameRenderer& getRenderer() { return renderer; }
         static InputHandler& getInputHandler() { return inputHandler; }

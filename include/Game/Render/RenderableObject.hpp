@@ -213,6 +213,28 @@ class RenderableObject : public RenderableObjectBase {
          */
         RenderableObject& setPositionOnScreenCentered(int x, int y);
 
+        // /**
+        //  * @brief Sets the object's upper left point's
+        //  * position on the screen as a percentage of the
+        //  * current window width and height.
+        //  * 
+        //  * @param pX 
+        //  * @param pY 
+        //  * @return RenderableObject& 
+        //  */
+        // RenderableObject& setPositionOnScreenRelative(float pX, float pY);
+
+        // /**
+        //  * @brief Sets the object's upper left point's
+        //  * position on the screen as a percentage of the
+        //  * current window width and height.
+        //  * 
+        //  * @param pX 
+        //  * @param pY 
+        //  * @return RenderableObject& 
+        //  */
+        // RenderableObject& setPositionOnScreenCenteredRelative(float pX, float pY);
+
         /**
          * @brief Sets the object's size on the screen, or the bottom
          * right point's position on the screen.
@@ -497,5 +519,5 @@ class RenderableObject : public RenderableObjectBase {
          * @return SDL_BlendMode, usually used by the game's renderer
          */
         SDL_BlendMode getBlendMode() const { return this->blendMode; }
-        
+      
 };

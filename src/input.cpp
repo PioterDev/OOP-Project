@@ -108,7 +108,7 @@ const char keynames[179][32] = {
     "American back",
     "American forward",
     "American stop",
-    "Americal refresh",
+    "American refresh",
     "American bookmarks", //1073742098
     //163-172
     "Brightness down", //1073742099
@@ -214,7 +214,7 @@ void InputHandler::processInput(Game& game) {
                     
                 }
                 else if(latestEvent.key.keysym.sym == SDLK_d) {
-                    
+
                 }
                 break;
             }

@@ -134,6 +134,15 @@ RenderableObject& RenderableObject::setPositionOnScreenCentered(int x, int y) {
     return *this;
 }
 
+//TODO: to be reworked to allow querying the window size statically
+/* RenderableObject& RenderableObject::setPositionOnScreenRelative(Program& program, float pX, float pY) {
+    this->targetPortion.x = 
+}
+
+RenderableObject& RenderableObject::setPositionOnScreenCenteredRelative(float pX, float pY) {
+
+} */
+
 RenderableObject& RenderableObject::setSizeOnScreen(u32 width, u32 height) {
     this->targetPortion.w = (int)width;
     this->targetPortion.h = (int)height;

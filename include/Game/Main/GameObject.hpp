@@ -56,6 +56,7 @@ class GameObject {
          * for any use - be it flags, bitfields
          * or any thing 64 bits wide - it's free real estate!
          */
+        //TODO: make `all` atomic for future multithreaded access...maybe, idk
         union {
             uint64_t all;
             char bytes[sizeof(uint64_t)];

@@ -11,7 +11,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
         char message[128];
         snprintf(
             message, sizeof(message), 
-            "The program could not start and exited with the code %d."
+            "The program could not start and exited with code %d."
             " For further information, please contact the developer.", 
             static_cast<int>(status)
         );

@@ -2,8 +2,8 @@
 
 #include "Bindings.h"
 
-#include "Game/UIElement.hpp"
-#include "Game/PhysicalObject.hpp"
+#include "Game/Render/UIElement.hpp"
+#include "Game/Physics/PhysicalObject.hpp"
 #include "DSA/ListArray.hpp"
 #include "program.hpp"
 

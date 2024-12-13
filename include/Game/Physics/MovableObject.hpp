@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Game/PhysicalObject.hpp"
+#include "Game/Physics/PhysicalObject.hpp"
 
 class MovableObject : public PhysicalObject {
     
