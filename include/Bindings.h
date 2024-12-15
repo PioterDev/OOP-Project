@@ -284,10 +284,15 @@ ForceInline uint64_t getClockResolution() {
 }
 
 #ifndef sleep
-#ifdef WINDOWS
+#if defined(WINDOWS)
 #define sleep(ms) Sleep(ms)
 #elif defined(LINUX)
-#define sleep(ms) usleep(1000 * ms)
+#define sleep(ms) do {                  \
+    struct timespec ts;                 \
+    ts.tv_nsec = (ms % 1000) * 1000000; \
+    ts.tv_sec = ms / 1000;              \
+    nanosleep(&ts, &ts);                \
+} while(0)
 #else
 #define sleep(ms)
 #endif /* OS */
