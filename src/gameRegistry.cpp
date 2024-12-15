@@ -50,7 +50,7 @@ void MainRegistry::init() {
     /////////////////////////
     /*   Font IDs section  */
     /////////////////////////
-    MainRegistry::consolasFontIndex = Program::getResourceManager().loadFont("./assets/Consolas.ttf");
+    MainRegistry::consolasFontIndex = Program::getResourceManager().loadFont("./assets/segoeuil.ttf", 128);
 
     ////////////////////////
     /* Object IDs section */

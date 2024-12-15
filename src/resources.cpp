@@ -48,6 +48,7 @@ Status ResourceManager::init() {
     
     this->soundEffects.push_back(nullptr); //will be changed
     this->music.push_back(nullptr);
+    this->fonts.push_back({nullptr, nullptr, 0});
 
     return Status::SUCCESS;
 }
@@ -56,7 +57,7 @@ void ResourceManager::shutdown() {
     for(size_t i = 0; i < this->textures.size(); i++) {
         SDL_DestroyTexture(this->textures[i].texture);
         if(this->textures[i].flags & TextureFlags_CopyPath) {
-            delete[] this->textures[i].location;
+            free(this->textures[i].location);
         }
     }
     for(size_t i = 1; i < this->soundEffects.size(); i++) {
@@ -101,7 +102,7 @@ SDL_Texture* ResourceManager::createFallbackTexture() {
     return t;
 }
 
-TextureHandle ResourceManager::registerTexture(const char* path, const u32 flags, const u32 maxTimeLoad) {
+TextureHandle ResourceManager::registerTexture(char* path, const u32 flags, const u32 maxTimeLoad) {
     Program::getLogger().info("Registering texture at ", path);
     if((this->latestStatus = tryOpeningFile(path)) != Status::SUCCESS) return fallbackHandle;
     
@@ -117,14 +118,18 @@ TextureHandle ResourceManager::registerTexture(const char* path, const u32 flags
             return fallbackHandle;
         }
         SDL_SetTextureScaleMode(this->textures[handle].texture, SDL_ScaleModeBest);
+        this->textures[handle].flags |= TextureFlags_LoadImmediately;
 
     }
     this->textures[handle].flags = flags;
 
     if(flags & TextureFlags_CopyPath) {
         size_t s = strlen(path) + 1;
-        this->textures[handle].location = new char[s];
-        memcpy((void*)this->textures[handle].location, (void*)path, s);
+        this->textures[handle].location = (char*)malloc(s);
+        if(this->textures[handle].location != nullptr) {
+            memcpy((void*)this->textures[handle].location, (void*)path, s);
+        }
+        this->textures[handle].flags |= TextureFlags_CopyPath;
     }
     else {
         this->textures[handle].location = path;
@@ -136,47 +141,84 @@ TextureHandle ResourceManager::registerTexture(const char* path, const u32 flags
     return handle;
 }
 
-Status ResourceManager::loadTexture(TextureHandle handle) {
-    if(handle >= this->textures.size()) {
-        this->latestStatus = Status::OUT_OF_BOUNDS;
-        return Status::OUT_OF_BOUNDS;
-    }
-    if(this->textures[handle].location == nullptr) { 
-        this->latestStatus = Status::NULL_PASSED;
-        return Status::NULL_PASSED;
-    }
+TextureHandle ResourceManager::createTextTexture(
+    char* text, const u32 flags, const FontHandle font,
+    const Color foregroundColor, const u32 wrapLength
+) {
+    TextureHandle handle = (TextureHandle)this->textures.size();
+    this->textures.emplace_back();
 
-    Status tryOpen = tryOpeningFile(this->textures[handle].location);
-    if(tryOpen != Status::SUCCESS) {
-        this->latestStatus = tryOpen;
-        return tryOpen;
+    this->textures[handle].flags |= TextureFlags_Text;
+    if(flags & TextureFlags_CopyPath) {
+        size_t s = strlen(text) + 1;
+        this->textures[handle].location = (char*)malloc(s);
+        if(this->textures[handle].location != nullptr) {
+            memcpy((void*)this->textures[handle].location, (void*)text, s);
+        }
+        this->textures[handle].flags |= TextureFlags_CopyPath;
+    }
+    else {
+        this->textures[handle].location = text;
+    }
+    //will decide later whether it makes sense to destroy a text box texture
+    this->textures[handle].milisecondsToUnload = 0;
+    this->textures[handle].lastAccessedAt = SDL_GetPerformanceCounter();
+
+    SDL_Surface* s = nullptr;
+    SDL_Texture* t = nullptr;
+
+    TTF_Font* f = this->getFont(font);
+    if(f == nullptr) goto failure;
+
+    s = TTF_RenderUTF8_Blended_Wrapped(
+        f, text, *(SDL_Color*)&foregroundColor, wrapLength
+    );
+    if(s == nullptr) goto failure;
+    
+    t = SDL_CreateTextureFromSurface(Program::getRenderingContext(), s);
+    SDL_FreeSurface(s);
+    if(t == nullptr) goto failure;
+
+    this->textures[handle].texture = t;
+
+    return handle;
+
+    failure: {
+        if(flags & TextureFlags_CopyPath) {
+            free(this->textures[handle].location);
+        }
+        this->textures.pop_back();
+        return 0;
+    }
+}
+
+Status ResourceManager::loadTexture(TextureHandle handle) {
+    if(handle >= this->textures.size()) return this->latestStatus = Status::OUT_OF_BOUNDS;
+    if(this->textures[handle].location == nullptr) return this->latestStatus = Status::NULL_PASSED;
+
+    if((this->latestStatus = tryOpeningFile(this->textures[handle].location)) != Status::SUCCESS) {
+        return this->latestStatus;
     }
     
-    if(this->textures[handle].texture != nullptr) {
-        this->latestStatus = Status::ALREADY_EXISTS;
-        return Status::ALREADY_EXISTS;
-    }
+    if(this->textures[handle].texture != nullptr) return this->latestStatus = Status::ALREADY_EXISTS;
 
     this->textures[handle].texture = IMG_LoadTexture(
         Program::getRenderingContext(), this->textures[handle].location
     );
-    if(this->textures[handle].texture == nullptr) {
-        this->latestStatus = Status::TEXTURE_LOAD_FAILURE;
-        return Status::TEXTURE_LOAD_FAILURE;
-    }
+    if(this->textures[handle].texture == nullptr) return this->latestStatus = Status::TEXTURE_LOAD_FAILURE;
 
     return Status::SUCCESS;
 }
 
 SDL_Texture* ResourceManager::getTexture(TextureHandle handle) {
-    if(handle >= this->textures.size()) return this->textures[0].texture;
+    if(!this->isTextureHandleValid(handle)) return this->textures[0].texture;
     this->textures[handle].lastAccessedAt = SDL_GetPerformanceCounter();
     return this->textures[handle].texture;
 }
 
 Size ResourceManager::getTextureOriginalSize(TextureHandle handle) {
+    if(!this->isTextureHandleValid(handle)) return {fallbackTextureWidth, fallbackTextureHeight}; //fallback texture
     Size textureSize;
-    if(handle >= this->textures.size()) return {fallbackTextureWidth, fallbackTextureHeight}; //fallback texture
     if(this->textures[handle].texture == nullptr) {
         this->latestStatus = Status::NULL_PASSED;
         return {0, 0};
@@ -233,26 +275,97 @@ Mix_Music* ResourceManager::getMusic(u32 id) {
 }
 
 
-u32 ResourceManager::loadFont(const char* path) {
+FontHandle ResourceManager::loadFont(const char* path, const FontAttributes attributes) {
     Program::getLogger().info("Loading font from ", path);
     if((this->latestStatus = tryOpeningFile(path)) != Status::SUCCESS) return 0;
 
-    FontData fontData;
-    fontData.font = TTF_OpenFont(path, 128);
+    FontData fontData = {nullptr, nullptr, 0};
+    fontData.font = TTF_OpenFont(path, attributes.size & 0xFFFF);
     if(fontData.font == nullptr) {
         Program::getLogger().error("Cannot load font: ", TTF_GetError());
         this->latestStatus = Status::FONT_LOAD_FAILURE;
         return 0;
     }
-    TTF_SetFontStyle(fontData.font, TTF_STYLE_STRIKETHROUGH);
+    
+    TTF_SetFontStyle(fontData.font, static_cast<int>(attributes.style));
+    TTF_SetFontDirection(fontData.font, static_cast<TTF_Direction>(attributes.direction));
+    TTF_SetFontWrappedAlign(fontData.font, static_cast<u32>(attributes.wrapAlignment));
+
     fontData.location = path;
-    fontData.style = FontStyle_Strikethrough;
+    fontData.properties |= static_cast<u32>(attributes.style);
+    fontData.properties |= static_cast<u32>(attributes.direction) << 4;
+    fontData.properties |= static_cast<u32>(attributes.wrapAlignment) << 6;
+    fontData.properties |= (attributes.size & 0xFFFF) << 8;
+
     this->fonts.push_back(fontData);
 
     return this->fonts.size() - 1;
 }
 
-TTF_Font* ResourceManager::getFont(u32 id) {
-    if(id >= this->fonts.size()) return nullptr;
+TTF_Font* ResourceManager::getFont(FontHandle id) {
+    if(!this->isFontHandleValid(id)) return nullptr;
     return this->fonts[id].font;
+}
+
+u32 ResourceManager::queryFontSize(FontHandle id) {
+    if(!this->isFontHandleValid(id)) return 0;
+    return (this->fonts[id].properties & (0xFFFF << 8)) >> 8;
+}
+
+FontStyle ResourceManager::queryFontStyle(FontHandle id) {
+    if(!this->isFontHandleValid(id)) return FontStyle::Invalid;
+    switch(this->fonts[id].properties & 0xF) {
+        case 0:
+            return FontStyle::Normal;
+        case 1:
+            return FontStyle::Bold;
+        case 2:
+            return FontStyle::Italic;
+        case 4:
+            return FontStyle::Underline;
+        case 8:
+            return FontStyle::Strikethrough;
+        default:
+            return FontStyle::Invalid; //should be unreachable
+    }
+}
+
+FontDirection ResourceManager::queryFontDirection(FontHandle id) {
+    if(!this->isFontHandleValid(id)) return FontDirection::Invalid;
+    switch((this->fonts[id].properties & (0b11 << 4)) >> 4) {
+        case 0:
+            return FontDirection::LR;
+        case 1:
+            return FontDirection::RL;
+        case 2:
+            return FontDirection::TB;
+        case 3:
+            return FontDirection::BT;
+        default:
+            return FontDirection::Invalid; //should be unreachable
+    }
+}
+
+FontWrapAlignment ResourceManager::queryFontWrapAlignment(FontHandle id) {
+    if(!this->isFontHandleValid(id)) return FontWrapAlignment::Invalid;
+    switch((this->fonts[id].properties & (0b11 << 6)) >> 6) {
+        case 0:
+            return FontWrapAlignment::Left;
+        case 1:
+            return FontWrapAlignment::Center;
+        case 2:
+            return FontWrapAlignment::Right;
+        default:
+            return FontWrapAlignment::Invalid; //should be unreachable
+    }
+}
+
+FontAttributes ResourceManager::queryFontAttributes(FontHandle id) {
+    FontAttributes att;
+    att.style = this->queryFontStyle(id);
+    att.direction = this->queryFontDirection(id);
+    att.wrapAlignment = this->queryFontWrapAlignment(id);
+    att.size = this->queryFontSize(id);
+
+    return att;
 }
