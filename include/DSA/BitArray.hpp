@@ -9,26 +9,26 @@
 /**
  * @brief A bit array implementation as an alternative to
  * std::vector<bool> (this thing is...not great).
+ * It is guaranteed that bits are stored contigously here.
  * 
  * @throws std::bad_alloc if it fails to (re)allocate memory
  */
 class BitArray {
     private:
-        u64 numberOfBits;
-        u64 numberOfBitsAvailable;
+        u64 numberOfBits = 0;
+        u64 numberOfBitsAvailable = 0;
         u8* bits = nullptr;
 
         ForceInline u64 roundUpToPowerOf2(u64 in) {
-            u64 out = in;
-            out--;
-            out |= out >> 1;
-            out |= out >> 2;
-            out |= out >> 4;
-            out |= out >> 8;
-            out |= out >> 16;
-            out |= out >> 32;
-            out++;
-            return out;
+            in--;
+            in |= in >> 1;
+            in |= in >> 2;
+            in |= in >> 4;
+            in |= in >> 8;
+            in |= in >> 16;
+            in |= in >> 32;
+            in++;
+            return in;
         }
 
         bool reallocate(u64 minimumNewSize);
@@ -40,11 +40,14 @@ class BitArray {
          * 
          * @throws std::bad_alloc on allocation failure
          */
-        BitArray(u64 initialSize);
+        BitArray(const u64 initialSize);
         
         ~BitArray() {
             free(this->bits);
         }
+
+        BitArray(const BitArray& other);
+        BitArray(BitArray&& other);
 
         /**
          * @brief Sets the selected bit.
@@ -55,7 +58,7 @@ class BitArray {
          * 
          * @throws std::bad_alloc on reallocation failure
          */
-        void set(u64 bit);
+        void set(const u64 bit);
 
         /**
          * @brief Clears he selected bit.
@@ -66,17 +69,18 @@ class BitArray {
          * 
          * @throws std::bad_alloc on reallocation failure
          */
-        void clear(u64 bit);
+        void clear(const u64 bit);
 
         /**
          * @brief Checks if `bit`'s bit is set. If `bit`
-         * is larger than the number of bits used, returns false.
+         * is larger than the number of bits used,
+         * it does NOT throw an exception, but always returns false.
          * 
          * @param bit bit
          * 
          * @return whether `bit` is set
          */
-        bool operator[](u64 bit) { return at(bit); }
+        bool operator[](const u64 bit) { return this->at(bit); }
 
         /**
          * @brief Checks if `bit`'s bit is set. If `bit`
@@ -86,7 +90,7 @@ class BitArray {
          * 
          * @return whether `bit` is set
          */
-        bool at(u64 bit);
+        bool at(const u64 bit);
 
         /**
          * @brief Get size of the bit array.

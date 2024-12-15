@@ -2,16 +2,34 @@
 #include "DSA/ListArray.hpp"
 
 
-BitArray::BitArray(u64 initialSize) {
+BitArray::BitArray(const u64 initialSize) {
     u64 numberOfBytes = initialSize / 8 + (initialSize % 8 == 0 ? 0 : 1);
     if(numberOfBytes == 0) numberOfBytes = 1; //edge case
     this->bits = (u8*)calloc(numberOfBytes, 1);
     if(this->bits == nullptr) Unlikely throw std::bad_alloc();
-    this->numberOfBits = 0;
     this->numberOfBitsAvailable = numberOfBytes * 8;
 }
 
-void BitArray::set(u64 bit) {
+BitArray::BitArray(const BitArray& other)
+: numberOfBits(other.numberOfBits),
+  numberOfBitsAvailable(other.numberOfBitsAvailable)
+{
+    u64 numberOfBytes = other.numberOfBitsAvailable / 8 + (other.numberOfBitsAvailable % 8 == 0 ? 0 : 1);
+    if(numberOfBytes == 0) numberOfBytes = 1; //edge case
+    this->bits = (u8*)calloc(numberOfBytes, 1);
+    if(this->bits == nullptr) throw std::bad_alloc();
+}
+
+BitArray::BitArray(BitArray&& other)
+: numberOfBits(other.numberOfBits),
+  numberOfBitsAvailable(other.numberOfBitsAvailable),
+  bits(other.bits)
+{
+    other.bits = nullptr;
+    other.numberOfBits = other.numberOfBitsAvailable = 0;
+}
+
+void BitArray::set(const u64 bit) {
     if(bit >= this->numberOfBitsAvailable) {
         if(this->reallocate(bit + 1)) Unlikely throw std::bad_alloc();
     }
@@ -19,7 +37,7 @@ void BitArray::set(u64 bit) {
     this->bits[bit / 8] |= (1 << (bit % 8));
 }
 
-void BitArray::clear(u64 bit) {
+void BitArray::clear(const u64 bit) {
     if(bit >= this->numberOfBitsAvailable) {
         if(reallocate(bit + 1)) Unlikely throw std::bad_alloc();
     }
@@ -28,12 +46,12 @@ void BitArray::clear(u64 bit) {
 }
 
 
-bool BitArray::at(u64 bit) {
+bool BitArray::at(const u64 bit) {
     if(bit >= this->numberOfBits) return false;
     return (this->bits[bit / 8] & (1 << (bit % 8))) != 0;
 }
 
-bool BitArray::reallocate(u64 minimumNewSize) {
+bool BitArray::reallocate(const u64 minimumNewSize) {
     u64 newSize = this->roundUpToPowerOf2(minimumNewSize / 8 + (minimumNewSize % 8 == 0 ? 0 : 1));
     u8* newBits = (u8*)calloc(newSize, 1);
     if(newBits == nullptr) return true;
