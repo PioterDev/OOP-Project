@@ -32,14 +32,18 @@ typedef enum {
     TextureFlags_LoadImmediately = 1 << 0,
     //Copies the path into a dynamically allocated buffer
     TextureFlags_CopyPath = 1 << 1,
-    //Whether the texture is tied to a text box
-    TextureFlags_Text = 1 << 2,
+    //Whether the texture is tied to a UTF-8 text box,
+    //mutually excludes `TextureFlags_Text_UTF16`
+    TextureFlags_Text_UTF8 = 1 << 2,
+    //Whether the texture is tied to a UTF-16 text box,
+    //mutually excludes `TextureFlags_Text_UTF8`
+    TextureFlags_Text_UTF16 = 1 << 3,
 } TextureFlags;
 
-typedef struct {
+typedef struct TextureData {
     SDL_Texture* texture;
     //TODO: change it back to const char*
-    char* location;
+    const char* location;
     u32 flags;
     u32 milisecondsToUnload;
     u64 lastAccessedAt;
@@ -80,7 +84,7 @@ typedef struct {
     u32 size;
 } FontAttributes;
 
-typedef struct {
+typedef struct FontData {
     TTF_Font* font;
     const char* location;
     /**
@@ -90,9 +94,13 @@ typedef struct {
      * in the following way:
      * 
      * Bits 0-3 are used for `FontStyle`,
+     * 
      * bits 4-5 are used for `FontDirection`,
+     * 
      * bits 6-7 are used for `FontWrapAlignment`,
-     * bits 8-23 are used for the font's size
+     * 
+     * bits 8-23 are used for the font's size,
+     * 
      * bits 24-31 are currently unused.
      */
     u32 properties;
@@ -102,6 +110,10 @@ class ResourceManager {
     friend class Program;
 
     private:
+        enum class TextEncoding {
+            UTF8,
+            UTF16
+        };
         vector<TextureData> textures;
         vector<Mix_Chunk*> soundEffects;
         vector<Mix_Music*> music;
@@ -127,11 +139,16 @@ class ResourceManager {
          */
         Status loadTexture(TextureHandle handle);
 
-        bool isTextureHandleValid(const TextureHandle handle) { return handle < this->textures.size(); }
-        bool isFontHandleValid(const FontHandle handle) { return handle < this->fonts.size(); }
+        bool isTextureHandleValid(const TextureHandle handle);
+        bool isFontHandleValid(const FontHandle handle);
         //TODO: add these 2
         // bool isHandleValid(const SoundHandle handle);
         // bool isHandleValid(const MusicHandle handle);
+
+        TextureHandle __createTextTexture(
+            const void* text, const u32 flags, const FontHandle font,
+            const Color foregroundColor, const u32 wrapLength, const TextEncoding encoding
+        );
     public:
         Status init();
         void shutdown();
@@ -165,26 +182,53 @@ class ResourceManager {
          * Texture at index 0 is always valid and used as a fallback
          * if loading the texture from `path` fails.
          */
-        TextureHandle registerTexture(char* path, const u32 flags, const u32 maxTimeLoaded);
+        TextureHandle registerTexture(const char* path, const u32 flags, const u32 maxTimeLoaded);
         
         /**
-         * @brief Creates a renderable text box.
+         * @brief Creates a renderable text box using a UTF-8 character set.
          * 
-         * @param text 
+         * @param text text to make into a texture
          * @param flags texture flags OR'ed together.
          * `TextureFlags_LoadImmediately` has no effect here,
          * `TextureFlags_CopyPath` copies `text` into a separate buffer,
-         * `TextureFlags_Text` is always applied, even if not specified
+         * `TextureFlags_Text_...` is always applied, even if not specified
          * @param font handle to the font, obtained from
          * `ResourceManager::loadFont(...)`.
          * @param foregroundColor color for the foreground of the text box 
          * @return a TextureHandle, see `ResourceManager::registerTexture(...)`
          * for details.
          */
-        TextureHandle createTextTexture(
-            char* text, const u32 flags, const FontHandle font,
+        ForceInline TextureHandle createTextTexture(
+            const char* text, const u32 flags, const FontHandle font,
             const Color foregroundColor, const u32 wrapLength
-        );
+        ) {
+            return this->__createTextTexture(
+                text, flags, font, foregroundColor, wrapLength, TextEncoding::UTF8
+            );
+        }
+
+        /**
+         * @brief Creates a renderable text box using a UTF-16 character set.
+         * 
+         * @param text text to make into a texture
+         * @param flags texture flags OR'ed together.
+         * `TextureFlags_LoadImmediately` has no effect here,
+         * `TextureFlags_CopyPath` copies `text` into a separate buffer,
+         * `TextureFlags_Text_...` is always applied, even if not specified
+         * @param font handle to the font, obtained from
+         * `ResourceManager::loadFont(...)`.
+         * @param foregroundColor color for the foreground of the text box 
+         * @return a TextureHandle, see `ResourceManager::registerTexture(...)`
+         * for details.
+         */
+        ForceInline TextureHandle createTextTexture(
+            const char16_t* text, const u32 flags, const FontHandle font,
+            const Color foregroundColor, const u32 wrapLength
+        ) {
+            return this->__createTextTexture(
+                text, flags, font, foregroundColor, wrapLength, TextEncoding::UTF16
+            );
+        }
         
         /**
          * @brief Get a pointer to the texture with a given texture handle.

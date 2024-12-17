@@ -3,6 +3,7 @@
 
 #include "program.hpp"
 #include "resources.hpp"
+#include "util.hpp"
 
 static constexpr u32 fallbackTextureWidth = 64;
 static constexpr u32 fallbackTextureHeight = 64;
@@ -31,6 +32,9 @@ Status tryOpeningFile(const char* path) {
     }
 }
 
+bool ResourceManager::isTextureHandleValid(const TextureHandle handle) { return handle < this->textures.size(); }
+bool ResourceManager::isFontHandleValid(const FontHandle handle) { return handle < this->fonts.size(); }
+
 Status ResourceManager::init() {
     this->textures.reserve(128);
     this->soundEffects.reserve(16);
@@ -57,7 +61,7 @@ void ResourceManager::shutdown() {
     for(size_t i = 0; i < this->textures.size(); i++) {
         SDL_DestroyTexture(this->textures[i].texture);
         if(this->textures[i].flags & TextureFlags_CopyPath) {
-            free(this->textures[i].location);
+            free((char*)this->textures[i].location);
         }
     }
     for(size_t i = 1; i < this->soundEffects.size(); i++) {
@@ -102,7 +106,7 @@ SDL_Texture* ResourceManager::createFallbackTexture() {
     return t;
 }
 
-TextureHandle ResourceManager::registerTexture(char* path, const u32 flags, const u32 maxTimeLoad) {
+TextureHandle ResourceManager::registerTexture(const char* path, const u32 flags, const u32 maxTimeLoad) {
     Program::getLogger().info("Registering texture at ", path);
     if((this->latestStatus = tryOpeningFile(path)) != Status::SUCCESS) return fallbackHandle;
     
@@ -125,10 +129,11 @@ TextureHandle ResourceManager::registerTexture(char* path, const u32 flags, cons
 
     if(flags & TextureFlags_CopyPath) {
         size_t s = strlen(path) + 1;
-        this->textures[handle].location = (char*)malloc(s);
-        if(this->textures[handle].location != nullptr) {
+        char* pathCopy = (char*)malloc(s);
+        if(pathCopy != nullptr) {
             memcpy((void*)this->textures[handle].location, (void*)path, s);
         }
+        this->textures[handle].location = pathCopy;
         this->textures[handle].flags |= TextureFlags_CopyPath;
     }
     else {
@@ -141,24 +146,45 @@ TextureHandle ResourceManager::registerTexture(char* path, const u32 flags, cons
     return handle;
 }
 
-TextureHandle ResourceManager::createTextTexture(
-    char* text, const u32 flags, const FontHandle font,
-    const Color foregroundColor, const u32 wrapLength
+TextureHandle ResourceManager::__createTextTexture(
+    const void* text, const u32 flags, const FontHandle font,
+    const Color foregroundColor, const u32 wrapLength, const TextEncoding encoding
 ) {
     TextureHandle handle = (TextureHandle)this->textures.size();
     this->textures.emplace_back();
+    
+    switch (encoding) {
+        case TextEncoding::UTF8:
+            this->textures[handle].flags |= TextureFlags_Text_UTF8;
+            break;
+        case TextEncoding::UTF16:
+            this->textures[handle].flags |= TextureFlags_Text_UTF16;
+            break;
+        default:
+            break;
+    }
 
-    this->textures[handle].flags |= TextureFlags_Text;
     if(flags & TextureFlags_CopyPath) {
-        size_t s = strlen(text) + 1;
-        this->textures[handle].location = (char*)malloc(s);
-        if(this->textures[handle].location != nullptr) {
+        size_t s;
+        switch(encoding) {
+            case TextEncoding::UTF8:
+                s = strlen((const char*)text) + 1;
+                break;
+            case TextEncoding::UTF16:
+                s = (wstrlen((const char16_t*)text) + 1) * 2;
+                break;
+            default:
+                break;
+        }
+        char* textCopy = (char*)malloc(s);
+        if(textCopy != nullptr) {
             memcpy((void*)this->textures[handle].location, (void*)text, s);
         }
+        this->textures[handle].location = textCopy;
         this->textures[handle].flags |= TextureFlags_CopyPath;
     }
     else {
-        this->textures[handle].location = text;
+        this->textures[handle].location = (const char*)text;
     }
     //will decide later whether it makes sense to destroy a text box texture
     this->textures[handle].milisecondsToUnload = 0;
@@ -170,9 +196,21 @@ TextureHandle ResourceManager::createTextTexture(
     TTF_Font* f = this->getFont(font);
     if(f == nullptr) goto failure;
 
-    s = TTF_RenderUTF8_Blended_Wrapped(
-        f, text, *(SDL_Color*)&foregroundColor, wrapLength
-    );
+    switch(encoding) {
+        case TextEncoding::UTF8:
+            s = TTF_RenderUTF8_Blended_Wrapped(
+                f, (const char*)text, *(SDL_Color*)&foregroundColor, wrapLength
+            );
+            break;
+        case TextEncoding::UTF16:
+            s = TTF_RenderUNICODE_Blended_Wrapped(
+                f, (const Uint16*)text, *(SDL_Color*)&foregroundColor, wrapLength
+            );
+            break;
+        default:
+            break;
+        
+    }
     if(s == nullptr) goto failure;
     
     t = SDL_CreateTextureFromSurface(Program::getRenderingContext(), s);
@@ -184,8 +222,9 @@ TextureHandle ResourceManager::createTextTexture(
     return handle;
 
     failure: {
+        Program::getLogger().error("Cannot create a text texture: ", TTF_GetError());
         if(flags & TextureFlags_CopyPath) {
-            free(this->textures[handle].location);
+            free((char*)this->textures[handle].location);
         }
         this->textures.pop_back();
         return 0;

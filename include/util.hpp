@@ -18,3 +18,11 @@ void itos(int in, const unsigned int base, char* buf, const size_t bufsize);
  * @return converted string
  */
 template<class...Args> string toString(Args...args);
+
+/**
+ * @brief strlen for char16_t.
+ * 
+ * @param str 
+ * @return length of `str`
+ */
+size_t wstrlen(const char16_t* str);

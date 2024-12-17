@@ -44,3 +44,9 @@ template<class...Args> string toString(Args...args) {
     (s << ... << args);
     return s.str();
 }
+
+size_t wstrlen(const char16_t* str) {
+    const char16_t* s = str;
+    while(*s) ++s;
+    return (size_t)(s - str) >> 1;
+}
