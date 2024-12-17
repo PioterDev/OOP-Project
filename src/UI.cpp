@@ -28,7 +28,7 @@ void UIElement::render() {
         0,
         (i32)(5.0 * sin(0.05 * Game::getRenderer().getNumberOfFramesRendered()))
     );
-    this->rotate(1.0);
+    // this->rotate(1.0);
     return; //for now no render logic
 }
 

@@ -28,7 +28,7 @@ RenderableObjectBase::RenderableObjectBase(
 }
 
 RenderableObjectBase& RenderableObjectBase::bindTexture(
-    TextureHandle textureHandle
+    const TextureHandle textureHandle
 ) {
     this->textureHandle = textureHandle;
     this->setVisible();
@@ -81,21 +81,21 @@ RenderableObject& RenderableObject::setTargetPortion(const SDL_Rect& r) {
     return *this;
 }
 
-RenderableObject& RenderableObject::scaleX(float scale) {
+RenderableObject& RenderableObject::scaleX(const float scale) {
     if(scale < 0.0) return *this;
     this->targetPortion.w = (int)(scale * (float)Program::getResourceManager().getTextureOriginalSize(this->textureHandle).width);
 
     return *this;
 }
 
-RenderableObject& RenderableObject::scaleY(float scale) {
+RenderableObject& RenderableObject::scaleY(const float scale) {
     if(scale < 0.0) return *this;
     this->targetPortion.h = (int)(scale * (float)Program::getResourceManager().getTextureOriginalSize(this->textureHandle).height);
 
     return *this;
 }
 
-RenderableObject& RenderableObject::scale(float scaleX, float scaleY) {
+RenderableObject& RenderableObject::scale(const float scaleX, const float scaleY) {
     if(scaleX < 0.0) return *this;
     this->targetPortion.w = (int)(scaleX * (float)Program::getResourceManager().getTextureOriginalSize(this->textureHandle).width);
     if(scaleY < 0.0) return *this;
@@ -104,7 +104,7 @@ RenderableObject& RenderableObject::scale(float scaleX, float scaleY) {
     return *this;
 }
 
-RenderableObject& RenderableObject::scale(float scale) {
+RenderableObject& RenderableObject::scale(const float scale) {
     if(scale < 0.0) return *this;
     this->targetPortion.w = (int)(scale * (float)Program::getResourceManager().getTextureOriginalSize(this->textureHandle).width);
     this->targetPortion.h = (int)(scale * (float)Program::getResourceManager().getTextureOriginalSize(this->textureHandle).height);
@@ -112,7 +112,7 @@ RenderableObject& RenderableObject::scale(float scale) {
     return *this;
 }
 
-RenderableObject& RenderableObject::rotate(double degrees) {
+RenderableObject& RenderableObject::rotate(const double degrees) {
     this->angle += degrees;
     while(this->angle >= 360.0) { this->angle -= 360.0; }
     while(this->angle <= 360.0) { this->angle += 360.0; }
@@ -120,14 +120,14 @@ RenderableObject& RenderableObject::rotate(double degrees) {
     return *this;
 }
 
-RenderableObject& RenderableObject::setPositionOnScreen(int x, int y) {
+RenderableObject& RenderableObject::setPositionOnScreen(const int x, const int y) {
     this->targetPortion.x = x;
     this->targetPortion.y = y;
 
     return *this;
 }
 
-RenderableObject& RenderableObject::setPositionOnScreenCentered(int x, int y) {
+RenderableObject& RenderableObject::setPositionOnScreenCentered(const int x, const int y) {
     this->targetPortion.x = x - this->targetPortion.w / 2;
     this->targetPortion.y = y - this->targetPortion.h / 2;
 
@@ -143,35 +143,42 @@ RenderableObject& RenderableObject::setPositionOnScreenCenteredRelative(float pX
 
 } */
 
-RenderableObject& RenderableObject::setSizeOnScreen(u32 width, u32 height) {
+RenderableObject& RenderableObject::setSizeOnScreen(const u32 width, const u32 height) {
     this->targetPortion.w = (int)width;
     this->targetPortion.h = (int)height;
 
     return *this;
 }
 
-RenderableObject& RenderableObject::moveOnScreen(i32 dx, i32 dy) {
+RenderableObject& RenderableObject::setSizeOnScreen(const Size size) {
+    this->targetPortion.w = (int)size.width;
+    this->targetPortion.h = (int)size.height;
+
+    return *this;
+}
+
+RenderableObject& RenderableObject::moveOnScreen(const i32 dx, const i32 dy) {
     this->targetPortion.x += dx;
     this->targetPortion.y += dy;
 
     return *this;
 }
 
-RenderableObject& RenderableObject::stretchX(float factor) {
+RenderableObject& RenderableObject::stretchX(const float factor) {
     if(factor < 0.0) return *this;
     this->targetPortion.w = (int)roundf((float)this->targetPortion.w * factor);
 
     return *this;
 }
 
-RenderableObject& RenderableObject::stretchY(float factor) {
+RenderableObject& RenderableObject::stretchY(const float factor) {
     if(factor < 0.0) return *this;
     this->targetPortion.h = (int)roundf((float)this->targetPortion.h * factor);
 
     return *this;
 }
 
-RenderableObject& RenderableObject::stretch(float factorX, float factorY) {
+RenderableObject& RenderableObject::stretch(const float factorX, const float factorY) {
     if(factorX < 0.0) return *this;
     this->targetPortion.w = (int)roundf((float)this->targetPortion.w * factorX);
     if(factorY < 0.0) return *this;
@@ -181,7 +188,7 @@ RenderableObject& RenderableObject::stretch(float factorX, float factorY) {
 }
 
 
-RenderableObject& RenderableObject::stretch(float factor) {
+RenderableObject& RenderableObject::stretch(const float factor) {
     if(factor < 0.0) return *this;
     this->targetPortion.w = (int)roundf((float)this->targetPortion.w * factor);
     this->targetPortion.h = (int)roundf((float)this->targetPortion.h * factor);
@@ -190,21 +197,21 @@ RenderableObject& RenderableObject::stretch(float factor) {
 }
 
 
-RenderableObject& RenderableObject::stretchX(i32 dx) {
+RenderableObject& RenderableObject::stretchX(const i32 dx) {
     this->targetPortion.w += dx;
     if(this->targetPortion.w < 0) this->targetPortion.w = 0;
 
     return *this;
 }
 
-RenderableObject& RenderableObject::stretchY(i32 dy) {
+RenderableObject& RenderableObject::stretchY(const i32 dy) {
     this->targetPortion.h += dy;
     if(this->targetPortion.h < 0) this->targetPortion.h = 0;
 
     return *this;
 }
 
-RenderableObject& RenderableObject::stretch(i32 dx, i32 dy) {
+RenderableObject& RenderableObject::stretch(const i32 dx, const i32 dy) {
     this->targetPortion.w += dx;
     this->targetPortion.h += dy;
     if(this->targetPortion.w < 0) this->targetPortion.w = 0;
@@ -213,7 +220,7 @@ RenderableObject& RenderableObject::stretch(i32 dx, i32 dy) {
     return *this;
 }
 
-RenderableObject& RenderableObject::stretch(i32 d) {
+RenderableObject& RenderableObject::stretch(const i32 d) {
     this->targetPortion.w += d;
     this->targetPortion.h += d;
     if(this->targetPortion.w < 0) this->targetPortion.w = 0;
@@ -313,7 +320,7 @@ RenderableObject& RenderableObject::setBlendMultiplicative() {
     return *this;
 }
 
-RenderableObject& RenderableObject::setBlendMode(SDL_BlendMode blendMode) {
+RenderableObject& RenderableObject::setBlendMode(const SDL_BlendMode blendMode) {
     this->blendMode = blendMode;
     
     return *this;

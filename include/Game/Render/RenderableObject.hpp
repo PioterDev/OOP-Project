@@ -123,7 +123,7 @@ class RenderableObject : public RenderableObjectBase {
          * 
          * @return this, for chaining
          */
-        RenderableObject& scaleX(float scale);
+        RenderableObject& scaleX(const float scale);
         
         /**
          * @brief Scales the texture in the Y axis (vertically).
@@ -141,7 +141,7 @@ class RenderableObject : public RenderableObjectBase {
          * 
          * @return this, for chaining
          */
-        RenderableObject& scaleY(float scale);
+        RenderableObject& scaleY(const float scale);
         /**
          * @brief Scales the texture separately in the
          * X and Y axes.
@@ -160,7 +160,7 @@ class RenderableObject : public RenderableObjectBase {
          * 
          * @return this, for chaining
          */
-        RenderableObject& scale(float scaleX, float scaleY);
+        RenderableObject& scale(const float scaleX, const float scaleY);
         /**
          * @brief Scales the texture.
          * 
@@ -177,14 +177,14 @@ class RenderableObject : public RenderableObjectBase {
          * 
          * @return this, for chaining
          */
-        RenderableObject& scale(float scale);
+        RenderableObject& scale(const float scale);
 
         /**
          * @brief Rotates the object around its center.
          * 
          * @param degrees degrees to rotate
          */
-        RenderableObject& rotate(double degrees);
+        RenderableObject& rotate(const double degrees);
 
         /**
          * @brief Sets the object's upper left point's
@@ -198,7 +198,7 @@ class RenderableObject : public RenderableObjectBase {
          * 
          * @return this, for chaining
          */
-        RenderableObject& setPositionOnScreen(int x, int y);
+        RenderableObject& setPositionOnScreen(const int x, const int y);
         /**
          * @brief Sets the object's center's position
          * on the screen. 
@@ -211,7 +211,7 @@ class RenderableObject : public RenderableObjectBase {
          * 
          * @return this, for chaining
          */
-        RenderableObject& setPositionOnScreenCentered(int x, int y);
+        RenderableObject& setPositionOnScreenCentered(const int x, const int y);
 
         // /**
         //  * @brief Sets the object's upper left point's
@@ -243,7 +243,16 @@ class RenderableObject : public RenderableObjectBase {
          * @param height screen height taken up by the object
          * @return this, for chaining
          */
-        RenderableObject& setSizeOnScreen(u32 width, u32 height);
+        RenderableObject& setSizeOnScreen(const u32 width, const u32 height);
+        /**
+         * @brief Sets the object's size on the screen, or the bottom
+         * right point's position on the screen.
+         * 
+         * @param width screen width taken up by the object
+         * @param height screen height taken up by the object
+         * @return this, for chaining
+         */
+        RenderableObject& setSizeOnScreen(const Size size);
 
         /**
          * @brief Moves the object by a given offset on the screen.
@@ -252,7 +261,7 @@ class RenderableObject : public RenderableObjectBase {
          * @param dy offset in the Y axis
          * @return this, for chaining 
          */
-        RenderableObject& moveOnScreen(i32 dx, i32 dy);
+        RenderableObject& moveOnScreen(const i32 dx, const i32 dy);
 
         /**
          * @brief Stretches the object by a given factor in the X axis.
@@ -265,7 +274,7 @@ class RenderableObject : public RenderableObjectBase {
          * If `factor` is negative, it's not applied.
          * @return this, for chaining
          */
-        RenderableObject& stretchX(float factorX);
+        RenderableObject& stretchX(const float factorX);
         /**
          * @brief Stretches the object by a given factor in the Y axis.
          *
@@ -277,7 +286,7 @@ class RenderableObject : public RenderableObjectBase {
          * If `factor` is negative, it's not applied.
          * @return this, for chaining
          */
-        RenderableObject& stretchY(float factor);
+        RenderableObject& stretchY(const float factor);
         /**
          * @brief Stretches the object by a given factor in
          * the X and Y axis separately.
@@ -292,7 +301,7 @@ class RenderableObject : public RenderableObjectBase {
          * If `factor` is negative, it's not applied.
          * @return this, for chaining
          */
-        RenderableObject& stretch(float factorX, float factorY);
+        RenderableObject& stretch(const float factorX, const float factorY);
         /**
          * @brief Stretches the object by a given factor in
          * both axes.
@@ -305,7 +314,7 @@ class RenderableObject : public RenderableObjectBase {
          * If `factor` is negative, it's not applied.
          * @return this, for chaining
          */
-        RenderableObject& stretch(float factor);
+        RenderableObject& stretch(const float factor);
 
         /**
          * @brief Stretches the object by a given number of pixels
@@ -314,7 +323,7 @@ class RenderableObject : public RenderableObjectBase {
          * @param dx 
          * @return this, for chaining
          */
-        RenderableObject& stretchX(i32 dx);
+        RenderableObject& stretchX(const i32 dx);
         /**
          * @brief Stretches the object by a given number of pixels
          * in the Y axis from its upper left point.
@@ -322,7 +331,7 @@ class RenderableObject : public RenderableObjectBase {
          * @param dy 
          * @return this, for chaining
          */
-        RenderableObject& stretchY(i32 dy);
+        RenderableObject& stretchY(const i32 dy);
         /**
          * @brief Stretches the object by a given number of pixels
          * in the X and Y axis separately from its upper left point.
@@ -331,7 +340,7 @@ class RenderableObject : public RenderableObjectBase {
          * @param dy 
          * @return this, for chaining
          */
-        RenderableObject& stretch(i32 dx, i32 dy);
+        RenderableObject& stretch(const i32 dx, const i32 dy);
         /**
          * @brief Stretches the object by a given number of pixels
          * in both axes from its upper left point.
@@ -339,7 +348,7 @@ class RenderableObject : public RenderableObjectBase {
          * @param d
          * @return this, for chaining
          */
-        RenderableObject& stretch(i32 d);
+        RenderableObject& stretch(const i32 d);
 
         /**
          * @brief Sets the object's flip to none.
@@ -512,7 +521,7 @@ class RenderableObject : public RenderableObjectBase {
          * 
          * @return this, for chaining 
          */
-        RenderableObject& setBlendMode(SDL_BlendMode blendMode);
+        RenderableObject& setBlendMode(const SDL_BlendMode blendMode);
         /**
          * @brief Get the object's associated blend mode.
          * 

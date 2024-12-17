@@ -60,7 +60,7 @@ class RenderableObjectBase : public GameObject {
         /**
          * @brief Binds a texture to the object.
          * 
-         * @param textureHandleIndex obtained from the texture registry
+         * @param textureHandle obtained from the texture registry
          * @return this, for chaining
          */
         RenderableObjectBase& bindTexture(TextureHandle textureHandle);

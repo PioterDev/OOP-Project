@@ -25,6 +25,10 @@ void Game::run() {
     UIElement& obj = UIElement::createUIElement(MainRegistry::someObjectID, MainRegistry::gregTextureIndex);
     obj.setSizeOnScreen(200, 200).setPositionOnScreenCentered(640, 360).setBlendModulate();
 
+    TextureHandle tex = Program::getResourceManager().createTextTexture(u"Hello, world~ żółć", 0, MainRegistry::consolasFontIndex, {255, 255, 0, 255}, 1920);
+    UIElement& t = UIElement::createUIElement(MainRegistry::someObjectID, "Hello there", tex);
+    t.setSizeOnScreen(Program::getResourceManager().getTextureOriginalSize(tex)).setPositionOnScreen(0, 0);
+
     this->world.populateChunk({0, 0}, Blocks::cobblestone->getInstanceID());
     this->world.populateChunk({1, 1}, Blocks::cobblestone->getInstanceID());
     ///End of section for testing ///
