@@ -18,35 +18,54 @@ using std::string, std::vector;
 using namespace Enums;
 using namespace Structs;
 
+extern const char* emptyCString;
+extern const char* noErrorCString;
+
 class RenderableObject;
 
+//TODO: finish ResourceManager in terms of SFX, Music
+//and documentation
+
 typedef uint32_t TextureHandle;
+typedef uint32_t SFXHandle;
+typedef uint32_t MusicHandle;
 typedef uint32_t FontHandle;
 
 /**
  * @brief Flags for textures, loaded
  * from a file or created dynamically.
+ * 
+ * Flags 6-31 are reserved for internal use.
  */
 typedef enum {
     //Causes the texture to be loaded immediately
     TextureFlags_LoadImmediately = 1 << 0,
     //Copies the path into a dynamically allocated buffer
     TextureFlags_CopyPath = 1 << 1,
-    //Whether the texture is tied to a UTF-8 text box,
-    //mutually excludes `TextureFlags_Text_UTF16`
+    
+    //Whether the texture is tied to a UTF-8 text box.
+    //Mutually excludes `TextureFlags_Text_UTF16`.
     TextureFlags_Text_UTF8 = 1 << 2,
-    //Whether the texture is tied to a UTF-16 text box,
-    //mutually excludes `TextureFlags_Text_UTF8`
+    //Whether the texture is tied to a UTF-16 text box.
+    //Mutually excludes `TextureFlags_Text_UTF8`.
     TextureFlags_Text_UTF16 = 1 << 3,
+
+    //Nearest pixel sampling
+    TextureFlags_ScaleModeNearest = 0 << 4,
+    //Linear filtering
+    TextureFlags_ScaleModeLinear = 1 << 4,
+    //Anisotropic filtering
+    TextureFlags_ScaleModeBest = 2 << 4,
+    //Internal flag to signal whether a handle is valid.
+    TextureFlags_IsValid = 1 << 31
 } TextureFlags;
 
 typedef struct TextureData {
-    SDL_Texture* texture;
-    //TODO: change it back to const char*
-    const char* location;
-    u32 flags;
-    u32 milisecondsToUnload;
-    u64 lastAccessedAt;
+    SDL_Texture* texture = nullptr;
+    const char* location = nullptr;
+    u32 flags = 0;
+    u32 milisecondsToUnload = 0;
+    u64 lastAccessedAt = 0;
 } TextureData;
 
 /**
@@ -78,10 +97,10 @@ enum class FontWrapAlignment : int {
 };
 
 typedef struct {
-    FontStyle style;
-    FontDirection direction;
-    FontWrapAlignment wrapAlignment;
-    u32 size;
+    FontStyle style = FontStyle::Normal;
+    FontDirection direction = FontDirection::LR;
+    FontWrapAlignment wrapAlignment = FontWrapAlignment::Left;
+    u32 size = 0;
 } FontAttributes;
 
 typedef struct FontData {
@@ -114,49 +133,56 @@ class ResourceManager {
             UTF8,
             UTF16
         };
+
         vector<TextureData> textures;
         vector<Mix_Chunk*> soundEffects;
         vector<Mix_Music*> music;
         vector<FontData> fonts;
+
         Status latestStatus = Status::SUCCESS;
+        const char* errorMessage = emptyCString;
+
+
+
+        bool isTextureHandleValid(const TextureHandle handle) const noexcept;
+        //TODO: add these 2
+        // bool isHandleValid(const SoundHandle handle);
+        // bool isHandleValid(const MusicHandle handle);
+        bool isFontHandleValid(const FontHandle handle) const noexcept;
 
         /**
          * @brief Creates a fallback texture.
          * 
          * @return SDL_Texture* to the fallback texture
          * 
-         * If this function return a nullptr, the game cannot be
-         * safely started as other textures will most likely
+         * If this function return a nullptr, the game cannot
+         * safely start as other textures will most likely
          * fail to be created as well.
          */
-        SDL_Texture* createFallbackTexture();
+        SDL_Texture* __createFallbackTexture() noexcept;
 
-        /**
-         * @brief Loads the texture of the given handle.
-         * 
-         * @param handle texture handle
-         * @return Status
-         */
-        Status loadTexture(TextureHandle handle);
-
-        bool isTextureHandleValid(const TextureHandle handle);
-        bool isFontHandleValid(const FontHandle handle);
-        //TODO: add these 2
-        // bool isHandleValid(const SoundHandle handle);
-        // bool isHandleValid(const MusicHandle handle);
+        Status __registerTextureAt(TextureHandle handle, const char* path, const u32 flags) noexcept;
 
         TextureHandle __createTextTexture(
             const void* text, const u32 flags, const FontHandle font,
             const Color foregroundColor, const u32 wrapLength, const TextEncoding encoding
-        );
-    public:
-        Status init();
-        void shutdown();
+        ) noexcept;
 
-        Status getLatestStatus() const { return this->latestStatus; }
+        Status __createTextTextureAt(
+            TextureHandle handle,
+            const void* text, const u32 flags, const FontHandle font,
+            const Color foregroundColor, const u32 wrapLength, const TextEncoding encoding
+        ) noexcept;
+    public:
+        Status init() noexcept;
+        void shutdown() noexcept;
+
+        Status getLatestStatus() const noexcept { return this->latestStatus; }
+
+        const char* getLatestError() const noexcept { return this->errorMessage; }
 
         /**
-         * @brief Registers a texture in the resource manager's registry.
+         * @brief Register a new texture in the resource manager's registry.
          * 
          * @param path path to the file with texture. Be mindful that
          * passing a variable created on the stack WILL most likely
@@ -164,6 +190,10 @@ class ResourceManager {
          * is not loaded immediately AND set to be always loaded.
          * This function has no way of verifying that the passed
          * pointer is safe to store.
+         * 
+         * It is allowed that the file at `path` may not exist
+         * when calling this function if `TextureFlags_LoadImmediately`
+         * is not specified.
          * @param flags texture flags OR'ed together
          * @param maxTimeLoaded how long should the texture remain loaded
          * in memory after being requested. After this time, the texture is unloaded
@@ -182,7 +212,22 @@ class ResourceManager {
          * Texture at index 0 is always valid and used as a fallback
          * if loading the texture from `path` fails.
          */
-        TextureHandle registerTexture(const char* path, const u32 flags, const u32 maxTimeLoaded);
+        TextureHandle registerTexture(const char* path, const u32 flags) noexcept;
+        
+        /**
+         * @brief Registers a texture in the resource manager's
+         * registry using an existing handle.
+         * 
+         * @param handle handle to the texture
+         * @param path path to the file with a texture,
+         * same restrictions apply as with
+         * `ResourceManager::registerTexture(...)`.
+         * @param flags texture flags OR'ed together
+         * @return Status 
+         */
+        Status registerTextureAt(TextureHandle handle, const char* path, const u32 flags) noexcept {
+            return this->__registerTextureAt(handle, path, flags);
+        }
         
         /**
          * @brief Creates a renderable text box using a UTF-8 character set.
@@ -201,7 +246,7 @@ class ResourceManager {
         ForceInline TextureHandle createTextTexture(
             const char* text, const u32 flags, const FontHandle font,
             const Color foregroundColor, const u32 wrapLength
-        ) {
+        ) noexcept {
             return this->__createTextTexture(
                 text, flags, font, foregroundColor, wrapLength, TextEncoding::UTF8
             );
@@ -224,9 +269,59 @@ class ResourceManager {
         ForceInline TextureHandle createTextTexture(
             const char16_t* text, const u32 flags, const FontHandle font,
             const Color foregroundColor, const u32 wrapLength
-        ) {
+        ) noexcept {
             return this->__createTextTexture(
                 text, flags, font, foregroundColor, wrapLength, TextEncoding::UTF16
+            );
+        }
+
+        /**
+         * @brief Creates a renderable text box using a UTF-8 character set
+         * in an existing handle.
+         * 
+         * @param handle handle to the texture
+         * @param text text to make into a texture
+         * @param flags texture flags OR'ed together.
+         * `TextureFlags_LoadImmediately` has no effect here,
+         * `TextureFlags_CopyPath` copies `text` into a separate buffer,
+         * `TextureFlags_Text_...` is always applied, even if not specified
+         * @param font handle to the font, obtained from
+         * `ResourceManager::loadFont(...)`.
+         * @param foregroundColor color for the foreground of the text box 
+         * @return TODO: status
+         */
+        ForceInline Status createTextTextureAt(
+            TextureHandle handle,
+            const char* text, const u32 flags, const FontHandle font,
+            const Color foregroundColor, const u32 wrapLength
+        ) noexcept {
+            return this->__createTextTextureAt(
+                handle, text, flags, font, foregroundColor, wrapLength, TextEncoding::UTF8
+            );
+        }
+
+        /**
+         * @brief Creates a renderable text box using a UTF-16 character set
+         * in an existing handle.
+         * 
+         * @param handle handle to the texture
+         * @param text text to make into a texture
+         * @param flags texture flags OR'ed together.
+         * `TextureFlags_LoadImmediately` has no effect here,
+         * `TextureFlags_CopyPath` copies `text` into a separate buffer,
+         * `TextureFlags_Text_...` is always applied, even if not specified
+         * @param font handle to the font, obtained from
+         * `ResourceManager::loadFont(...)`.
+         * @param foregroundColor color for the foreground of the text box 
+         * @return TODO: status
+         */
+        ForceInline Status createTextTextureAt(
+            TextureHandle handle,
+            const char16_t* text, const u32 flags, const FontHandle font,
+            const Color foregroundColor, const u32 wrapLength
+        ) noexcept {
+            return this->__createTextTextureAt(
+                handle, text, flags, font, foregroundColor, wrapLength, TextEncoding::UTF16
             );
         }
         
@@ -242,22 +337,103 @@ class ResourceManager {
          * it is dangerous, risks memory leaks and potentially crashes.
          * Instead use the ResourceManager, as it has a broader context.
          */
-        SDL_Texture* getTexture(TextureHandle handle);
+        SDL_Texture* getTexture(TextureHandle handle) noexcept;
         /**
          * @brief Query the texture for its original size.
          * 
          * @param handle handle to the texture
          * @return size of the texture
          */
-        Size getTextureOriginalSize(TextureHandle handle);
+        Size getTextureOriginalSize(TextureHandle handle) noexcept;
+
+        /**
+         * @brief Reserves a texture handle for later use.
+         * 
+         * @return a unique index into the texture registry or 0
+         * on failure, call `getLatestError()` for more information.
+         * 
+         * The texture handle will not change throughout
+         * the duration of the program, even when the texture
+         * is destroyed. The caller is required to store the returned
+         * value, otherwise it won't be able to bind to the texture.
+         */
+        TextureHandle reserveTextureHandle() noexcept;
+
+        /**
+         * @brief Loads the texture of the given handle.
+         * 
+         * @param handle handle to the texture
+         * @return `Status::SUCCESS` on success,
+         * a variety of status codes on failure;
+         * call `getLatestError()` for more information.
+         */
+        Status loadTexture(TextureHandle handle) noexcept;
+
+        /**
+         * @brief Unloads the texture of the given handle.
+         * 
+         * @param handle handle to the texture
+         * @return `Status::SUCCESS` on success,
+         * 
+         * `Status::INVALID_ARGS` if `handle` is invalid.
+         */
+        Status unloadTexture(TextureHandle handle) noexcept;
+
+        /**
+         * @brief Destroys a given texture, freeing
+         * its handle for other textures and invalidating it.
+         * 
+         * @param handle handle to the texture
+         * 
+         * @return Status
+         */
+        Status destroyTexture(TextureHandle handle) noexcept;
+
+        /**
+         * @brief Whether the texture at the given
+         * handle is a text texture.
+         * 
+         * @param handle handle to the texture
+         */
+        bool isTextTexture(TextureHandle handle) noexcept;
 
 
-        u32 loadSoundEffect(const char* path);
-        Mix_Chunk* getSoundEffect(u32 id);
+        /**
+         * @brief Loads a sound effect from a given path at
+         * default volume (12.5% of maximum).
+         * 
+         * You can use it for music, the difference between
+         * SoundEffect and Music is that SoundEffect is decoded
+         * once, while Music is decoded on the fly, meaning this
+         * takes up more memory, but less CPU and sound effects
+         * are more likely to be invoked frequently than music
+         * tracks.
+         */
+        u32 loadSoundEffect(const char* path) noexcept {
+            return this->loadSoundEffect(path, 16);
+        }
+        /**
+         * @brief Loads a sound effect from a given path.
+         * 
+         * You can use it for music, the difference between
+         * SoundEffect and Music is that SoundEffect is decoded
+         * once, while Music is decoded on the fly, meaning this
+         * takes up more memory, but less CPU and sound effects
+         * are more likely to be invoked frequently than music
+         * tracks.
+         * 
+         * @param path path to the audio file
+         * @param volume initial volume of the sound effect
+         * 
+         * @return a unique index into the (TODO: this shit)
+         */
+        SFXHandle loadSoundEffect(const char* path, u8 volume) noexcept;
+
+        Mix_Chunk* getSoundEffect(u32 id) noexcept;
 
 
-        u32 loadMusic(const char* path);
-        Mix_Music* getMusic(u32 id);
+        MusicHandle loadMusic(const char* path) noexcept;
+        Mix_Music* getMusic(u32 id) noexcept;
 
         /**
          * @brief Loads a font dynamically from a given path with default
@@ -273,7 +449,7 @@ class ResourceManager {
          * Same rules that apply to texture handles apply here,
          * see `ResourceManager::registerTexture(...)` for details.
          */
-        FontHandle loadFont(const char* path, const u32 size) {
+        FontHandle loadFont(const char* path, const u32 size) noexcept {
             return this->loadFont(
                 path, {
                     FontStyle::Normal,
@@ -295,7 +471,7 @@ class ResourceManager {
          * Same rules that apply to texture handles apply here,
          * see `ResourceManager::registerTexture(...)` for details.
          */
-        FontHandle loadFont(const char* path, const FontAttributes attributes);
+        FontHandle loadFont(const char* path, const FontAttributes attributes) noexcept;
         /**
          * @brief Get the raw pointer to the internal font object
          * with a given font handle.
@@ -303,9 +479,9 @@ class ResourceManager {
          * 
          * @param id handle to the font, obtained from
          * `ResourceManager::loadFont(...)`.
-         * @return pointer to internal font object
+         * @return pointer to internal font object or nullptr on error
          */
-        TTF_Font* getFont(FontHandle id);
+        TTF_Font* getFont(FontHandle id) noexcept;
 
         /**
          * @brief Query the size of the font with a given handle.
@@ -315,7 +491,7 @@ class ResourceManager {
          * @return size of the font
          * or 0 if `id` is invalid
          */
-        u32 queryFontSize(FontHandle id);
+        u32 queryFontSize(FontHandle id) noexcept;
         /**
          * @brief Query the style of the font with a given handle.
          * 
@@ -324,7 +500,7 @@ class ResourceManager {
          * @return style of the font
          * or FontStyle::Invalid` if `id` is invalid
          */
-        FontStyle queryFontStyle(FontHandle id);
+        FontStyle queryFontStyle(FontHandle id) noexcept;
         /**
          * @brief Query the direction of the font with a given handle.
          * 
@@ -333,7 +509,7 @@ class ResourceManager {
          * @return direction of the font
          * or FontDIrection::Invalid` if `id` is invalid
          */
-        FontDirection queryFontDirection(FontHandle id);
+        FontDirection queryFontDirection(FontHandle id) noexcept;
         /**
          * @brief Query the wrap alignment of the font with a given handle.
          * 
@@ -342,7 +518,7 @@ class ResourceManager {
          * @return wrap alignment of the font
          * or FontWrapAlignment::Invalid` if `id` is invalid
          */
-        FontWrapAlignment queryFontWrapAlignment(FontHandle id);
+        FontWrapAlignment queryFontWrapAlignment(FontHandle id) noexcept;
         /**
          * @brief Query the font's attributes.
          * 
@@ -352,48 +528,8 @@ class ResourceManager {
          * font's attributes. If `id` is invalid, attributes
          * stored are the same as in queries for individual ones.
          */
-        FontAttributes queryFontAttributes(FontHandle id);
+        FontAttributes queryFontAttributes(FontHandle id) noexcept;
 
-};
-
-/**
- * @brief A wrapper around SDL_Mixer's Mix_Chunk.
- * 
- * You can use it for music, the difference between
- * SoundEffect and Music is that SoundEffect is decoded
- * once, while Music is decoded on the fly, meaning this
- * takes up more memory, but less CPU and sound effects
- * are more likely to be invoked frequently than music
- * tracks.
- */
-class SoundEffect {
-    friend class ResourceManager;
-
-    private:
-        Mix_Chunk* soundEffect = nullptr;
-        u32 volume = 128;
-    public:
-        void setVolume(u32 newVolume) {
-            Mix_VolumeChunk(this->soundEffect, newVolume);
-            this->volume = newVolume <= 128 ? newVolume : 128;
-        }
-        u32 getVolume() const { return this->volume; }
-
-        NoDiscard Status loadSoundEffect(const char* path);
-        NoDiscard Status loadSoundEffect(const string& path) { return loadSoundEffect(path.c_str()); }
-
-        /**
-         * @brief Destroys the sound effect data and resets
-         * the internal pointer to `NULL`.
-         * 
-         * This function exists for the same
-         * reason that `Texture::destroy()`
-         * exists.
-         */
-        void destroy() {
-            Mix_FreeChunk(this->soundEffect);
-            this->soundEffect = nullptr;
-        }
 };
 
 /**
@@ -402,30 +538,6 @@ class SoundEffect {
  * You can use it for sound effects, but really shouldn't
  * for performance reasons (see the difference in SoundEffect).
  */
-class Music {
-    friend class ResourceManager;
-
-    private:
-        Mix_Music* music = nullptr;
-        //Volume for music is global
-    protected:
-        /**
-         * @brief Destroys the music data and resets
-         * the internal pointer to `NULL`.
-         * 
-         * This function exists for the same
-         * reason that `Texture::destroy()`
-         * exists.
-         */
-        void destroy() {
-            Mix_FreeMusic(this->music);
-            this->music = nullptr;
-        }
-    public:
-        NoDiscard Status loadMusic(const char* path);
-        NoDiscard Status loadMusic(const string& path) { return loadMusic(path.c_str()); }
-
-};
 
 
 

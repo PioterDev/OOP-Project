@@ -5,48 +5,321 @@
 #include "resources.hpp"
 #include "util.hpp"
 
-static constexpr u32 fallbackTextureWidth = 64;
-static constexpr u32 fallbackTextureHeight = 64;
+static constexpr Size fallbackTextureSize = {64, 64};
 
 static constexpr TextureHandle fallbackHandle = 0;
 
-Status tryOpeningFile(const char* path) {
-    if(path == nullptr) return Status::FAILURE;
+
+const char* unknownError = "Cannot easily determine the cause of an error, sorry :(";
+const char* noErrorCString = "There was no error";
+const char* texHandleOOB = "Texture handle out of bounds";
+const char* texAlreadyExists = "Texture in the given handle already exists";
+const char* invalidTexHandle = "Invalid texture handle";
+const char* OOM = "Out of memory";
+
+
+
+Status tryOpeningFile(const char* path) noexcept {
+    if(path == nullptr) return Status::NULL_PASSED;
     FILE* f = fopen(path, "r");
-    if(f != nullptr) {
-        fclose(f);
-        return Status::SUCCESS;
-    }
+    if(f) { fclose(f); return Status::SUCCESS; }
     else {
         switch(errno) {
-            case EACCES:
-                Program::getLogger().error("Cannot load texture at ", path, ": access denied");
-                return Status::ACCESS_DENIED;
-            case ENOENT:
-                Program::getLogger().error("Cannot load texture at ", path, ": file does not exist");
-                return Status::NONEXISTENT;
-            default:
-                Program::getLogger().error("Cannot load texture at ", path, ": ", strerror(errno));
-                return Status::FAILURE;
+            case EACCES: return Status::ACCESS_DENIED;
+            case ENOENT: return Status::NONEXISTENT;
+            default: return Status::FAILURE;
         }
     }
 }
 
-bool ResourceManager::isTextureHandleValid(const TextureHandle handle) { return handle < this->textures.size(); }
-bool ResourceManager::isFontHandleValid(const FontHandle handle) { return handle < this->fonts.size(); }
+static const char* getFileOpenErrorMessage(Status status) noexcept {
+    switch(status) {
+        case Status::NULL_PASSED:   return "File path was NULL";
+        case Status::ACCESS_DENIED: return "Opening file not permitted";
+        case Status::NONEXISTENT:   return "File does not exist";
+        default: return strerror(errno);
+    }
+}
 
-Status ResourceManager::init() {
+
+
+bool ResourceManager::isTextureHandleValid(const TextureHandle handle) const noexcept {
+    if(handle >= this->textures.size()) return false;
+    else if(!(this->textures[handle].flags & TextureFlags_IsValid)) return false;
+    return true;
+}
+
+bool ResourceManager::isFontHandleValid(const FontHandle handle) const noexcept {
+    return handle < this->fonts.size();
+}
+
+
+SDL_Texture* ResourceManager::__createFallbackTexture() noexcept {
+    SDL_Rect rect = {0, 0, (int)fallbackTextureSize.width, (int)fallbackTextureSize.height};
+    SDL_Surface* s = SDL_CreateRGBSurface(
+        0, (int)fallbackTextureSize.width, (int)fallbackTextureSize.height,
+        32, 0, 0, 0, 0
+    );
+    if(s == nullptr) Unlikely {
+        this->latestStatus = Status::SDL_SURFACE_CREATION_FAILURE;
+        this->errorMessage = SDL_GetError();
+        return nullptr;
+    }
+    
+    SDL_Texture* t = nullptr;
+    
+    if(SDL_FillRect(
+        s, &rect, SDL_MapRGB(s->format, 255, 0, 255)
+    )) Unlikely {
+        goto failure;
+    }
+
+    rect.x += 32;
+    if(SDL_FillRect(s, &rect, 0)) Unlikely {
+        goto failure;
+    }
+
+    rect.x = 0;
+    rect.y += 32;
+    if(SDL_FillRect(s, &rect, 0)) Unlikely {
+        goto failure;
+    }
+
+    rect.x += 32;
+    if(SDL_FillRect(
+        s, &rect, SDL_MapRGB(s->format, 255, 0, 255)
+    )) Unlikely {
+        goto failure;
+    }
+
+    t = SDL_CreateTextureFromSurface(Program::getRenderingContext(), s);
+    if(t == nullptr) goto failure;
+    SDL_FreeSurface(s);
+    return t;
+
+    failure:
+        SDL_FreeSurface(s);
+        this->latestStatus = Status::SDL_FAILURE;
+        this->errorMessage = SDL_GetError();
+        return nullptr;
+}
+
+Status ResourceManager::__registerTextureAt(
+    TextureHandle handle, const char* path, const u32 flags
+) noexcept {
+    this->latestStatus = Status::SUCCESS;
+    this->errorMessage = noErrorCString;
+    
+    if(handle >= this->textures.size()) {
+        this->errorMessage = texHandleOOB;
+        return this->latestStatus = Status::OUT_OF_BOUNDS;
+    }
+
+    TextureData& data = this->textures[handle];
+
+    if(data.flags & TextureFlags_IsValid) {
+        this->errorMessage = texAlreadyExists;
+        return this->latestStatus = Status::ALREADY_EXISTS;
+    }
+
+    u32 scaleMode = (flags & (0b11 << 4)) >> 4;
+    if(scaleMode > SDL_ScaleModeBest) scaleMode = SDL_ScaleModeBest;
+    data.flags |= scaleMode << 4; //lots of shifting, lol
+    
+    if(flags & TextureFlags_LoadImmediately) {
+        if((this->latestStatus = tryOpeningFile(path)) != Status::SUCCESS) {
+            this->errorMessage = getFileOpenErrorMessage(this->latestStatus);
+            return this->latestStatus;
+        }
+        data.texture = IMG_LoadTexture(Program::getRenderingContext(), path);
+        if(data.texture == nullptr) {
+            // Program::getLogger().error("Cannot load texture: ", IMG_GetError());
+            this->errorMessage = IMG_GetError();
+            return this->latestStatus = Status::SDL_IMAGE_LOADTEXTURE_FAILURE;
+        }
+        
+        SDL_SetTextureScaleMode(data.texture, (SDL_ScaleMode)scaleMode);
+        data.flags |= TextureFlags_LoadImmediately;
+    }
+
+    if(flags & TextureFlags_CopyPath) {
+        size_t s = strlen(path) + 1;
+        char* pathCopy = (char*)malloc(s);
+
+        if(pathCopy) memcpy(pathCopy, path, s);
+        else this->latestStatus = Status::ALLOC_FAILURE;
+
+        data.location = pathCopy;
+        data.flags |= TextureFlags_CopyPath;
+    }
+    else data.location = path;
+
+    data.flags |= TextureFlags_IsValid;
+
+    // this->textures[handle].lastAccessedAt = SDL_GetPerformanceCounter();
+    return this->latestStatus;
+}
+
+TextureHandle ResourceManager::__createTextTexture(
+    const void* text, const u32 flags, const FontHandle font,
+    const Color foregroundColor, const u32 wrapLength, const TextEncoding encoding
+) noexcept {
+    TextureHandle handle = this->textures.size();
+    this->textures.emplace_back();
+    switch(this->__createTextTextureAt(
+        handle, text, flags, font,
+        foregroundColor, wrapLength, encoding
+    )) {
+        case Status::SUCCESS:
+            return handle;
+        case Status::ALLOC_FAILURE:
+            this->errorMessage = 
+                "Memory allocation for copying the text failed in "
+                "ResourceManager::createTextTexture(...)";
+            return handle;
+        default:
+            this->textures.pop_back();
+            return fallbackHandle;
+    }
+}
+
+Status ResourceManager::__createTextTextureAt(
+    TextureHandle handle,
+    const void* text, const u32 flags, const FontHandle font,
+    const Color foregroundColor, const u32 wrapLength, const TextEncoding encoding
+) noexcept {
+    this->latestStatus = Status::SUCCESS;
+    this->errorMessage = noErrorCString;
+
+    if(handle >= this->textures.size()) {
+        this->errorMessage = texHandleOOB;
+        return this->latestStatus = Status::OUT_OF_BOUNDS;
+    }
+
+    TextureData& data = this->textures[handle];
+
+    if(data.flags & TextureFlags_IsValid) {
+        this->errorMessage = texAlreadyExists;
+        return this->latestStatus = Status::ALREADY_EXISTS;
+    }
+
+    if(text == nullptr) {
+        this->errorMessage = "Text variable passed was NULL";
+        return this->latestStatus = Status::NULL_PASSED;
+    }
+
+    switch (encoding) {
+        case TextEncoding::UTF8:
+            data.flags |= TextureFlags_Text_UTF8;
+            break;
+        case TextEncoding::UTF16:
+            data.flags |= TextureFlags_Text_UTF16;
+            break;
+        default:
+            this->errorMessage = "Invalid/unsupported text encoding was somehow passed";
+            return this->latestStatus = Status::INVALID_ARGS;
+    }
+
+    if(flags & TextureFlags_CopyPath) {
+        size_t s = 0;
+        switch(encoding) {
+            case TextEncoding::UTF8:
+                s = strlen((const char*)text) + 1;
+                break;
+            case TextEncoding::UTF16:
+                s = (wstrlen((const char16_t*)text) + 1) * 2;
+                break;
+            default: //unreachable
+                break;
+        }
+        char* textCopy = (char*)malloc(s);
+        if(textCopy != nullptr) memcpy(textCopy, text, s);
+        else this->latestStatus = Status::ALLOC_FAILURE;
+        
+        data.location = textCopy;
+        data.flags |= TextureFlags_CopyPath;
+    }
+    else {
+        //in the context of text textures, `location` is used
+        //instead of another variable
+        data.location = (const char*)text;
+    }
+    //will decide later whether it makes sense to destroy a text box texture
+    data.milisecondsToUnload = 0;
+    data.lastAccessedAt = SDL_GetPerformanceCounter();
+
+    SDL_Surface* s = nullptr;
+    SDL_Texture* t = nullptr;
+    u32 scaleMode = (flags & (0b11 << 4)) >> 4;
+
+    TTF_Font* f = this->getFont(font);
+    if(f == nullptr) {
+        this->latestStatus = Status::OUT_OF_BOUNDS;
+        this->errorMessage = "Font handle out of bounds";
+        goto failure;
+    }
+
+    switch(encoding) {
+        case TextEncoding::UTF8:
+            s = TTF_RenderUTF8_Blended_Wrapped(
+                f, (const char*)text,
+                *(SDL_Color*)&foregroundColor, wrapLength
+            );
+            break;
+        case TextEncoding::UTF16:
+            s = TTF_RenderUNICODE_Blended_Wrapped(
+                f, (const Uint16*)text,
+                *(SDL_Color*)&foregroundColor, wrapLength
+            );
+            break;
+        default: //unreachable
+            break;
+        
+    }
+    if(s == nullptr) {
+        this->latestStatus = Status::SDL_TTF_RENDERTEXT_FAILURE;
+        this->errorMessage = TTF_GetError();
+        goto failure;
+    }
+    
+    t = SDL_CreateTextureFromSurface(Program::getRenderingContext(), s);
+    SDL_FreeSurface(s);
+    if(t == nullptr) {
+        this->latestStatus = Status::SDL_TEXTURE_CREATION_FAILURE;
+        this->errorMessage = SDL_GetError();
+        goto failure;
+    }
+
+    if(scaleMode > SDL_ScaleModeBest) scaleMode = SDL_ScaleModeBest;
+    SDL_SetTextureScaleMode(t, (SDL_ScaleMode)scaleMode);
+    data.flags |= scaleMode << 4;
+
+    data.texture = t;
+    data.flags |= TextureFlags_IsValid;
+
+    return this->latestStatus;
+
+    failure: {
+        if(flags & TextureFlags_CopyPath) {
+            free((char*)data.location);
+        }
+        return this->latestStatus;
+    }
+}
+
+
+
+Status ResourceManager::init() noexcept {
     this->textures.reserve(128);
     this->soundEffects.reserve(16);
     this->music.reserve(4);
     this->fonts.reserve(2);
-    TextureData t;
-    t.texture = this->createFallbackTexture();
-    if(t.texture == nullptr) {
-        this->latestStatus = Status::FALLBACK_TEXTURE_CREATION_FAILURE;
-        return Status::FALLBACK_TEXTURE_CREATION_FAILURE;
-    }
+    
+    TextureData t = {this->__createFallbackTexture(), nullptr, 0, 0, 0};
+    if(!t.texture) return this->latestStatus = Status::FALLBACK_TEXTURE_CREATION_FAILURE;
+    t.flags |= TextureFlags_IsValid;
     this->textures.push_back(t);
+
     memset((void*)&t, 0, sizeof(TextureData));
     this->textures.push_back(t); //no texture, placeholder for a transparent texture
     
@@ -57,9 +330,9 @@ Status ResourceManager::init() {
     return Status::SUCCESS;
 }
 
-void ResourceManager::shutdown() {
+void ResourceManager::shutdown() noexcept {
     for(size_t i = 0; i < this->textures.size(); i++) {
-        SDL_DestroyTexture(this->textures[i].texture);
+        if(this->textures[i].texture) SDL_DestroyTexture(this->textures[i].texture);
         if(this->textures[i].flags & TextureFlags_CopyPath) {
             free((char*)this->textures[i].location);
         }
@@ -75,283 +348,272 @@ void ResourceManager::shutdown() {
     }
 }
 
-SDL_Texture* ResourceManager::createFallbackTexture() {
-    SDL_Rect rect = {0, 0, (int)fallbackTextureWidth, (int)fallbackTextureHeight};
-    SDL_Surface* s = SDL_CreateRGBSurface(
-        0, (int)fallbackTextureWidth, (int)fallbackTextureHeight,
-        32, 0, 0, 0, 0
-    );
-    if(s == nullptr) return nullptr;
-    
-    if(SDL_FillRect(s, &rect, SDL_MapRGB(s->format, 255, 0, 255))) {
-        SDL_FreeSurface(s);
-        Program::getLogger().fatal("Cannot create a fallback texture: ", SDL_GetError());
-        return nullptr;
-    }
-    //the rest *should* not fail
-
-    rect.x += 32;
-    SDL_FillRect(s, &rect, 0);
-    rect.x = 0;
-    rect.y += 32;
-    SDL_FillRect(s, &rect, 0);
-    rect.x += 32;
-    SDL_FillRect(s, &rect, SDL_MapRGB(s->format, 255, 0, 255));
-
-    SDL_Texture* t = SDL_CreateTextureFromSurface(
-        Program::getRenderingContext(), s
-    );
-    SDL_FreeSurface(s);
-    if(t == nullptr) Program::getLogger().fatal("Cannot create a fallback texture: ", SDL_GetError());
-    return t;
-}
-
-TextureHandle ResourceManager::registerTexture(const char* path, const u32 flags, const u32 maxTimeLoad) {
-    Program::getLogger().info("Registering texture at ", path);
-    if((this->latestStatus = tryOpeningFile(path)) != Status::SUCCESS) return fallbackHandle;
+TextureHandle ResourceManager::registerTexture(const char* path, const u32 flags) noexcept {
+    // Program::getLogger().info("Registering texture at ", path);
     
     TextureHandle handle = (TextureHandle)this->textures.size();
-    this->textures.emplace_back();
-    
-    if(flags & TextureFlags_LoadImmediately) {
-        this->textures[handle].texture = IMG_LoadTexture(Program::getRenderingContext(), path);
-        if(this->textures[handle].texture == nullptr) {
-            Program::getLogger().error("Cannot load texture: ", IMG_GetError());
-            this->latestStatus = Status::TEXTURE_LOAD_FAILURE;
+    try {
+        this->textures.emplace_back();
+    }
+    catch(const std::bad_alloc&) {
+        //TODO: make Program handle OOM
+    }
+
+    switch(this->__registerTextureAt(handle, path, flags)) {
+        case Status::SUCCESS:
+            return handle;
+        //a very bad case, but won't cause a crashing state
+        case Status::ALLOC_FAILURE:
+            this->errorMessage = 
+                "Memory allocation for copying the path failed in "
+                "ResourceManager::registerTexture(...)";
+            return handle;
+        case Status::SDL_TEXTURE_QUERY_FAILURE:
+            return handle;
+        default:
             this->textures.pop_back();
             return fallbackHandle;
-        }
-        SDL_SetTextureScaleMode(this->textures[handle].texture, SDL_ScaleModeBest);
-        this->textures[handle].flags |= TextureFlags_LoadImmediately;
-
-    }
-    this->textures[handle].flags = flags;
-
-    if(flags & TextureFlags_CopyPath) {
-        size_t s = strlen(path) + 1;
-        char* pathCopy = (char*)malloc(s);
-        if(pathCopy != nullptr) {
-            memcpy((void*)this->textures[handle].location, (void*)path, s);
-        }
-        this->textures[handle].location = pathCopy;
-        this->textures[handle].flags |= TextureFlags_CopyPath;
-    }
-    else {
-        this->textures[handle].location = path;
-    }
-
-    this->textures[handle].milisecondsToUnload = maxTimeLoad;
-    this->textures[handle].lastAccessedAt = SDL_GetPerformanceCounter();
-    
-    return handle;
-}
-
-TextureHandle ResourceManager::__createTextTexture(
-    const void* text, const u32 flags, const FontHandle font,
-    const Color foregroundColor, const u32 wrapLength, const TextEncoding encoding
-) {
-    TextureHandle handle = (TextureHandle)this->textures.size();
-    this->textures.emplace_back();
-    
-    switch (encoding) {
-        case TextEncoding::UTF8:
-            this->textures[handle].flags |= TextureFlags_Text_UTF8;
-            break;
-        case TextEncoding::UTF16:
-            this->textures[handle].flags |= TextureFlags_Text_UTF16;
-            break;
-        default:
-            break;
-    }
-
-    if(flags & TextureFlags_CopyPath) {
-        size_t s;
-        switch(encoding) {
-            case TextEncoding::UTF8:
-                s = strlen((const char*)text) + 1;
-                break;
-            case TextEncoding::UTF16:
-                s = (wstrlen((const char16_t*)text) + 1) * 2;
-                break;
-            default:
-                break;
-        }
-        char* textCopy = (char*)malloc(s);
-        if(textCopy != nullptr) {
-            memcpy((void*)this->textures[handle].location, (void*)text, s);
-        }
-        this->textures[handle].location = textCopy;
-        this->textures[handle].flags |= TextureFlags_CopyPath;
-    }
-    else {
-        this->textures[handle].location = (const char*)text;
-    }
-    //will decide later whether it makes sense to destroy a text box texture
-    this->textures[handle].milisecondsToUnload = 0;
-    this->textures[handle].lastAccessedAt = SDL_GetPerformanceCounter();
-
-    SDL_Surface* s = nullptr;
-    SDL_Texture* t = nullptr;
-
-    TTF_Font* f = this->getFont(font);
-    if(f == nullptr) goto failure;
-
-    switch(encoding) {
-        case TextEncoding::UTF8:
-            s = TTF_RenderUTF8_Blended_Wrapped(
-                f, (const char*)text, *(SDL_Color*)&foregroundColor, wrapLength
-            );
-            break;
-        case TextEncoding::UTF16:
-            s = TTF_RenderUNICODE_Blended_Wrapped(
-                f, (const Uint16*)text, *(SDL_Color*)&foregroundColor, wrapLength
-            );
-            break;
-        default:
-            break;
-        
-    }
-    if(s == nullptr) goto failure;
-    
-    t = SDL_CreateTextureFromSurface(Program::getRenderingContext(), s);
-    SDL_FreeSurface(s);
-    if(t == nullptr) goto failure;
-
-    this->textures[handle].texture = t;
-
-    return handle;
-
-    failure: {
-        Program::getLogger().error("Cannot create a text texture: ", TTF_GetError());
-        if(flags & TextureFlags_CopyPath) {
-            free((char*)this->textures[handle].location);
-        }
-        this->textures.pop_back();
-        return 0;
     }
 }
 
-Status ResourceManager::loadTexture(TextureHandle handle) {
-    if(handle >= this->textures.size()) return this->latestStatus = Status::OUT_OF_BOUNDS;
-    if(this->textures[handle].location == nullptr) return this->latestStatus = Status::NULL_PASSED;
+TextureHandle ResourceManager::reserveTextureHandle() noexcept {
+    TextureHandle handle = this->textures.size();
+    try {
+        this->textures.emplace_back();
+    }
+    catch(const std::bad_alloc&) {
+        this->latestStatus = Status::ALLOC_FAILURE;
+        this->errorMessage = OOM;
+        return fallbackHandle;
+    }
+    return handle;
+}
 
-    if((this->latestStatus = tryOpeningFile(this->textures[handle].location)) != Status::SUCCESS) {
+Status ResourceManager::loadTexture(TextureHandle handle) noexcept {
+    if(!this->isTextureHandleValid(handle)) {
+        this->errorMessage = invalidTexHandle;
+        return this->latestStatus = Status::INVALID_ARGS;
+    }
+
+    TextureData& data = this->textures[handle];
+
+    if(data.texture != nullptr) {
+        //already loaded - we don't care if it's a text
+        //texture, doesn't have a set location or
+        //if its file even exists, it's loaded
+        return Status::SUCCESS;
+    }
+
+    if(this->isTextTexture(handle)) {
+        this->errorMessage = "Cannot load texture - it is a text texture";
+        return this->latestStatus = Status::FAILURE;
+    }
+
+    if(data.location == nullptr) {
+        this->errorMessage = "Texture doesn't have a set location";
+        return this->latestStatus = Status::NULL_PASSED;
+    }
+
+    if((this->latestStatus = tryOpeningFile(data.location)) != Status::SUCCESS) {
+        this->errorMessage = getFileOpenErrorMessage(this->latestStatus);
         return this->latestStatus;
     }
     
-    if(this->textures[handle].texture != nullptr) return this->latestStatus = Status::ALREADY_EXISTS;
+    data.texture = IMG_LoadTexture(Program::getRenderingContext(), data.location);
+    if(data.texture == nullptr) {
+        this->errorMessage = IMG_GetError();
+        return this->latestStatus = Status::SDL_IMAGE_LOADTEXTURE_FAILURE;
+    }
 
-    this->textures[handle].texture = IMG_LoadTexture(
-        Program::getRenderingContext(), this->textures[handle].location
+    SDL_SetTextureScaleMode(
+        data.texture, (SDL_ScaleMode)((data.flags & (0b11 << 4)) >> 4)
     );
-    if(this->textures[handle].texture == nullptr) return this->latestStatus = Status::TEXTURE_LOAD_FAILURE;
+    
 
     return Status::SUCCESS;
 }
 
-SDL_Texture* ResourceManager::getTexture(TextureHandle handle) {
-    if(!this->isTextureHandleValid(handle)) return this->textures[0].texture;
-    this->textures[handle].lastAccessedAt = SDL_GetPerformanceCounter();
-    return this->textures[handle].texture;
+Status ResourceManager::unloadTexture(TextureHandle handle) noexcept {
+    if(!this->isTextureHandleValid(handle)) {
+        this->errorMessage = invalidTexHandle;
+        return this->latestStatus = Status::INVALID_ARGS;
+    }
+
+    if(this->textures[handle].texture != nullptr) {
+        SDL_DestroyTexture(this->textures[handle].texture);
+        this->textures[handle].texture = nullptr;
+    }
+
+    return Status::SUCCESS;
 }
 
-Size ResourceManager::getTextureOriginalSize(TextureHandle handle) {
-    if(!this->isTextureHandleValid(handle)) return {fallbackTextureWidth, fallbackTextureHeight}; //fallback texture
-    Size textureSize;
-    if(this->textures[handle].texture == nullptr) {
-        this->latestStatus = Status::NULL_PASSED;
-        return {0, 0};
+SDL_Texture* ResourceManager::getTexture(TextureHandle handle) noexcept {
+    if(!this->isTextureHandleValid(handle)) return this->textures[0].texture;
+    
+    TextureData& data = this->textures[handle];
+    if(data.texture == nullptr) {
+        if(this->loadTexture(handle) != Status::SUCCESS) {
+            return this->textures[0].texture;
+        }
     }
+    
+    data.lastAccessedAt = SDL_GetPerformanceCounter();
+    return data.texture;
+}
+
+Size ResourceManager::getTextureOriginalSize(TextureHandle handle) noexcept {
+    if(!this->isTextureHandleValid(handle)) 
+        return fallbackTextureSize;
+
+    Size textureSize;
+    TextureData& data = this->textures[handle];
+    
+    if(data.texture == nullptr) {
+        if(this->loadTexture(handle) != Status::SUCCESS) {
+            return {0, 0};
+        }
+    }
+
     if(SDL_QueryTexture(
-        this->textures[handle].texture, nullptr, nullptr,
+        data.texture, nullptr, nullptr,
         (int*)&textureSize.width, (int*)&textureSize.height)
     ) {
-        Program::getLogger().error("Cannot query texture: ", SDL_GetError());
-        this->latestStatus = Status::TEXTURE_QUERY_FAILURE;
+        this->latestStatus = Status::SDL_TEXTURE_QUERY_FAILURE;
+        this->errorMessage = SDL_GetError();
         return {0, 0};
     }
-    this->textures[handle].lastAccessedAt = SDL_GetPerformanceCounter();
+    data.lastAccessedAt = SDL_GetPerformanceCounter();
+
     return textureSize;
 }
 
-u32 ResourceManager::loadSoundEffect(const char* path) {
-    Program::getLogger().info("Loading sound effect from ", path);
-    if((this->latestStatus = tryOpeningFile(path)) != Status::SUCCESS) return 0;
+Status ResourceManager::destroyTexture(TextureHandle handle) noexcept {
+    if(!this->isTextureHandleValid(handle)) {
+        this->errorMessage = "Texture handle already invalid";
+        return this->latestStatus = Status::NONEXISTENT;
+    }
+
+    TextureData& data = this->textures[handle];
+
+    if((data.flags & TextureFlags_CopyPath)) {
+        free((void*)data.location);
+        data.flags ^= TextureFlags_CopyPath;
+    }
+    data.location = nullptr;
+    if(data.texture != nullptr) {
+        SDL_DestroyTexture(data.texture);
+        data.texture = nullptr;
+    }
+    data.milisecondsToUnload = 0;
+    data.flags = 0;
+
+    return Status::SUCCESS;
+}
+
+bool ResourceManager::isTextTexture(TextureHandle handle) noexcept {
+    if(!this->isTextureHandleValid(handle)) return false;
+
+    return (this->textures[handle].flags & (TextureFlags_Text_UTF8 | TextureFlags_Text_UTF16)) != 0;
+}
+
+SFXHandle ResourceManager::loadSoundEffect(const char* path, u8 volume) noexcept {
+    if((this->latestStatus = tryOpeningFile(path)) != Status::SUCCESS) {
+        this->errorMessage = getFileOpenErrorMessage(this->latestStatus);
+        return 0;
+    }
 
     Mix_Chunk* chunk = Mix_LoadWAV(path);
     if(chunk == nullptr) {
-        Program::getLogger().error("Cannot load sound effect: ", Mix_GetError());
         this->latestStatus = Status::SOUND_LOAD_FAILURE;
+        this->errorMessage = Mix_GetError();
         return 0;
     }
+    Mix_VolumeChunk(chunk, volume);
+
     this->soundEffects.push_back(chunk);
     return this->soundEffects.size() - 1;
 }
 
-Mix_Chunk* ResourceManager::getSoundEffect(u32 id) {
+Mix_Chunk* ResourceManager::getSoundEffect(SFXHandle id) noexcept {
     if(id >= this->soundEffects.size()) return nullptr;
     return this->soundEffects[id];
 }
 
 
-u32 ResourceManager::loadMusic(const char* path) {
+MusicHandle ResourceManager::loadMusic(const char* path) noexcept {
     Program::getLogger().info("Loading music from ", path);
-    if((this->latestStatus = tryOpeningFile(path)) != Status::SUCCESS) return 0;
+    if((this->latestStatus = tryOpeningFile(path)) != Status::SUCCESS) {
+        this->errorMessage = getFileOpenErrorMessage(this->latestStatus);
+        return 0;
+    }
 
     Mix_Music* music = Mix_LoadMUS(path);
     if(music == nullptr) {
-        Program::getLogger().error("Cannot load music effect: ", Mix_GetError());
         this->latestStatus = Status::MUSIC_LOAD_FAILURE;
+        this->errorMessage = Mix_GetError();
         return 0;
     }
     this->music.push_back(music);
     return this->music.size() - 1;
 }
 
-Mix_Music* ResourceManager::getMusic(u32 id) {
-    if(id >= this->music.size()) return nullptr;
-    return this->music[id];
+Mix_Music* ResourceManager::getMusic(MusicHandle handle) noexcept {
+    if(handle >= this->music.size()) return nullptr;
+    return this->music[handle];
 }
 
 
-FontHandle ResourceManager::loadFont(const char* path, const FontAttributes attributes) {
+FontHandle ResourceManager::loadFont(const char* path, const FontAttributes attributes) noexcept {
     Program::getLogger().info("Loading font from ", path);
-    if((this->latestStatus = tryOpeningFile(path)) != Status::SUCCESS) return 0;
+    if((this->latestStatus = tryOpeningFile(path)) != Status::SUCCESS) {
+        this->errorMessage = getFileOpenErrorMessage(this->latestStatus);
+        return 0;
+    }
+    FontHandle handle = this->fonts.size();
+    FontData* fontData = nullptr;
 
-    FontData fontData = {nullptr, nullptr, 0};
-    fontData.font = TTF_OpenFont(path, attributes.size & 0xFFFF);
-    if(fontData.font == nullptr) {
+    try {
+        fontData = &this->fonts.emplace_back();
+    }
+    catch(const std::bad_alloc&) {
+        //TODO: make Program handle OOM
+
+        this->latestStatus = Status::ALLOC_FAILURE;
+        this->errorMessage = "Font registry failed to reallocate";
+    }
+
+    // FontData fontData = {nullptr, nullptr, 0};
+    fontData->font = TTF_OpenFont(path, attributes.size & 0xFFFF);
+    if(fontData->font == nullptr) {
         Program::getLogger().error("Cannot load font: ", TTF_GetError());
         this->latestStatus = Status::FONT_LOAD_FAILURE;
         return 0;
     }
     
-    TTF_SetFontStyle(fontData.font, static_cast<int>(attributes.style));
-    TTF_SetFontDirection(fontData.font, static_cast<TTF_Direction>(attributes.direction));
-    TTF_SetFontWrappedAlign(fontData.font, static_cast<u32>(attributes.wrapAlignment));
+    TTF_SetFontStyle(fontData->font, static_cast<int>(attributes.style));
+    TTF_SetFontDirection(fontData->font, static_cast<TTF_Direction>(attributes.direction));
+    TTF_SetFontWrappedAlign(fontData->font, static_cast<u32>(attributes.wrapAlignment));
 
-    fontData.location = path;
-    fontData.properties |= static_cast<u32>(attributes.style);
-    fontData.properties |= static_cast<u32>(attributes.direction) << 4;
-    fontData.properties |= static_cast<u32>(attributes.wrapAlignment) << 6;
-    fontData.properties |= (attributes.size & 0xFFFF) << 8;
+    fontData->location = path;
+    fontData->properties |= static_cast<u32>(attributes.style);
+    fontData->properties |= static_cast<u32>(attributes.direction) << 4;
+    fontData->properties |= static_cast<u32>(attributes.wrapAlignment) << 6;
+    fontData->properties |= (attributes.size & 0xFFFF) << 8;
 
-    this->fonts.push_back(fontData);
-
-    return this->fonts.size() - 1;
+    return handle;
 }
 
-TTF_Font* ResourceManager::getFont(FontHandle id) {
+TTF_Font* ResourceManager::getFont(FontHandle id) noexcept {
     if(!this->isFontHandleValid(id)) return nullptr;
     return this->fonts[id].font;
 }
 
-u32 ResourceManager::queryFontSize(FontHandle id) {
+u32 ResourceManager::queryFontSize(FontHandle id) noexcept {
     if(!this->isFontHandleValid(id)) return 0;
     return (this->fonts[id].properties & (0xFFFF << 8)) >> 8;
 }
 
-FontStyle ResourceManager::queryFontStyle(FontHandle id) {
+FontStyle ResourceManager::queryFontStyle(FontHandle id) noexcept {
     if(!this->isFontHandleValid(id)) return FontStyle::Invalid;
     switch(this->fonts[id].properties & 0xF) {
         case 0:
@@ -369,7 +631,7 @@ FontStyle ResourceManager::queryFontStyle(FontHandle id) {
     }
 }
 
-FontDirection ResourceManager::queryFontDirection(FontHandle id) {
+FontDirection ResourceManager::queryFontDirection(FontHandle id) noexcept {
     if(!this->isFontHandleValid(id)) return FontDirection::Invalid;
     switch((this->fonts[id].properties & (0b11 << 4)) >> 4) {
         case 0:
@@ -385,7 +647,7 @@ FontDirection ResourceManager::queryFontDirection(FontHandle id) {
     }
 }
 
-FontWrapAlignment ResourceManager::queryFontWrapAlignment(FontHandle id) {
+FontWrapAlignment ResourceManager::queryFontWrapAlignment(FontHandle id) noexcept {
     if(!this->isFontHandleValid(id)) return FontWrapAlignment::Invalid;
     switch((this->fonts[id].properties & (0b11 << 6)) >> 6) {
         case 0:
@@ -399,7 +661,7 @@ FontWrapAlignment ResourceManager::queryFontWrapAlignment(FontHandle id) {
     }
 }
 
-FontAttributes ResourceManager::queryFontAttributes(FontHandle id) {
+FontAttributes ResourceManager::queryFontAttributes(FontHandle id) noexcept {
     FontAttributes att;
     att.style = this->queryFontStyle(id);
     att.direction = this->queryFontDirection(id);
