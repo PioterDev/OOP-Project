@@ -9,6 +9,8 @@ using std::string, std::ostringstream;
 
 static constexpr char digits[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+const char* emptyCString = "";
+
 void itos(int in, const unsigned int base, char* buf, const size_t bufsize) {
     if(base > sizeof(digits) - 1 || base < 2) return;
 

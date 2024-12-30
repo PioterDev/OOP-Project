@@ -20,10 +20,10 @@ class RenderableObjectBase : public GameObject {
     protected:
         TextureHandle textureHandle;
     public:
-        RenderableObjectBase(const u32 objectID);
-        RenderableObjectBase(const u32 objectID, const char* name);
-        RenderableObjectBase(const u32 objectID, const TextureHandle textureHandle);
-        RenderableObjectBase(const u32 objectID, const char* name, const TextureHandle textureHandle);
+        explicit RenderableObjectBase(const u32 objectID);
+        explicit RenderableObjectBase(const u32 objectID, const char* name);
+        explicit RenderableObjectBase(const u32 objectID, const TextureHandle textureHandle);
+        explicit RenderableObjectBase(const u32 objectID, const char* name, const TextureHandle textureHandle);
 
         ~RenderableObjectBase() = default;
         /**

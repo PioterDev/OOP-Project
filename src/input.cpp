@@ -42,10 +42,10 @@ const char keynames[179][32] = {
     "F13", "F14", "F15", "F16", "F17", "F18", 
     "F19", "F20", "F21", "F22", "F23", "F24",
     "Execute",
-    "Help", "Menu", "Select", "Stop", "Repeat",
+    "Help", "Menu", "Select", "Stop", "Redo",
     "Undo", "Cut", "Copy", "Paste", "Find",
     "Volume up", "Volume down", "Keypad ,",
-    "Keypad =400???", //1073741958
+    "Keypad = (AS/400)", //1073741958
     //79-90
     "Alt erase?", //1073741977
     "Sysrq",
@@ -137,33 +137,15 @@ int getKeystringIndex(SDL_Keycode key) {
     int index = 0;
     //first check the irregular ones
     switch(key) {
-        case SDLK_RETURN:
-            index = 1;
-            break;
-        case SDLK_ESCAPE:
-            index = 2;
-            break;
-        case SDLK_BACKSPACE:
-            index = 3;
-            break;
-        case SDLK_TAB:
-            index = 4;
-            break;
-        case SDLK_SPACE:
-            index = 5;
-            break;
-        case SDLK_DELETE:
-            index = 25;
-            break;
-        case SDLK_MODE:
-            index = 145;
-            break;
-        case SDLK_AUDIOREWIND:
-            index = 173;
-            break;
-        case SDLK_AUDIOFASTFORWARD:
-            index = 174;
-            break;
+        case SDLK_RETURN:           index = 1; break;
+        case SDLK_ESCAPE:           index = 2; break;
+        case SDLK_BACKSPACE:        index = 3; break;
+        case SDLK_TAB:              index = 4; break;
+        case SDLK_SPACE:            index = 5; break;
+        case SDLK_DELETE:           index = 25; break;
+        case SDLK_MODE:             index = 145; break;
+        case SDLK_AUDIOREWIND:      index = 173; break;
+        case SDLK_AUDIOFASTFORWARD: index = 174; break;
     }
     //if the key is not there, check the continous ones
     if(index == 0) {

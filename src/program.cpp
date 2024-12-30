@@ -90,7 +90,7 @@ Status Program::initSystems() {
     Program::renderingContext = SDL_CreateRenderer(this->window, -1, 0);
     if(Program::renderingContext == nullptr) {
         logger.fatal("Renderer creation failed: ", SDL_GetError());
-        return Status::RENDERER_CREATION_FAILURE;
+        return Status::SDL_RENDERER_CREATION_FAILURE;
     }
 
     if(Program::resourceManager.init() != Status::SUCCESS) {

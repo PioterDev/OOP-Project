@@ -52,7 +52,7 @@ bool BitArray::at(const u64 bit) {
 }
 
 bool BitArray::reallocate(const u64 minimumNewSize) {
-    u64 newSize = this->roundUpToPowerOf2(minimumNewSize / 8 + (minimumNewSize % 8 == 0 ? 0 : 1));
+    u64 newSize = roundUpToPowerOf2(minimumNewSize / 8 + (minimumNewSize % 8 == 0 ? 0 : 1));
     u8* newBits = (u8*)calloc(newSize, 1);
     if(newBits == nullptr) return true;
     memcpy(newBits, this->bits, this->numberOfBits / 8 + (this->numberOfBits % 8 == 0 ? 0 : 1));

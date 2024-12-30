@@ -1,14 +1,9 @@
 #pragma once
 
 #include "Bindings.h"
+#include "deus.hpp"
 
-#include <string>
-
-#include "Game/Main/MainRegistry.hpp"
-
-using std::string;
-
-extern const char* defaultObjectName;
+extern const char* emptyCString;
 
 /**
  * @brief A generic game object, meant to be
@@ -24,8 +19,8 @@ extern const char* defaultObjectName;
  * b) the instance - a 32-bit unsigned integer that uniquely
  * identifies which instance of the object it is
  * 
- * There can be 2^32 different kinds of objects and
- * each kind can be instantiated 2^32 times.
+ * There can be 2³² different kinds of objects and
+ * each kind can be instantiated 2³² times.
  * 
  * 2) 64 flags - true/false values, indexed from 0 to 63
  * 
@@ -48,7 +43,7 @@ class GameObject {
          * the first 32 bits are for the instance number,
          * the next 32 bits are for the type ID.
          */
-        UUID uuid;
+        Unions::UUID uuid;
 
         /**
          * @brief GameObject class reserves
@@ -58,8 +53,8 @@ class GameObject {
          */
         //TODO: make `all` atomic for future multithreaded access...maybe, idk
         union {
-            uint64_t all;
-            char bytes[sizeof(uint64_t)];
+            u64 all;
+            char bytes[sizeof(u64)];
         } flags;
         
         /**
@@ -82,7 +77,7 @@ class GameObject {
          * every object instance bound to the now invalid pointer shall
          * be updated.
          */
-        const char* name = defaultObjectName;
+        const char* name = emptyCString;
     protected:
         /**
          * @brief Sets the name of the object.
@@ -101,19 +96,19 @@ class GameObject {
          * 
          * @param uuid UUID
          */
-        void setUUID(uint64_t uuid) { this->uuid.uuid = uuid; }
+        void setUUID(u64 uuid) { this->uuid.uuid = uuid; }
         /**
          * @brief Sets the instance ID of the object.
          * 
          * @param instance instance ID
          */
-        void setInstanceID(uint32_t instance) { this->uuid.parts.instance = instance; }
+        void setInstanceID(u32 instance) { this->uuid.parts.instance = instance; }
         /**
          * @brief Set the type ID of the object.
          * 
          * @param type type ID
          */
-        void setTypeID(uint32_t type) { this->uuid.parts.type = type; }
+        void setTypeID(u32 type) { this->uuid.parts.type = type; }
 
         /**
          * @brief Sets the `flag`th flag of the object.
@@ -122,13 +117,13 @@ class GameObject {
          * 
          * @param flag index from 0 to 63 of the bit to set
          */
-        void setFlag(uint32_t flag) { this->flags.all |= ((uint64_t)1 << flag); }
+        void setFlag(u32 flag) { this->flags.all |= ((u64)1 << flag); }
         /**
          * @brief Sets the entire object flags to `flags`.
          * 
          * @param flags flags
          */
-        void setFlags(uint64_t flags) { this->flags.all = flags; }
+        void setFlags(u64 flags) { this->flags.all = flags; }
         /**
          * @brief Clears the `flag`th flag of the object.
          * 
@@ -136,17 +131,17 @@ class GameObject {
          * 
          * @param flag index from 0 to 63 of the bit to clear
          */
-        void clearFlag(uint32_t flag) { this->flags.all &= ~((uint64_t)1 << flag); }
+        void clearFlag(u32 flag) { this->flags.all &= ~((u64)1 << flag); }
         /**
          * @brief Clears all flags in the object. Generally discouraged.
          */
-        void clearFlags() { this->flags.all = (uint64_t)0; }
+        void clearFlags() { this->flags.all = (u64)0; }
         /**
          * @brief Flips the `flag`th flag of the object.
          * 
          * @param flag index from 0 to 64 of the bit to flip
          */
-        void flipFlag(uint32_t flag) { this->flags.all ^= ((uint64_t)1 << flag); }
+        void flipFlag(u32 flag) { this->flags.all ^= ((u64)1 << flag); }
         /**
          * @brief Marks the object for deletion. The behavior of using
          * the object after marking it deleted is undefined. Don't do that :)
@@ -159,14 +154,14 @@ class GameObject {
          * which is rather difficult to change after initialization.
          * @param objectID ID of the object
          */
-        GameObject(const uint32_t objectID) { this->uuid.parts.type = objectID; }
+        explicit GameObject(const u32 objectID) { this->uuid.parts.type = objectID; }
         /**
          * @brief Constructor for a GameObject.
          * 
          * @param objectID ID of the object
          * @param name name of the object
          */
-        GameObject(const uint32_t objectID, const char* name) : name(name) { this->uuid.parts.type = objectID; }
+        explicit GameObject(const u32 objectID, const char* name) : name(name) { this->uuid.parts.type = objectID; }
         
         ~GameObject() = default;
 
@@ -182,7 +177,7 @@ class GameObject {
          * 
          * @return copy of the flags as a 64-bit integer
          */
-        uint64_t getFlags() const { return this->flags.all; }
+        u64 getFlags() const { return this->flags.all; }
         /**
          * @brief Checks the `flag`th flag of the object.
          * 
@@ -191,24 +186,24 @@ class GameObject {
          * @param flag index from 0 to 63 of the bit to check
          * @return whether the `flag`th flag is set
          */
-        bool isFlagSet(uint32_t flag) const { return this->flags.all & ((uint64_t)1 << flag); }
+        bool isFlagSet(u32 flag) const { return this->flags.all & ((u64)1 << flag); }
 
         /**
          * @brief Get UUID of the object.
          * 
          * @return copy of UUID of the object
          */
-        uint64_t getUUID() const { return this->uuid.uuid; }
+        u64 getUUID() const { return this->uuid.uuid; }
         /**
          * @brief Get the instance ID of the object.
          * 
          * @return copy of instance ID of the object
          */
-        uint32_t getInstanceID() const { return this->uuid.parts.instance; }
+        u32 getInstanceID() const { return this->uuid.parts.instance; }
         /**
          * @brief Get the type ID of the object.
          * 
          * @return copy of type ID of the object
          */
-        uint32_t getTypeID() const { return this->uuid.parts.type; }
+        u32 getTypeID() const { return this->uuid.parts.type; }
 };

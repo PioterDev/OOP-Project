@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef GAME_HPP
 /**
  * @file game.hpp

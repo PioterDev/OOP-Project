@@ -17,10 +17,10 @@
 class UIElement : public RenderableObject {
     friend class GameRenderer;
     public:
-        UIElement(const u32 objectID);
-        UIElement(const u32 objectID, const char* name);
-        UIElement(const u32 objectID, const TextureHandle textureHandle);
-        UIElement(const u32 objectID, const char* name, const TextureHandle textureHandle);
+        explicit UIElement(const u32 objectID);
+        explicit UIElement(const u32 objectID, const char* name);
+        explicit UIElement(const u32 objectID, const TextureHandle textureHandle);
+        explicit UIElement(const u32 objectID, const char* name, const TextureHandle textureHandle);
 
         ~UIElement() = default;
 

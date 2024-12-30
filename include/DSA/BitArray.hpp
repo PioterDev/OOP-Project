@@ -19,18 +19,6 @@ class BitArray {
         u64 numberOfBitsAvailable = 0;
         u8* bits = nullptr;
 
-        ForceInline u64 roundUpToPowerOf2(u64 in) {
-            in--;
-            in |= in >> 1;
-            in |= in >> 2;
-            in |= in >> 4;
-            in |= in >> 8;
-            in |= in >> 16;
-            in |= in >> 32;
-            in++;
-            return in;
-        }
-
         bool reallocate(u64 minimumNewSize);
     public:
         /**
@@ -40,7 +28,7 @@ class BitArray {
          * 
          * @throws std::bad_alloc on allocation failure
          */
-        BitArray(const u64 initialSize);
+        explicit BitArray(const u64 initialSize);
         
         ~BitArray() {
             free(this->bits);

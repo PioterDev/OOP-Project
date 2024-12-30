@@ -35,14 +35,18 @@ using namespace Enums;
     logger.trace("[", __FILE__, "/", __func__, ":", __LINE__, "] ", message); \
 } while(0)
 #define LogDebug(logger, message)
-#endif /* LOGLEVEL == Trace */
-
-#if LOGLEVEL == 1 //Debug level
+#define LoggerLineTerminator endl
+#elif LOGLEVEL == 1 //Debug level
 #define LogTrace(logger, message)
 #define LogDebug(logger, message) do { \
     logger.debug(message); \
 } while(0)
-#endif /* LOGLEVEL == Debug */
+#define LoggerLineTerminator endl
+#else
+#define LogTrace(logger, message)
+#define LogDebug(logger, message)
+#define LoggerLineTerminator '\n'
+#endif /* LOGLEVEL */
 
 class Logger {
     private:
@@ -103,6 +107,10 @@ class Logger {
             (this->stream << ... << args);
         }
 
+        template<class...Args> void println(Args...args) {
+            (this->stream << ... << args) << LoggerLineTerminator;
+        }
+
         template<class...Args> void debug(Args... args) {
             this->printShared();
             (this->stream << " [Debug] " << ... << args) << endl;
@@ -110,17 +118,17 @@ class Logger {
 
         template<class...Args> void info(Args... args) {
             this->printShared();
-            (this->stream << " [Info] " << ... << args) << endl;
+            (this->stream << " [Info] " << ... << args) << LoggerLineTerminator;
         }
 
         template<class...Args> void warn(Args... args) {
             this->printShared();
-            (this->stream << " [Warning] " << ... << args) << endl;
+            (this->stream << " [Warning] " << ... << args) << LoggerLineTerminator;
         }
 
         template<class...Args> void error(Args... args) {
             this->printShared();
-            (this->stream << " [Error] " << ... << args) << endl;
+            (this->stream << " [Error] " << ... << args) << LoggerLineTerminator;
         }
 
         template<class...Args> void fatal(Args... args) {

@@ -3,6 +3,7 @@ build/*.o
 out/log/*.log
 out/*.dll
 out/*.exe
+out/assets/*
 uml/*
 !uml/*.tex
 !uml/*.pdf

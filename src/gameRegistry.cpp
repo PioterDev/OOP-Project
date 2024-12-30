@@ -2,8 +2,6 @@
 #include "program.hpp"
 #include "Game/Block/Blocks.hpp"
 
-const char* defaultObjectName = "";
-
 /////////////////////////
 /* Texture IDs section */
 /////////////////////////

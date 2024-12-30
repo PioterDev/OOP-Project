@@ -2,8 +2,6 @@
 
 #include "Bindings.h"
 
-#include <cmath>
-
 #include "Game/Render/RenderableObject.hpp"
 
 /**

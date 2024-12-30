@@ -62,10 +62,10 @@ class RenderableObject : public RenderableObjectBase {
          */
         SDL_BlendMode blendMode = SDL_BLENDMODE_NONE;
     public:
-        RenderableObject(const u32 objectID);
-        RenderableObject(const u32 objectID, const char* name);
-        RenderableObject(const u32 objectID, const TextureHandle textureHandle);
-        RenderableObject(const u32 objectID, const char* name, const TextureHandle textureHandle);
+        explicit RenderableObject(const u32 objectID);
+        explicit RenderableObject(const u32 objectID, const char* name);
+        explicit RenderableObject(const u32 objectID, const TextureHandle textureHandle);
+        explicit RenderableObject(const u32 objectID, const char* name, const TextureHandle textureHandle);
 
         ~RenderableObject() = default;
         /**

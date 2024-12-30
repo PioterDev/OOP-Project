@@ -27,8 +27,8 @@ class World : public GameObject {
     protected:
         unordered_map<ChunkPos, Chunk*, PointHash> chunks;
     public:
-        World(const u32 objectID) : GameObject(objectID), chunks(256) {}
-        World(const u32 objectID, const char* name) : GameObject(objectID, name), chunks(256) {}
+        explicit World(const u32 objectID) : GameObject(objectID), chunks(256) {}
+        explicit World(const u32 objectID, const char* name) : GameObject(objectID, name), chunks(256) {}
         
         ~World() {
             for(auto& [point, chunk] : this->chunks) {

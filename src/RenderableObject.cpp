@@ -120,14 +120,14 @@ RenderableObject& RenderableObject::rotate(const double degrees) {
     return *this;
 }
 
-RenderableObject& RenderableObject::setPositionOnScreen(const int x, const int y) {
+RenderableObject& RenderableObject::setPositionOnScreen(const i32 x, const i32 y) {
     this->targetPortion.x = x;
     this->targetPortion.y = y;
 
     return *this;
 }
 
-RenderableObject& RenderableObject::setPositionOnScreenCentered(const int x, const int y) {
+RenderableObject& RenderableObject::setPositionOnScreenCentered(const i32 x, const i32 y) {
     this->targetPortion.x = x - this->targetPortion.w / 2;
     this->targetPortion.y = y - this->targetPortion.h / 2;
 

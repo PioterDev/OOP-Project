@@ -23,7 +23,7 @@ class GameRenderer {
 
         //Registers the timestamp when rendering
         //the latest frame has ended
-        u64 lastFrameAt;
+        u64 lastFrameAt = 0;
         //Counts the number of frames since rendering started
         u64 numberOfFramesRendered = 0;
         
@@ -35,7 +35,7 @@ class GameRenderer {
 
         UIElement& registerUIElement(UIElement element) { return uiElements.append(std::move(element)); }
 
-        void registerPhysicalObject(PhysicalObject* obj) { physicalObjectsToRender.append(obj); }
+        // void registerPhysicalObject(PhysicalObject* obj) { physicalObjectsToRender.append(std::move(obj)); }
 
         // void render();
         void renderInPlace(Game& game);

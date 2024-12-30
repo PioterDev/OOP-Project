@@ -60,6 +60,6 @@ u32 Blocks::getCurrentBlockID() {
 }
 
 Block* Blocks::getBlockWithID(u32 id) {
-    if(Blocks::blocks.size() >= id) return Blocks::blocks[0];
+    if(id >= Blocks::blocks.size()) return Blocks::blocks[0];
     return Blocks::blocks[id];
 }

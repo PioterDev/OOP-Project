@@ -40,7 +40,7 @@ template<typename T> class ListArray {
     public:
         ListArray() : head(createNode(nodeSize)), tail(head) {}
 
-        ListArray(u32 nodeSize)
+        explicit ListArray(u32 nodeSize)
          : nodeSize(nodeSize), head(createNode(nodeSize)), tail(head) {}
 
         ~ListArray() {
@@ -79,7 +79,7 @@ template<typename T> class ListArray {
          * @param obj object to add, constructed in-place
          * @return reference to the object added
          */
-        T& prepend(T obj) {
+        T& prepend(T&& obj) {
             if(this->head->usedSize + sizeof(T) > this->head->nodeSize) {
                 ListArrayNode* newHead = createNode(this->nodeSize);
                 newHead->next = this->head;
@@ -97,7 +97,7 @@ template<typename T> class ListArray {
          * @param obj object to add, constructed in-place
          * @return reference to the object added
          */
-        T& append(T obj) {
+        T& append(T&& obj) {
             if(this->tail->usedSize + sizeof(T) > this->tail->nodeSize) {
                 this->tail->next = createNode(this->nodeSize);
                 this->tail = this->tail->next;

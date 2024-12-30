@@ -22,10 +22,10 @@ class Block : public RenderableObjectBase {
     public:
         static const AABB standardBlockAABB;
         
-        Block(const u32 objectID);
-        Block(const u32 objectID, const char* name);
-        Block(const u32 objectID, const TextureHandle textureHandle);
-        Block(const u32 objectID, const char* name, const TextureHandle textureHandle);
+        explicit Block(const u32 objectID);
+        explicit Block(const u32 objectID, const char* name);
+        explicit Block(const u32 objectID, const TextureHandle textureHandle);
+        explicit Block(const u32 objectID, const char* name, const TextureHandle textureHandle);
 
         Block& setDensity(float density);
 

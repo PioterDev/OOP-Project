@@ -20,6 +20,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
         );
         return static_cast<int>(status);
     }
+    
     try {
         game.run();
     }

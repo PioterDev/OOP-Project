@@ -89,21 +89,18 @@ class Program {
         struct ProgramFlags flags;
 
         static const uint8_t* keyboardState;
-        u32 numberOfKeyboardKeys;
-
-        /* static thread_local string latestError;
-        static thread_local Status latestErrorCode; */
+        u32 numberOfKeyboardKeys = 0;
 
         static u64 clockFrequency;
-        u64 startTimestamp;
+        u64 startTimestamp = 0;
 
         //Video-related members
         SDL_Window* window;
         WindowParameters windowParameters;
         static SDL_Renderer* renderingContext;
-        Color backgroundColor;
+        Color backgroundColor = Colors::BLACK;
         Point mousePosition;
-        u32 mouseButtons;
+        u32 mouseButtons = 0;
 
         //Audio-related members
         struct AudioParameters audioParameters;

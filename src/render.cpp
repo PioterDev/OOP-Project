@@ -7,10 +7,11 @@ void GameRenderer::renderInPlace(Game& game) {
     Size windowSize = game.getWindowSize();
     SDL_Rect r;
     Color backgroundColor = game.getBackgroundColor();
+    SDL_Renderer* renderer = game.getRenderingContext();
 
-    SDL_RenderClear(game.getRenderingContext());
+    SDL_RenderClear(renderer);
     SDL_SetRenderDrawColor(
-        game.getRenderingContext(),
+        renderer,
         backgroundColor.red,
         backgroundColor.green,
         backgroundColor.green,
@@ -47,7 +48,7 @@ void GameRenderer::renderInPlace(Game& game) {
             if(block->getTexture() == nullptr) continue;
 
             SDL_RenderCopy(
-                game.getRenderingContext(),
+                renderer,
                 block->getTexture(),
                 nullptr, &r
             );
@@ -55,13 +56,13 @@ void GameRenderer::renderInPlace(Game& game) {
     }
     /// End of block rendering ///
 
-    //"&game = game" bruh, lambdas are weird
-    this->uiElements.forEach([&game = game](UIElement& element) {
+    this->uiElements.forEach([renderer = renderer](UIElement& element) {
         if(!element.isVisible()) return;
         element.render();
 
         SDL_Texture* texture = element.getTexture();
         if(!texture) return;
+        
         Color colorMod = element.getModulation();
         SDL_BlendMode blendMode = element.getBlendMode();
         
@@ -76,7 +77,7 @@ void GameRenderer::renderInPlace(Game& game) {
         }
 
         SDL_RenderCopyEx(
-            game.getRenderingContext(),
+            renderer,
             element.getTexture(),
             &element.texturePortion,
             &element.targetPortion,
@@ -101,7 +102,7 @@ void GameRenderer::renderInPlace(Game& game) {
     //to the string to show requires recreating the entire texture
     //but alas, let's hope that's a rare circumstance
 
-    SDL_RenderPresent(game.getRenderingContext());
+    SDL_RenderPresent(renderer);
     
     this->lastFrameAt = SDL_GetPerformanceCounter();
     this->numberOfFramesRendered++;
