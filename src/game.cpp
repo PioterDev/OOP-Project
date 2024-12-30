@@ -7,6 +7,9 @@ MainRegistry Game::registry;
 GameRenderer Game::renderer;
 InputHandler Game::inputHandler;
 
+Keymap testKeymap;
+
+
 Game::~Game() {}
 
 Status Game::init() {
@@ -21,6 +24,31 @@ Status Game::init() {
 void Game::run() {
     i64 start = 0, end = 0, delta = 0, overhead = 0, frameTime = 0;
     
+    {
+        KeyboardKey keys[3] = {KeyboardKey_LCTRL, KeyboardKey_LSHIFT, KeyboardKey_C};
+        bool ifPressed[3] = {true, true, true};
+
+        u64 c = testKeymap.registerKeyCombination(3, keys, ifPressed, false);
+        std::function<void()> f = []() { Program::getLogger().println("Hello from Ctrl+Shift+C!"); };
+        testKeymap.registerKeyCombinationCallback(c, std::move(f));
+
+        keys[0] = KeyboardKey_LSHIFT;
+        keys[1] = KeyboardKey_LCTRL;
+        c = testKeymap.registerKeyCombination(3, keys, ifPressed, false);
+        f = [](){ Program::getLogger().println("This is NOT Ctrl+Shift+C, this is Shift+Ctrl+C muahaha"); };
+        testKeymap.registerKeyCombinationCallback(c, std::move(f));
+
+        keys[0] = KeyboardKey_LCTRL;
+        keys[1] = KeyboardKey_LCTRL;
+        keys[2] = KeyboardKey_LCTRL;
+        ifPressed[1] = false;
+        c = testKeymap.registerKeyCombination(3, keys, ifPressed, false);
+        f = [](){ Program::getLogger().println("Ctrl, release Ctrl, Ctrl again."); };
+        testKeymap.registerKeyCombinationCallback(c, std::move(f));
+    }
+
+    this->inputHandler.swapKeymap(&testKeymap);
+
     ///Section for testing ///
     UIElement& obj = UIElement::createUIElement(MainRegistry::someObjectID, MainRegistry::gregTextureIndex);
     obj.setSizeOnScreen(200, 200).setPositionOnScreenCentered(640, 360).setBlendModulate();
