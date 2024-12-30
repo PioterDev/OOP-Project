@@ -21,6 +21,7 @@ namespace Enums {
     /**
      * @brief Enum for returning
      * the status of an operation.
+     * Used throughout the entire project.
      */
     enum class Status : u32 {
         SUCCESS,

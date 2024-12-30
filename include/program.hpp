@@ -28,6 +28,7 @@ struct alignas(8) ProgramFlags {
     u8 SDL_TTF_Initalized : 1 = false;
     u8 canPlaySound : 1 = false;
     u8 running : 1 = false;
+    u8 paused : 1 = false;
 };
 
 typedef struct {

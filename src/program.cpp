@@ -100,6 +100,7 @@ Status Program::initSystems() {
     
     srand(time(nullptr));
     this->flags.running = true;
+    this->flags.paused = false;
     
     Program::clockFrequency = SDL_GetPerformanceFrequency();
     Program::keyboardState = SDL_GetKeyboardState((int*)&this->numberOfKeyboardKeys);

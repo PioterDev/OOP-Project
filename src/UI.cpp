@@ -28,7 +28,7 @@ void UIElement::render() {
         0,
         (i32)(5.0 * sin(0.05 * Game::getRenderer().getNumberOfFramesRendered()))
     );
-    // this->rotate(1.0);
+    this->scaleX(2.0f * abs(sinf(0.05f * (float)Game::getRenderer().getNumberOfFramesRendered())) + 0.1f);
     return; //for now no render logic
 }
 

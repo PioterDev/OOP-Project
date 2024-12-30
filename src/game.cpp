@@ -51,11 +51,12 @@ void Game::run() {
 
     ///Section for testing ///
     UIElement& obj = UIElement::createUIElement(MainRegistry::someObjectID, MainRegistry::gregTextureIndex);
-    obj.setSizeOnScreen(200, 200).setPositionOnScreenCentered(640, 360).setBlendModulate();
+    obj.setSizeOnScreen(400, 400).setPositionOnScreenCentered(640, 360);
 
-    TextureHandle tex = Program::getResourceManager().createTextTexture(u"Hello, world~ żółć", 0, MainRegistry::consolasFontIndex, {255, 255, 0, 255}, 1920);
+    TextureHandle tex = Program::getResourceManager().createTextTexture(u"That will be 5€.", 0, MainRegistry::consolasFontIndex, Colors::RED, 480);
     UIElement& t = UIElement::createUIElement(MainRegistry::someObjectID, "Hello there", tex);
-    t.setSizeOnScreen(Program::getResourceManager().getTextureOriginalSize(tex)).setPositionOnScreen(0, 0);
+    Size s = Program::getResourceManager().getTextureOriginalSize(tex);
+    t.setSizeOnScreen(s).setPositionOnScreen(0, 400);
 
     this->world.populateChunk({0, 0}, Blocks::cobblestone->getInstanceID());
     this->world.populateChunk({1, 1}, Blocks::cobblestone->getInstanceID());
@@ -68,7 +69,7 @@ void Game::run() {
         
         
         this->inputHandler.processInput(*this);
-        this->renderer.renderInPlace(*this);
+        if(!this->flags.paused) Likely this->renderer.renderInPlace(*this);
         
 
 
