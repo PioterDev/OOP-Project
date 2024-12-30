@@ -82,32 +82,49 @@ RenderableObject& RenderableObject::setTargetPortion(const SDL_Rect& r) {
 }
 
 RenderableObject& RenderableObject::scaleX(const float scale) {
-    if(scale < 0.0) return *this;
+    if(scale < 0.0f) return *this;
+
+    int w = this->targetPortion.w;
     this->targetPortion.w = (int)(scale * (float)Program::getResourceManager().getTextureOriginalSize(this->textureHandle).width);
+    this->targetPortion.x -= (this->targetPortion.w - w) / 2;
 
     return *this;
 }
 
 RenderableObject& RenderableObject::scaleY(const float scale) {
-    if(scale < 0.0) return *this;
+    if(scale < 0.0f) return *this;
+    
+    int h = this->targetPortion.h;
     this->targetPortion.h = (int)(scale * (float)Program::getResourceManager().getTextureOriginalSize(this->textureHandle).height);
+    this->targetPortion.y -= (this->targetPortion.h - h) / 2;
 
     return *this;
 }
 
 RenderableObject& RenderableObject::scale(const float scaleX, const float scaleY) {
-    if(scaleX < 0.0) return *this;
-    this->targetPortion.w = (int)(scaleX * (float)Program::getResourceManager().getTextureOriginalSize(this->textureHandle).width);
-    if(scaleY < 0.0) return *this;
-    this->targetPortion.h = (int)(scaleY * (float)Program::getResourceManager().getTextureOriginalSize(this->textureHandle).height);
-    
+    if(scaleX < 0.0f) return *this;
+
+    Size originalSize = Program::getResourceManager().getTextureOriginalSize(this->textureHandle);
+    int w = this->targetPortion.w, h = this->targetPortion.h;
+    this->targetPortion.w = (int)(scaleX * (float)originalSize.width);
+    this->targetPortion.x -= (this->targetPortion.w - w) / 2;
+
+    if(scaleY < 0.0f) return *this;
+    this->targetPortion.h = (int)(scaleY * (float)originalSize.height);
+    this->targetPortion.y -= (this->targetPortion.h - h) / 2;
+
     return *this;
 }
 
 RenderableObject& RenderableObject::scale(const float scale) {
-    if(scale < 0.0) return *this;
-    this->targetPortion.w = (int)(scale * (float)Program::getResourceManager().getTextureOriginalSize(this->textureHandle).width);
-    this->targetPortion.h = (int)(scale * (float)Program::getResourceManager().getTextureOriginalSize(this->textureHandle).height);
+    if(scale < 0.0f) return *this;
+    Size originalSize = Program::getResourceManager().getTextureOriginalSize(this->textureHandle);
+
+    int w = this->targetPortion.w, h = this->targetPortion.h;    
+    this->targetPortion.w = (int)(scale * (float)originalSize.width);
+    this->targetPortion.h = (int)(scale * (float)originalSize.height);
+    this->targetPortion.x -= (this->targetPortion.w - w) / 2;
+    this->targetPortion.y -= (this->targetPortion.h - h) / 2;
 
     return *this;
 }

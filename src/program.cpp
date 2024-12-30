@@ -84,7 +84,7 @@ Status Program::initSystems() {
     );
     if(this->window == nullptr) {
         logger.fatal("Window creation failed: ", SDL_GetError());
-        return Status::WINDOW_CREATION_FAILURE;
+        return Status::SDL_WINDOW_CREATION_FAILURE;
     }
 
     Program::renderingContext = SDL_CreateRenderer(this->window, -1, 0);

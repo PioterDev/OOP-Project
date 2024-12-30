@@ -42,8 +42,8 @@ void MainRegistry::init() {
     /////////////////////////
     /* Texture IDs section */
     /////////////////////////
-    MainRegistry::gregTextureIndex = Program::getResourceManager().registerTexture("./assets/abruz.png", TextureFlags_LoadImmediately, 0);
-    MainRegistry::stoneTextureIndex = Program::getResourceManager().registerTexture("./assets/cobblestone.png", TextureFlags_LoadImmediately, 0);
+    MainRegistry::gregTextureIndex = Program::getResourceManager().registerTexture("./assets/abruz.png", TextureFlags_LoadImmediately);
+    MainRegistry::stoneTextureIndex = Program::getResourceManager().registerTexture("./assets/cobblestone.png", TextureFlags_LoadImmediately);
 
     /////////////////////////
     /*   Font IDs section  */
