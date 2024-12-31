@@ -2,7 +2,9 @@
 #include "Game/Main/Game.hpp"
 #include "Math.hpp"
 
-constexpr double sizeOfBlockTexture = 64.0;
+using namespace Structs;
+
+static constexpr double sizeOfBlockTexture = 64.0;
 
 /**
  * @brief Draws an arc on the current rendering target.

@@ -11,21 +11,17 @@
 #include "Game/Main/GameObject.hpp"
 #include "program.hpp"
 
-using std::unordered_map;
-
-using namespace Enums;
-
 typedef struct {
     u32 blockIDs[16][16];
 } Chunk;
 
 class PointHash {
-    public: size_t operator()(const ChunkPos& p) const { return p.x * p.x + p.y * p.y; }
+    public: size_t operator()(const Structs::ChunkPos& p) const { return p.x * p.x + p.y * p.y; }
 };
 
 class World : public GameObject {
     protected:
-        unordered_map<ChunkPos, Chunk*, PointHash> chunks;
+        std::unordered_map<Structs::ChunkPos, Chunk*, PointHash> chunks;
     public:
         explicit World(const u32 objectID) : GameObject(objectID), chunks(256) {}
         explicit World(const u32 objectID, const char* name) : GameObject(objectID, name), chunks(256) {}
@@ -37,9 +33,9 @@ class World : public GameObject {
         }
 
         const Chunk* getChunk(const i32 x, const i32 y) { return this->chunks[{x, y}]; }
-        const Chunk* getChunk(const ChunkPos which) { return this->chunks[which]; }
+        const Chunk* getChunk(const Structs::ChunkPos which) { return this->chunks[which]; }
         
-        Status populateChunk(const ChunkPos which, const u32 blockID);
+        Enums::Status populateChunk(const Structs::ChunkPos which, const u32 blockID);
 
         /**
          * @brief Get the Block at given position.
@@ -55,9 +51,9 @@ class World : public GameObject {
          * @param pos block position
          * @return const Block* or NULL if there's no block
          */
-        const Block* getBlockAt(BlockPos pos) { return this->getBlockAt(pos.x, pos.y); }
+        const Block* getBlockAt(Structs::BlockPos pos) { return this->getBlockAt(pos.x, pos.y); }
 
         void printChunk(i32 x, i32 y);
-        void printChunk(ChunkPos pos) { this->printChunk(pos.x, pos.y); }
+        void printChunk(Structs::ChunkPos pos) { this->printChunk(pos.x, pos.y); }
 
 };

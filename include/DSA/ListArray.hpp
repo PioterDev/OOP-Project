@@ -2,10 +2,9 @@
 
 #include <cstdlib>
 #include <cstdint>
+#include <stdexcept>
 
 #include "deus.hpp"
-
-using namespace Enums;
 
 /**
  * @brief A more cache and memory-friendly singly linked list implementation.
@@ -56,7 +55,22 @@ template<typename T> class ListArray {
             }
         }
 
-        T& operator[](size_t index) {
+        T& operator[](const size_t index) {
+            size_t i = 0, currentIndex = 0;
+            ListArrayNode* current = this->head;
+            while(currentIndex != index) {
+                if(current == nullptr) throw std::out_of_range("");
+                if(currentIndex >= (current->usedSize - 16u) / sizeof(T) - 1) {
+                    currentIndex = 0;
+                    current = current->next;
+                    continue;
+                }
+                i++;
+            }
+            return current->elements[currentIndex];
+        }
+
+        const T& operator[](const size_t index) const {
             size_t i = 0, currentIndex = 0;
             ListArrayNode* current = this->head;
             while(currentIndex != index) {

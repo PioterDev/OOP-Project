@@ -1,4 +1,7 @@
 #include "Game/Render/RenderableObject.hpp"
+#include "program.hpp"
+
+using namespace Structs;
 
 RenderableObjectBase::RenderableObjectBase(
     const u32 objectID
@@ -26,6 +29,11 @@ RenderableObjectBase::RenderableObjectBase(
 ) : GameObject(objectID, name), textureHandle(textureHandle)  {
     this->setVisible();
 }
+
+SDL_Texture* RenderableObjectBase::getTexture() const noexcept {
+    return Program::getResourceManager().getTexture(this->textureHandle);
+}
+
 
 RenderableObjectBase& RenderableObjectBase::bindTexture(
     const TextureHandle textureHandle

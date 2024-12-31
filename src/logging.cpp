@@ -3,6 +3,9 @@
 #include "logging.hpp"
 #include "util.hpp"
 
+using namespace Enums;
+using std::ofstream, std::string;
+
 Status Logger::init(const char* pathToFile) {
     this->stream.open(pathToFile, ofstream::out | ofstream::app);
     if(!this->stream.is_open()) return Status::FAILURE;

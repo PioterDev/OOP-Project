@@ -13,10 +13,10 @@ class PhysicalObject : public RenderableObject {
     friend class GameRenderer;
 
     protected:
-        Vector2d position;
-        Point positionRounded;
-        SizeF32 size;
-        AABB aabb;
+        Structs::Vector2d position;
+        Structs::Point positionRounded;
+        Structs::SizeF32 size;
+        Structs::AABB aabb;
         
     public:
         /* PhysicalObject(const uint32_t objectID);
@@ -27,8 +27,8 @@ class PhysicalObject : public RenderableObject {
         ); */
 
 
-        const AABB& getAABB() const { return this->aabb; }
-        AABB getAABBCopy() const { return this->aabb; }
+        const Structs::AABB& getAABB() const { return this->aabb; }
+        Structs::AABB getAABBCopy() const { return this->aabb; }
         PhysicalObject& setAABB() {
             this->aabb.x1 = this->position.x - this->size.width;
             this->aabb.x2 = this->position.x + this->size.width;
@@ -36,16 +36,16 @@ class PhysicalObject : public RenderableObject {
             this->aabb.y2 = this->position.y + this->size.height;
             return *this;
         }
-        Vector2d getPosition() const { return this->position; }
-        PhysicalObject& setPosition(Vector2d pos) {
+        Structs::Vector2d getPosition() const { return this->position; }
+        PhysicalObject& setPosition(Structs::Vector2d pos) {
             this->position = pos;
             this->positionRounded.x = (i32)round(pos.x);
             this->positionRounded.y = (i32)round(pos.y);
             return *this;
         }
-        Point getPositionRounded() const { return this->positionRounded; }
-        SizeF32 getSize() const { return this->size; }
-        PhysicalObject& setSize(SizeF32 size) {
+        Structs::Point getPositionRounded() const { return this->positionRounded; }
+        Structs::SizeF32 getSize() const { return this->size; }
+        PhysicalObject& setSize(Structs::SizeF32 size) {
             this->size = size;
             return *this;
         }

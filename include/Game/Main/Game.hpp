@@ -39,7 +39,7 @@ class Game : public Program {
         static MainRegistry& getRegistry() { return registry; }
         static GameRenderer& getRenderer() { return renderer; }
         static InputHandler& getInputHandler() { return inputHandler; }
-        NoDiscard Status init();
+        NoDiscard Enums::Status init();
         void run();
 
         static u64 getTimeSinceLastFrame() { return renderer.getTimeSinceLastFrame(); }

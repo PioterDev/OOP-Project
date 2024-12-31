@@ -3,6 +3,9 @@
 #include "Game/Physics/PhysicalObject.hpp"
 #include "Game/Render/UIElement.hpp"
 
+using namespace Enums;
+using namespace Structs;
+
 MainRegistry Game::registry;
 GameRenderer Game::renderer;
 InputHandler Game::inputHandler;

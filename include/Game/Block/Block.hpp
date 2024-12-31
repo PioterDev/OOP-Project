@@ -6,8 +6,6 @@
 #include "Game/Main/GameObject.hpp"
 #include "Game/Render/RenderableObjectBase.hpp"
 
-using namespace Structs;
-
 /**
  * @brief A block is the most basic
  * representation of a part of the world it
@@ -20,7 +18,7 @@ class Block : public RenderableObjectBase {
          */
         float density;
     public:
-        static const AABB standardBlockAABB;
+        static const Structs::AABB standardBlockAABB;
         
         explicit Block(const u32 objectID);
         explicit Block(const u32 objectID, const char* name);

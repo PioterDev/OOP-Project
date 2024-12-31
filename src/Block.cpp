@@ -1,6 +1,8 @@
 #include "Game/Block/Block.hpp"
 #include "Game/Block/Blocks.hpp"
 
+using namespace Structs;
+
 const AABB Block::standardBlockAABB = {0.0, 0.0, 1.0, 1.0};
 
 Block::Block(const u32 objectID) : RenderableObjectBase(objectID) {

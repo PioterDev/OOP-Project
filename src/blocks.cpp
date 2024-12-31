@@ -1,7 +1,7 @@
 #include "Game/Block/Blocks.hpp"
 #include "Game/Main/MainRegistry.hpp"
 
-vector<Block*> Blocks::blocks;
+Vector<Block*> Blocks::blocks;
 u32 Blocks::numberOfBlocksRegistered = 0;
 
 Block* Blocks::cobblestone = nullptr;
@@ -51,7 +51,7 @@ u32 Blocks::init(u32 blockID) {
 }
 
 void Blocks::addBlock(Block* block) {
-    Blocks::blocks.push_back(block);
+    Blocks::blocks.append(block);
     Blocks::numberOfBlocksRegistered++;
 }
 

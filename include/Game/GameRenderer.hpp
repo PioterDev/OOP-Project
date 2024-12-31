@@ -27,7 +27,7 @@ class GameRenderer {
         //Counts the number of frames since rendering started
         u64 numberOfFramesRendered = 0;
         
-        Point cameraPosition = {0, 0};
+        Structs::Point cameraPosition = {0, 0};
 
         void moveCamera(i32 offX, i32 offY);
     public:
@@ -40,12 +40,8 @@ class GameRenderer {
         // void render();
         void renderInPlace(Game& game);
 
-        // std::thread startRender() {
-        //     return std::thread([this] { this->render(); });
-        // }
-
         u64 getTimeSinceLastFrame() const { return SDL_GetPerformanceCounter() - this->lastFrameAt; }
         u64 getNumberOfFramesRendered() const { return this->numberOfFramesRendered; }
 
-        Point getCameraPosition() const { return this->cameraPosition; }
+        Structs::Point getCameraPosition() const { return this->cameraPosition; }
 };

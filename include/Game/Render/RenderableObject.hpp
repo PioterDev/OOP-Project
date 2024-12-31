@@ -1,9 +1,8 @@
 #pragma once
 
-#include <cmath>
+#include <SDL_render.h>
 
 #include "Game/Render/RenderableObjectBase.hpp"
-#include "program.hpp"
 
 /**
  * @brief A renderable object is an object
@@ -54,7 +53,7 @@ class RenderableObject : public RenderableObjectBase {
          * 
          * to the texture and removed from the texture after rendering.
          */
-        Color colorModulation = {255, 255, 255, 255};
+        Structs::Color colorModulation = Structs::Colors::WHITE;
 
         /**
          * @brief Blend mode of the associated texture,
@@ -252,7 +251,7 @@ class RenderableObject : public RenderableObjectBase {
          * @param height screen height taken up by the object
          * @return this, for chaining
          */
-        RenderableObject& setSizeOnScreen(const Size size);
+        RenderableObject& setSizeOnScreen(const Structs::Size size);
 
         /**
          * @brief Moves the object by a given offset on the screen.
@@ -460,7 +459,7 @@ class RenderableObject : public RenderableObjectBase {
          * 
          * @return Color struct, equivalent to internal data stored. 
          */
-        Color getModulation() const { return this->colorModulation; }
+        Structs::Color getModulation() const { return this->colorModulation; }
         /**
          * @brief Get the color modulation of the object as an integer.
          * 

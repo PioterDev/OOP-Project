@@ -2,16 +2,8 @@
 
 #include "Bindings.h"
 
-#include <vector>
-
-#include "DSA/BitArray.hpp"
 #include "deus.hpp"
-
-using std::vector;
-
-using namespace Enums;
-using namespace Unions;
-using namespace Structs;
+#include "DSA/BitArray.hpp"
 
 typedef struct {
     char* name;

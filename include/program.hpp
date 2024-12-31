@@ -3,6 +3,7 @@
 #include "Bindings.h"
 
 #include <chrono>
+#include <string>
 #include <thread>
 
 #include <SDL_render.h>
@@ -14,10 +15,6 @@
 #include "logging.hpp"
 #include "resources.hpp"
 
-using namespace Enums;
-using namespace Structs;
-
-using std::array;
 // #undef sleep
 // #define sleep(ms) std::this_thread::sleep_for(std::chrono::milliseconds(ms))
 
@@ -32,8 +29,8 @@ struct alignas(8) ProgramFlags {
 };
 
 typedef struct {
-    string name = "Window";
-    Size size = {1280, 720};
+    std::string name = "Window";
+    Structs::Size size = {1280, 720};
 } WindowParameters;
 
 struct alignas(4) AudioParameters {
@@ -52,7 +49,7 @@ class Program {
          * 
          * @return status of startup - 0 is success, everything else is mapped to Enums::Status
          */
-        NoDiscard Status initSystems();
+        NoDiscard Enums::Status initSystems();
 
         static u64 getClockFrequency() { return Program::clockFrequency; }
 
@@ -61,7 +58,7 @@ class Program {
         // static InputHandler& getInputHandler() { return inputHandler; }
         static ResourceManager& getResourceManager() { return Program::resourceManager; }
 
-        Size getWindowSize() const { return this->windowParameters.size; }
+        Structs::Size getWindowSize() const { return this->windowParameters.size; }
 
         /**
          * @brief Get the window associated with the program.
@@ -71,13 +68,13 @@ class Program {
          */
         SDL_Window* getWindow() { return this->window; }
 
-        Color getBackgroundColor() const { return this->backgroundColor; }
-        void setBackgroundColor(const Color color) { this->backgroundColor = color; }
+        Structs::Color getBackgroundColor() const { return this->backgroundColor; }
+        void setBackgroundColor(const Structs::Color color) { this->backgroundColor = color; }
         void setBackgroundColor(const u8 red, const u8 green, const u8 blue, const u8 alpha) { this->backgroundColor = {red, green, blue, alpha}; }
 
         u32 getNumberOfKeys() const { return this->numberOfKeyboardKeys; }
 
-        Point getMousePosition() const { return this->mousePosition; }
+        Structs::Point getMousePosition() const { return this->mousePosition; }
         void updateMouse() {
             this->mouseButtons = SDL_GetMouseState(
                 &this->mousePosition.x, &this->mousePosition.y
@@ -99,8 +96,8 @@ class Program {
         SDL_Window* window;
         WindowParameters windowParameters;
         static SDL_Renderer* renderingContext;
-        Color backgroundColor = Colors::BLACK;
-        Point mousePosition;
+        Structs::Color backgroundColor = Structs::Colors::BLACK;
+        Structs::Point mousePosition;
         u32 mouseButtons = 0;
 
         //Audio-related members

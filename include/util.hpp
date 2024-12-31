@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 /**
  * @brief Integer to C string.
@@ -17,7 +18,7 @@ void itos(int in, const unsigned int base, char* buf, const size_t bufsize);
  *
  * @return converted string
  */
-template<class...Args> string toString(Args...args);
+template<class...Args> std::string toString(Args...args);
 
 /**
  * @brief strlen for char16_t.

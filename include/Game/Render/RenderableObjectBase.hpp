@@ -2,7 +2,6 @@
 
 #include "Game/Main/GameObject.hpp"
 #include "resources.hpp"
-#include "program.hpp"
 
 /**
  * @brief A base class for renderable objects.
@@ -55,7 +54,7 @@ class RenderableObjectBase : public GameObject {
          * 
          * This is an externally managed resource, treat it with care.
          */
-        SDL_Texture* getTexture() const { return Program::getResourceManager().getTexture(this->textureHandle); }
+        SDL_Texture* getTexture() const noexcept;
 
         /**
          * @brief Binds a texture to the object.

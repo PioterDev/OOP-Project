@@ -20,10 +20,6 @@
 
 #include "deus.hpp"
 
-using std::ios, std::ofstream, std::string, std::endl;
-
-using namespace Enums;
-
 #define printFullDate true
 
 #if LOGLEVEL == 0 //Trace level
@@ -35,7 +31,7 @@ using namespace Enums;
     logger.trace("[", __FILE__, "/", __func__, ":", __LINE__, "] ", message); \
 } while(0)
 #define LogDebug(logger, message)
-#define LoggerLineTerminator endl
+#define LoggerLineTerminator std::endl
 #elif LOGLEVEL == 1 //Debug level
 #define LogTrace(logger, message)
 #define LogDebug(logger, message) do { \
@@ -50,7 +46,7 @@ using namespace Enums;
 
 class Logger {
     private:
-        ofstream stream;
+        std::ofstream stream;
         time_t latest = 0;
         //Using a C string for performance
         char date[20] = {0};
@@ -91,7 +87,7 @@ class Logger {
          * @param pathToFile path to file
          * @return 0 on success, 1 on failure
          */
-        NoDiscard Status init(const string& pathToFile);
+        NoDiscard Enums::Status init(const std::string& pathToFile);
 
         /**
          * @brief Initializes the logger.
@@ -99,9 +95,9 @@ class Logger {
          * @param pathToFile path to file
          * @return 0 on success, 1 on failure
          */
-        NoDiscard Status init(const char* pathToFile);
+        NoDiscard Enums::Status init(const char* pathToFile);
 
-        void flush() { this->stream << endl; }
+        void flush() { this->stream << std::endl; }
 
         template<class...Args> void print(Args...args) {
             (this->stream << ... << args);
@@ -113,7 +109,7 @@ class Logger {
 
         template<class...Args> void debug(Args... args) {
             this->printShared();
-            (this->stream << " [Debug] " << ... << args) << endl;
+            (this->stream << " [Debug] " << ... << args) << std::endl;
         }
 
         template<class...Args> void info(Args... args) {
@@ -133,12 +129,12 @@ class Logger {
 
         template<class...Args> void fatal(Args... args) {
             this->printShared();
-            (this->stream << " [Fatal] " << ... << args) << endl;
+            (this->stream << " [Fatal] " << ... << args) << std::endl;
         }
 
         template<class...Args> void trace(Args... args) {
             this->printShared();
-            (this->stream << " [Trace] " << ... << args) << endl;
+            (this->stream << " [Trace] " << ... << args) << std::endl;
         }
 };
 

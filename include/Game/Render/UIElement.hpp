@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Bindings.h"
-
-#include "deus.hpp"
 #include "Game/Render/RenderableObject.hpp"
 
 /**

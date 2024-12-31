@@ -1,7 +1,7 @@
-#include "Bindings.h"
-
-#include "deus.hpp"
 #include "program.hpp"
+
+using namespace Enums;
+using namespace Structs;
 
 static constexpr u32 SDL_InitFlags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS | SDL_INIT_TIMER;
 static constexpr int Img_Init_Flags = IMG_INIT_JPG | IMG_INIT_PNG;

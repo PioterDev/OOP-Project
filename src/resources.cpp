@@ -5,6 +5,9 @@
 #include "resources.hpp"
 #include "util.hpp"
 
+using namespace Enums;
+using namespace Structs;
+
 static constexpr Size fallbackTextureSize = {64, 64};
 
 static constexpr TextureHandle fallbackHandle = 0;

@@ -1,5 +1,8 @@
 #include "Game/World.hpp"
 
+using namespace Enums;
+using namespace Structs;
+
 Status World::populateChunk(const ChunkPos which, const u32 blockID) {
     Chunk* chunk = this->chunks[which];
     if(chunk != nullptr) return Status::ALREADY_EXISTS;

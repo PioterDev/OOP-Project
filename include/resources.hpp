@@ -13,11 +13,6 @@
 
 #include "deus.hpp"
 
-using std::string, std::vector;
-
-using namespace Enums;
-using namespace Structs;
-
 extern const char* emptyCString;
 extern const char* noErrorCString;
 
@@ -134,12 +129,12 @@ class ResourceManager {
             UTF16
         };
 
-        vector<TextureData> textures;
-        vector<Mix_Chunk*> soundEffects;
-        vector<Mix_Music*> music;
-        vector<FontData> fonts;
+        std::vector<TextureData> textures;
+        std::vector<Mix_Chunk*> soundEffects;
+        std::vector<Mix_Music*> music;
+        std::vector<FontData> fonts;
 
-        Status latestStatus = Status::SUCCESS;
+        Enums::Status latestStatus = Enums::Status::SUCCESS;
         const char* errorMessage = emptyCString;
 
 
@@ -161,23 +156,23 @@ class ResourceManager {
          */
         SDL_Texture* __createFallbackTexture() noexcept;
 
-        Status __registerTextureAt(TextureHandle handle, const char* path, const u32 flags) noexcept;
+        Enums::Status __registerTextureAt(TextureHandle handle, const char* path, const u32 flags) noexcept;
 
         TextureHandle __createTextTexture(
             const void* text, const u32 flags, const FontHandle font,
-            const Color foregroundColor, const u32 wrapLength, const TextEncoding encoding
+            const Structs::Color foregroundColor, const u32 wrapLength, const TextEncoding encoding
         ) noexcept;
 
-        Status __createTextTextureAt(
+        Enums::Status __createTextTextureAt(
             TextureHandle handle,
             const void* text, const u32 flags, const FontHandle font,
-            const Color foregroundColor, const u32 wrapLength, const TextEncoding encoding
+            const Structs::Color foregroundColor, const u32 wrapLength, const TextEncoding encoding
         ) noexcept;
     public:
-        Status init() noexcept;
+        Enums::Status init() noexcept;
         void shutdown() noexcept;
 
-        Status getLatestStatus() const noexcept { return this->latestStatus; }
+        Enums::Status getLatestStatus() const noexcept { return this->latestStatus; }
 
         const char* getLatestError() const noexcept { return this->errorMessage; }
 
@@ -223,9 +218,9 @@ class ResourceManager {
          * same restrictions apply as with
          * `ResourceManager::registerTexture(...)`.
          * @param flags texture flags OR'ed together
-         * @return Status 
+         * @return Enums::Status 
          */
-        Status registerTextureAt(TextureHandle handle, const char* path, const u32 flags) noexcept {
+        Enums::Status registerTextureAt(TextureHandle handle, const char* path, const u32 flags) noexcept {
             return this->__registerTextureAt(handle, path, flags);
         }
         
@@ -245,7 +240,7 @@ class ResourceManager {
          */
         ForceInline TextureHandle createTextTexture(
             const char* text, const u32 flags, const FontHandle font,
-            const Color foregroundColor, const u32 wrapLength
+            const Structs::Color foregroundColor, const u32 wrapLength
         ) noexcept {
             return this->__createTextTexture(
                 text, flags, font, foregroundColor, wrapLength, TextEncoding::UTF8
@@ -268,7 +263,7 @@ class ResourceManager {
          */
         ForceInline TextureHandle createTextTexture(
             const char16_t* text, const u32 flags, const FontHandle font,
-            const Color foregroundColor, const u32 wrapLength
+            const Structs::Color foregroundColor, const u32 wrapLength
         ) noexcept {
             return this->__createTextTexture(
                 text, flags, font, foregroundColor, wrapLength, TextEncoding::UTF16
@@ -290,10 +285,10 @@ class ResourceManager {
          * @param foregroundColor color for the foreground of the text box 
          * @return TODO: status
          */
-        ForceInline Status createTextTextureAt(
+        ForceInline Enums::Status createTextTextureAt(
             TextureHandle handle,
             const char* text, const u32 flags, const FontHandle font,
-            const Color foregroundColor, const u32 wrapLength
+            const Structs::Color foregroundColor, const u32 wrapLength
         ) noexcept {
             return this->__createTextTextureAt(
                 handle, text, flags, font, foregroundColor, wrapLength, TextEncoding::UTF8
@@ -315,10 +310,10 @@ class ResourceManager {
          * @param foregroundColor color for the foreground of the text box 
          * @return TODO: status
          */
-        ForceInline Status createTextTextureAt(
+        ForceInline Enums::Status createTextTextureAt(
             TextureHandle handle,
             const char16_t* text, const u32 flags, const FontHandle font,
-            const Color foregroundColor, const u32 wrapLength
+            const Structs::Color foregroundColor, const u32 wrapLength
         ) noexcept {
             return this->__createTextTextureAt(
                 handle, text, flags, font, foregroundColor, wrapLength, TextEncoding::UTF16
@@ -344,7 +339,7 @@ class ResourceManager {
          * @param handle handle to the texture
          * @return size of the texture
          */
-        Size getTextureOriginalSize(TextureHandle handle) noexcept;
+        Structs::Size getTextureOriginalSize(TextureHandle handle) noexcept;
 
         /**
          * @brief Reserves a texture handle for later use.
@@ -363,21 +358,21 @@ class ResourceManager {
          * @brief Loads the texture of the given handle.
          * 
          * @param handle handle to the texture
-         * @return `Status::SUCCESS` on success,
+         * @return `Enums::Status::SUCCESS` on success,
          * a variety of status codes on failure;
          * call `getLatestError()` for more information.
          */
-        Status loadTexture(TextureHandle handle) noexcept;
+        Enums::Status loadTexture(TextureHandle handle) noexcept;
 
         /**
          * @brief Unloads the texture of the given handle.
          * 
          * @param handle handle to the texture
-         * @return `Status::SUCCESS` on success,
+         * @return `Enums::Status::SUCCESS` on success,
          * 
-         * `Status::INVALID_ARGS` if `handle` is invalid.
+         * `Enums::Status::INVALID_ARGS` if `handle` is invalid.
          */
-        Status unloadTexture(TextureHandle handle) noexcept;
+        Enums::Status unloadTexture(TextureHandle handle) noexcept;
 
         /**
          * @brief Destroys a given texture, freeing
@@ -385,9 +380,9 @@ class ResourceManager {
          * 
          * @param handle handle to the texture
          * 
-         * @return Status
+         * @return Enums::Status
          */
-        Status destroyTexture(TextureHandle handle) noexcept;
+        Enums::Status destroyTexture(TextureHandle handle) noexcept;
 
         /**
          * @brief Whether the texture at the given
@@ -409,7 +404,7 @@ class ResourceManager {
          * are more likely to be invoked frequently than music
          * tracks.
          */
-        u32 loadSoundEffect(const char* path) noexcept {
+        SFXHandle loadSoundEffect(const char* path) noexcept {
             return this->loadSoundEffect(path, 16);
         }
         /**
@@ -429,11 +424,11 @@ class ResourceManager {
          */
         SFXHandle loadSoundEffect(const char* path, u8 volume) noexcept;
 
-        Mix_Chunk* getSoundEffect(u32 id) noexcept;
+        Mix_Chunk* getSoundEffect(SFXHandle handle) noexcept;
 
 
         MusicHandle loadMusic(const char* path) noexcept;
-        Mix_Music* getMusic(u32 id) noexcept;
+        Mix_Music* getMusic(MusicHandle handle) noexcept;
 
         /**
          * @brief Loads a font dynamically from a given path with default

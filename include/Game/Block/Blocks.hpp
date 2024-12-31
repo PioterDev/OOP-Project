@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DSA/Vector.hpp"
 #include "Game/Block/Block.hpp"
 
 /**
@@ -9,7 +10,7 @@
  */
 class Blocks {
     private:
-        static vector<Block*> blocks;
+        static Vector<Block*> blocks;
         static u32 numberOfBlocksRegistered;
     public:
         static void addBlock(Block* block);
