@@ -189,7 +189,7 @@ class Vector {
                 }
                 bool operator!=(const Iterator& other) const noexcept {
                     if constexpr(staticCapacity == 0) return heapPtr != other.heapPtr;
-                    else return staticPtr != other.staticPtr || heapPtr != other.heapPtr;
+                    else return staticPtr != other.staticPtr && heapPtr != other.heapPtr;
                 }
 
         };
@@ -227,7 +227,7 @@ class Vector {
                 }
                 bool operator!=(const ReverseIterator& other) const noexcept {
                     if constexpr(staticCapacity == 0) return heapPtr != other.heapPtr;
-                    else return staticPtr != other.staticPtr || heapPtr != other.heapPtr;
+                    else return staticPtr != other.staticPtr && heapPtr != other.heapPtr;
                 }
 
         };
@@ -261,11 +261,11 @@ class Vector {
                 
                 bool operator==(const ReadOnlyIterator& other) const noexcept {
                     if constexpr(staticCapacity == 0) return heapPtr == other.heapPtr;
-                    else return staticPtr == other.staticPtr || heapPtr == other.heapPtr;
+                    else return staticPtr == other.staticPtr && heapPtr == other.heapPtr;
                 }
                 bool operator!=(const ReadOnlyIterator& other) const noexcept {
                     if constexpr(staticCapacity == 0) return heapPtr != other.heapPtr;
-                    else return staticPtr != other.staticPtr || heapPtr != other.heapPtr;
+                    else return staticPtr != other.staticPtr && heapPtr != other.heapPtr;
                 }
 
         };
@@ -303,7 +303,7 @@ class Vector {
                 }
                 bool operator!=(const ReadOnlyReverseIterator& other) const noexcept {
                     if constexpr(staticCapacity == 0) return heapPtr != other.heapPtr;
-                    else return staticPtr != other.staticPtr || heapPtr != other.heapPtr;
+                    else return staticPtr != other.staticPtr && heapPtr != other.heapPtr;
                 }
 
         };
@@ -313,21 +313,29 @@ class Vector {
          */
         Iterator begin() const noexcept {
             if constexpr(staticCapacity == 0) return Iterator{ __data, __data, __data };
-            else return Iterator{ (T*)staticData.data(), &(T&)staticData.data()[staticCapacity], __data };
+            else return Iterator{ (T*)staticData.data(), &(T&)staticData.data()[__size > staticCapacity ? staticCapacity : __size], __data };
         }
         /**
          * @brief Get the read/write forward iterator marking the end of the container.
          */
         Iterator end() const noexcept {
             if constexpr(staticCapacity == 0) return Iterator{ __data, __data, &__data[__size] };
-            else return Iterator{ &(T&)staticData.data()[staticCapacity], &(T&)staticData.data()[staticCapacity], &__data[__size - staticCapacity] };
+            else return Iterator{
+                &(T&)staticData.data()[__size > staticCapacity ? staticCapacity : __size],
+                &(T&)staticData.data()[__size > staticCapacity ? staticCapacity : __size],
+                &__data[__size - staticCapacity] 
+            };
         }
         /**
          * @brief Get a read/write backward iterator (not fully implemented).
          */
         ReverseIterator rbegin() const noexcept {
             if constexpr(staticCapacity == 0) return ReverseIterator{ __data, &__data[__size - 1], __data - 1 };
-            else return ReverseIterator{ &(T&)staticData.data()[staticCapacity - 1], &__data[__size - 1 - staticCapacity], __data - 1 };
+            else return ReverseIterator{
+                &(T&)staticData.data()[(__size > staticCapacity ? staticCapacity : __size) - 1],
+                __size > staticCapacity ? &__data[__size - 1 - staticCapacity] : nullptr,
+                __size > staticCapacity ? __data - 1 : nullptr
+            };
         }
         /**
          * @brief Get the read/write backward iterator marking the end of the container.
@@ -341,21 +349,29 @@ class Vector {
          */
         ReadOnlyIterator cbegin() const noexcept {
             if constexpr(staticCapacity == 0) return ReadOnlyIterator{ __data, __data, __data };
-            else return ReadOnlyIterator{ staticData.data(), &staticData.data()[staticCapacity], __data };
+            else return ReadOnlyIterator{ staticData.data(), &staticData.data()[__size > staticCapacity ? staticCapacity : __size], __data };
         }
         /**
          * @brief Get the read-only forward iterator marking the end of the container.
          */
         ReadOnlyIterator cend() const noexcept {
             if constexpr(staticCapacity == 0) return ReadOnlyIterator{__data, __data, &__data[__size] };
-            else return ReadOnlyIterator{ &staticData.data()[staticCapacity], &staticData.data()[staticCapacity], &__data[__size - staticCapacity] };
+            else return ReadOnlyIterator{
+                &staticData.data()[__size > staticCapacity ? staticCapacity : __size],
+                &staticData.data()[__size > staticCapacity ? staticCapacity : __size],
+                &__data[__size - staticCapacity]
+            };
         }
         /**
          * @brief Get a read-only backward iterator (not fully implemented).
          */
         ReadOnlyReverseIterator crbegin() const noexcept {
             if constexpr(staticCapacity == 0) return ReadOnlyReverseIterator{ __data, &__data[__size - 1], __data - 1 };
-            else return ReadOnlyReverseIterator{ &staticData.data()[staticCapacity - 1], &__data[__size - 1 - staticCapacity], __data - 1 };
+            else return ReadOnlyReverseIterator{
+                &(T&)staticData.data()[(__size > staticCapacity ? staticCapacity : __size) - 1],
+                __size > staticCapacity ? &__data[__size - 1 - staticCapacity] : nullptr,
+                __size > staticCapacity ? __data - 1 : nullptr
+            };
         }
         /**
          * @brief Get the read-only backward iterator marking the end of the container.
@@ -452,7 +468,8 @@ class Vector {
             return *this;
         }
 
-        T& operator[](const size_t index) const { return __at(index); }
+        const T& operator[](const size_t index) const noexcept { return __at(index); }
+        T& operator[](const size_t index) noexcept { return __at(index); }
     public: //Simple functions
         /**
          * @brief Get a reference to the first element.
@@ -487,7 +504,16 @@ class Vector {
          * @return reference to element at index `index`
          * @throws std::out_of_range on attempted access out of bounds
          */
-        T& at(const size_t index) const {
+        T& at(const size_t index) {
+            if(index > this->__size) Unlikely throw std::out_of_range("Attempted access out of bounds");
+            if constexpr(staticCapacity == 0) return this->__data[index];
+            else {
+                if(index < staticCapacity) return this->staticData[index];
+                else return this->__data[index - staticCapacity];
+            }
+        }
+
+        const T& at(const size_t index) const {
             if(index > this->__size) Unlikely throw std::out_of_range("Attempted access out of bounds");
             if constexpr(staticCapacity == 0) return this->__data[index];
             else {
@@ -512,10 +538,16 @@ class Vector {
          * Be mindful that if `staticCapacity > 0` and `size < staticCapacity`
          * the pointer returned if `ifStatic` can be a dangling pointer.
          */
-        T* data(const bool ifStatic = false) const noexcept {
-            if constexpr(staticCapacity == 0) {
-                return this->__data;
+        T* data(const bool ifStatic = false) noexcept {
+            if constexpr(staticCapacity == 0) return this->__data;
+            else {
+                if(ifStatic) return this->staticData.data();
+                else return this->__data;
             }
+        };
+
+        const T* data(const bool ifStatic = false) const noexcept {
+            if constexpr(staticCapacity == 0) return this->__data;
             else {
                 if(ifStatic) return this->staticData.data();
                 else return this->__data;
