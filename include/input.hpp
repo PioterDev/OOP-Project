@@ -136,7 +136,7 @@ class Keymap {
         SortedVector<KeyCombinationBinding, staticCombinationCapacity> keybinds;
 
         ForceInline KeyCombinationBinding* findKeyCombination(const u64 combination) const noexcept {
-            KeyCombinationBinding dummy(combination);
+            const KeyCombinationBinding dummy(combination);
             return this->keybinds.find(dummy);
         }
     public:

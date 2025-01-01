@@ -192,7 +192,8 @@ class SortedVector : public Vector<T, staticCapacity, moveOnReallocation> {
                 while(left < right) {
                     mid = (left + right) / 2;
                     if(compare(__at(mid)) < 0) left = mid + 1;
-                    else right = mid - 1;
+                    else if(compare(__at(mid)) > 0) right = mid - 1;
+                    else return &(T&)__at(mid);
                 }
                 mid = (left + right) / 2;
                 if(compare(__at(mid)) != 0) return nullptr;
@@ -218,7 +219,8 @@ class SortedVector : public Vector<T, staticCapacity, moveOnReallocation> {
                 while(left < right) {
                     mid = (left + right) / 2;
                     if(__at(mid) < other) left = mid + 1;
-                    else right = mid - 1;
+                    else if(__at(mid) > other) right = mid - 1;
+                    else return &(T&)__at(mid);
                 }
                 mid = (left + right) / 2;
                 if(__at(mid) != other) return nullptr;

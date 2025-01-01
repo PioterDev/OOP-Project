@@ -189,7 +189,7 @@ class Vector {
                 }
                 bool operator!=(const Iterator& other) const noexcept {
                     if constexpr(staticCapacity == 0) return heapPtr != other.heapPtr;
-                    else return staticPtr != other.staticPtr && heapPtr != other.heapPtr;
+                    else return staticPtr != other.staticPtr || heapPtr != other.heapPtr;
                 }
 
         };
@@ -227,7 +227,7 @@ class Vector {
                 }
                 bool operator!=(const ReverseIterator& other) const noexcept {
                     if constexpr(staticCapacity == 0) return heapPtr != other.heapPtr;
-                    else return staticPtr != other.staticPtr && heapPtr != other.heapPtr;
+                    else return staticPtr != other.staticPtr || heapPtr != other.heapPtr;
                 }
 
         };
@@ -261,11 +261,11 @@ class Vector {
                 
                 bool operator==(const ReadOnlyIterator& other) const noexcept {
                     if constexpr(staticCapacity == 0) return heapPtr == other.heapPtr;
-                    else return staticPtr == other.staticPtr && heapPtr == other.heapPtr;
+                    else return staticPtr == other.staticPtr || heapPtr == other.heapPtr;
                 }
                 bool operator!=(const ReadOnlyIterator& other) const noexcept {
                     if constexpr(staticCapacity == 0) return heapPtr != other.heapPtr;
-                    else return staticPtr != other.staticPtr && heapPtr != other.heapPtr;
+                    else return staticPtr != other.staticPtr || heapPtr != other.heapPtr;
                 }
 
         };
@@ -303,7 +303,7 @@ class Vector {
                 }
                 bool operator!=(const ReadOnlyReverseIterator& other) const noexcept {
                     if constexpr(staticCapacity == 0) return heapPtr != other.heapPtr;
-                    else return staticPtr != other.staticPtr && heapPtr != other.heapPtr;
+                    else return staticPtr != other.staticPtr || heapPtr != other.heapPtr;
                 }
 
         };
@@ -323,7 +323,7 @@ class Vector {
             else return Iterator{
                 &(T&)staticData.data()[__size > staticCapacity ? staticCapacity : __size],
                 &(T&)staticData.data()[__size > staticCapacity ? staticCapacity : __size],
-                &__data[__size - staticCapacity] 
+                __size > staticCapacity ? &__data[__size - staticCapacity] : __data
             };
         }
         /**

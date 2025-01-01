@@ -48,9 +48,9 @@ void Game::run() {
         c = testKeymap.registerKeyCombination(3, keys, ifPressed, false);
         f = [](){ Program::getLogger().println("Ctrl, release Ctrl, Ctrl again."); };
         testKeymap.registerKeyCombinationCallback(c, std::move(f));
+     
+        this->inputHandler.swapKeymap(&testKeymap);
     }
-
-    this->inputHandler.swapKeymap(&testKeymap);
 
     ///Section for testing ///
     UIElement& obj = UIElement::createUIElement(MainRegistry::someObjectID, MainRegistry::gregTextureIndex);
