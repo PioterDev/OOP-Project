@@ -72,17 +72,17 @@
 #endif /* C++14 */
 #endif /* Defining DeprecatedMsg */
 
-// #ifndef Unused
-// #if __cplusplus >= 201703L
-// #define Unused [[maybe_unused]]
-// #else
-// #if defined(__GNUC__) || defined(__clang__)
-// #define Unused __attribute__((unused))
-// #else
-// #define Unused
-// #endif /* Compiler */
-// #endif /* C++11 */
-// #endif /* Defining Unused */
+#ifndef NoReturn
+#if __cplusplus >= 201103L
+#define NoReturn [[noreturn]]
+#else
+#if defined(__GNUC__)
+#define NoReturn __attribute__((noreturn))
+#else
+#error "NoReturn macro cannot be defined"
+#endif /* Compilers */
+#endif /* C++11 */
+#endif /* Defining NoReturn */
 
 #else /* C */
 
@@ -153,6 +153,20 @@
 #endif /* Compilers */
 #endif /* C23 */
 #endif /* Defining Deprecated */
+
+#ifndef NoReturn
+#if __STDC_VERSION >= 202311L
+#define NoReturn [[noreturn]]
+#else
+#if defined(__GNUC__)
+#define NoReturn __attribute__((noreturn))
+#else
+#error "NoReturn macro cannot be defined"
+#endif /* Compilers */
+#endif /* C23 */
+#endif /* Defining NoReturn */
+
+
 #endif /* C/C++ */
 
 #ifndef Packed
@@ -180,3 +194,28 @@
 #define ForceInline inline
 #endif /* Compiler */
 #endif /* Defining ForceInline */
+
+#ifndef BeforeMain
+
+#endif
+
+#ifdef __cplusplus
+#define BeforeMain(f) \
+static void f(); \
+struct __##f##__ { __##f##__() { f(); } }; static __##f##__ __##f##_; \
+static void f()
+#elif defined(_MSC_VER)
+#pragma section(".CRT$XCU",read)
+#define INITIALIZER_(f,p) \
+static void f(); \
+__declspec(allocate(".CRT$XCU")) void (*f##_)() = f; \
+__pragma(comment(linker,"/include:" p #f "_")) \
+static void f()
+#ifdef _WIN64
+#define BeforeMain(f) INITIALIZER_(f,"")
+#else
+#define BeforeMain(f) INITIALIZER_(f,"_")
+#endif
+#else
+#define BeforeMain(f) static void f(void) __attribute__((constructor))
+#endif
